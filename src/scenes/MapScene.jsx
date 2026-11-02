@@ -110,7 +110,7 @@ export default function MapScene({ site, data, onRetry }) {
                 <thead><tr><th>가로선</th><th className="is-num">이동</th><th><span className="sr-only">막대</span></th><th>판정</th></tr></thead>
                 <tbody>
                   {sceneRows.map((r) => (
-                    <tr key={r.id}><td className="cs-num">{r.id}</td><td className="is-num">{signed(r.change)}</td><td style={{ width: '35%' }}><Bar value={r.change} max={max} verdict={r.verdict} /></td><td><Verdict v={r.verdict} /></td></tr>
+                    <tr key={r.id}><td className="cs-num">{r.id}</td><td className="is-num">{signed(r.change)}</td><td><Bar value={r.change} max={max} verdict={r.verdict} /></td><td><Verdict v={r.verdict} /></td></tr>
                   ))}
                 </tbody>
               </table>

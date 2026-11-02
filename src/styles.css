@@ -64,7 +64,7 @@ html[data-krds-mode="light"] { --cs-line-base: var(--krds-color-light-success-50
 .cs-verdict.is-hold, .cs-verdict.is-nodata { color: var(--krds-color-text-subtle); }
 
 /* 변화 막대: 가운데 0선, 오른쪽 전진 왼쪽 후퇴 */
-.cs-bar { position: relative; display: block; height: var(--krds-number-5); min-width: calc(var(--krds-number-21) * 1.5); background: var(--krds-color-surface-gray-subtle); border-radius: var(--krds-radius-max); }
+.cs-bar { position: relative; display: block; height: var(--krds-number-5); min-width: var(--krds-number-21); background: var(--krds-color-surface-gray-subtle); border-radius: var(--krds-radius-max); }
 .cs-bar-zero { position: absolute; inset-block: 0; left: 50%; width: var(--krds-border-width-static-regular); background: var(--krds-color-border-gray); }
 .cs-bar-fill { position: absolute; inset-block: 0; border-radius: var(--krds-radius-max); }
 .cs-bar-fill.is-advance { background: var(--rb-status-information); }
