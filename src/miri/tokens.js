@@ -50,7 +50,7 @@ export const colors = {
   warning: { DEFAULT: ios.orangeAccessible, soft: ios.fill, text: ios.label },
   success: { DEFAULT: ios.greenAccessible, soft: ios.fill, text: ios.label },
 
-  // 문서함 종류 식별색(DAH Docs·Sheet·Form 규칙 준용: 흐린 틴트 금지, 진한 단색). 아이콘, 배지, 서식 카드 머리에만 쓴다
+  // 문서함 종류 식별색(DAH 문서와 시트, 서식 규칙 준용: 흐린 틴트 금지, 진한 단색). 아이콘, 배지, 서식 카드 머리에만 쓴다
   // 흰 글자 배지(11px 굵게)와 흰 면 위 글자 모두 4.5:1 이상이 되도록 HIG 고대비(Increased contrast, light) 값을 쓴다. 파랑 4.57, 초록 4.54, 보라 5.21
   kind: { doc: ios.blueAccessible, sheet: ios.greenAccessible, form: ios.purpleAccessible },
   chart: {
@@ -115,7 +115,7 @@ export const radius = {
   full: '9999px'
 }
 
-// DESIGN_DELTA.md 변경 1·3 무보더 원칙. 깊이는 이 3단으로만.
+// DESIGN_DELTA.md 변경 1과 3 무보더 원칙. 깊이는 이 3단으로만.
 // 관리자 카드 기본 sm, hover md, 드로어 모달 시트 lg.
 // card 는 sm 별칭, float 는 lg 별칭으로 tailwind.config 에서 매핑한다(컴포넌트가 두 이름을 쓴다)
 export const shadow = { none: 'none', ...kitShadow }
