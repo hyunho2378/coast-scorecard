@@ -1,0 +1,18 @@
+/* 피그마 시스템 아이콘(색 원 + 흰 표시) 두 겹 마스크. 갈래 ext 부품 공용.
+   기준 CSS(krds-built.css)는 .svg-icon.ico-*-fill 을 색이 칠해진 그림(background-image) + background-color: transparent !important 로 그린다.
+   그러면 피그마처럼 부품마다 색 변수(예: 인포박스 color/icon/secondary)를 줄 수 없어 별도 클래스를 쓴다.
+   모양: icons/sys_<이름>_shape.svg(피그마 icon/system-<이름>의 색 경로), 표시: sys_<이름>_mark.svg(흰 경로, color/icon/inverse) */
+.svg-icon.ico-sys-info, .svg-icon.ico-sys-danger, .svg-icon.ico-sys-success, .svg-icon.ico-sys-warning {
+  position:relative; flex-shrink:0; background-image:none; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+  -webkit-mask-position:center; mask-position:center; -webkit-mask-size:contain; mask-size:contain; }
+.svg-icon.ico-sys-info::after, .svg-icon.ico-sys-danger::after, .svg-icon.ico-sys-success::after, .svg-icon.ico-sys-warning::after {
+  content:""; position:absolute; inset:0; background-color:var(--krds-color-icon-inverse);
+  -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-position:center; mask-position:center; -webkit-mask-size:contain; mask-size:contain; }
+.svg-icon.ico-sys-info { background-color:var(--krds-color-icon-information); -webkit-mask-image:url(icons/sys_info_shape.svg); mask-image:url(icons/sys_info_shape.svg); }
+.svg-icon.ico-sys-info::after { -webkit-mask-image:url(icons/sys_info_mark.svg); mask-image:url(icons/sys_info_mark.svg); }
+.svg-icon.ico-sys-danger { background-color:var(--krds-color-icon-danger); -webkit-mask-image:url(icons/sys_danger_shape.svg); mask-image:url(icons/sys_danger_shape.svg); }
+.svg-icon.ico-sys-danger::after { -webkit-mask-image:url(icons/sys_danger_mark.svg); mask-image:url(icons/sys_danger_mark.svg); }
+.svg-icon.ico-sys-success { background-color:var(--krds-color-icon-success); -webkit-mask-image:url(icons/sys_success_shape.svg); mask-image:url(icons/sys_success_shape.svg); }
+.svg-icon.ico-sys-success::after { -webkit-mask-image:url(icons/sys_success_mark.svg); mask-image:url(icons/sys_success_mark.svg); }
+.svg-icon.ico-sys-warning { background-color:var(--krds-color-icon-warning); -webkit-mask-image:url(icons/sys_warning_shape.svg); mask-image:url(icons/sys_warning_shape.svg); }
+.svg-icon.ico-sys-warning::after { -webkit-mask-image:url(icons/sys_warning_mark.svg); mask-image:url(icons/sys_warning_mark.svg); }

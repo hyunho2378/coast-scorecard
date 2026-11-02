@@ -149,3 +149,16 @@ export function samepairFromCorrected(rows, corrected) {
     return { ...t, samepair: out }
   })
 }
+
+// 판정 정밀도: 측량 대조가 있는 사업지는 두 시점 변화량 오차, 없는 곳은 단일 시점 위치 오차 첫 항목
+export function precisionFor(rules, siteId) {
+  const list = Array.isArray(rules?.sensitivity) ? rules.sensitivity : null
+  if (!list?.length) return null
+  const site = rules.site_rules?.[siteId] || null
+  const e = (site?.surveyAvailable && list.find((s) => String(s.errorKind || '').includes('변화량'))) || list[0]
+  return {
+    errorM: e.errorM, errorKind: e.errorKind,
+    beachWidth: (e.beachWidthScore || []).map((b) => ({ w0: b.W0_m, sd: b.score_change_1sigma, p95: b.score_change_95 })),
+    targetFit: (e.targetFitScore?.[siteId]?.runs || []).map((r) => ({ offset: r.target_offset_m, score: r.true_score, p05: r.p05, p95: r.p95 }))
+  }
+}

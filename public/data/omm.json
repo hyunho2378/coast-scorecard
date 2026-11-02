@@ -1,7 +1,7 @@
 {
  "source": "CelesTrak GP 자료(GROUP=resource, FORMAT=json)",
  "fetched_kst": "2026-11-03",
- "note": "한 번 받은 정적 샘플. 화면은 이 파일만 읽음",
+ "note": "한 번 받은 정적 파일. 화면은 이 파일만 읽음",
  "omm": [
   {
    "OBJECT_NAME": "LANDSAT 8",

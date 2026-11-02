@@ -1,0 +1,57 @@
+/* D-15 5장: 상태 색은 KRDS 원시 색 단계 중 채도가 살아 있는 계단만 쓴다.
+   subtler, lighter, -light(옅은 단계)와 semantic warning 계열(갈색 #9E6A00)은 금지.
+   primary 50 / success 50(어두운 40) / warning 30(#FFB114, 밝고 어두운 화면 모두) / danger 50(어두운 40) / information 50(어두운 40).
+   글자는 KRDS 글자 변수(text/basic 등)를 그대로 쓰고, 이 파일은 상태 아이콘·강조 점·채운 배지의 바탕색만 담당한다. */
+:root,
+html[data-krds-mode="light"] {
+  --rb-status-primary: var(--krds-color-light-primary-50);
+  --rb-status-success: var(--krds-color-light-success-50);
+  --rb-status-warning: var(--krds-color-light-warning-30);
+  --rb-status-danger: var(--krds-color-light-danger-50);
+  --rb-status-information: var(--krds-color-light-information-50);
+}
+html[data-krds-mode="dark"] {
+  --rb-status-primary: var(--krds-color-light-primary-50);
+  --rb-status-success: var(--krds-color-light-success-40);
+  --rb-status-warning: var(--krds-color-light-warning-30);
+  --rb-status-danger: var(--krds-color-light-danger-40);
+  --rb-status-information: var(--krds-color-light-information-40);
+}
+html[data-krds-mode="high-contrast"] {
+  --rb-status-primary: var(--krds-color-high-contrast-primary-50);
+  --rb-status-success: var(--krds-color-high-contrast-success-40);
+  --rb-status-warning: var(--krds-color-high-contrast-warning-30);
+  --rb-status-danger: var(--krds-color-high-contrast-danger-40);
+  --rb-status-information: var(--krds-color-high-contrast-information-40);
+}
+
+/* 채운 원/알약(개수 등): primary 채움 + 흰 글자 */
+.rb-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: var(--krds-size-height-3); height: var(--krds-size-height-3);
+  padding-inline: var(--krds-padding-2);
+  border-radius: var(--krds-radius-max);
+  background: var(--rb-status-primary);
+  color: var(--krds-color-text-inverse-static);
+  font-size: var(--krds-pc-font-size-label-xsmall);
+  font-weight: var(--krds-font-weight-bold);
+  line-height: 1;
+}
+
+/* 상태 글자(아이콘 + 글자, 채움 없음) */
+.rb-status-text { display: inline-flex; align-items: center; gap: var(--krds-gap-2); }
+.rb-status-text.is-success { color: var(--rb-status-success); }
+.rb-status-text.is-warning { color: var(--krds-color-text-basic); }
+.rb-status-text.is-danger { color: var(--rb-status-danger); }
+.rb-status-text.is-information { color: var(--rb-status-information); }
+
+/* 공개, 상태 이름: GitHub Public처럼 회색 윤곽 알약 */
+.rb-pill {
+  display: inline-flex; align-items: center;
+  height: var(--krds-size-height-3);
+  padding-inline: var(--krds-padding-3);
+  border-radius: var(--krds-radius-max);
+  border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light);
+  color: var(--krds-color-text-subtle);
+  font-size: var(--krds-pc-font-size-label-xsmall);
+}

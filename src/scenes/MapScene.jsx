@@ -4,19 +4,22 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import * as maplibregl from 'maplibre-gl'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import clsx from 'clsx'
-import TimeAxis from '../miri/map/TimeAxis.jsx'
-import { STYLE_URL } from '../miri/map/mapTheme.js'
-import { PAL } from '../lib/palette.js'
+import TimeAxis from '../parts/TimeAxis.jsx'
+import { readPalette } from '../lib/palette.js'
+import { useModeTick } from '../shell/screenMode.js'
 import { sceneChanges } from '../lib/judge.js'
 import { fmtDate } from '../lib/ledger.js'
-import { Card, PageHeader, TestBadge, TideBadge, SiteState, ChangeBars, StateBlock, Stat, HOLD_ACTION } from '../ui/index.jsx'
+import { Bar, Box, PageHead, SiteState, Verdict, HOLD_ACTION, signed } from '../ui/index.jsx'
+
+// 바탕 타일: OpenFreeMap(키 불필요, 저작권 OpenStreetMap 기여자). 화면 모드에 맞춰 고른다
+const STYLE_URL = { light: 'https://tiles.openfreemap.org/styles/positron', dark: 'https://tiles.openfreemap.org/styles/dark' }
 
 maplibregl.setWorkerUrl(workerUrl)
 const EMPTY = { type: 'FeatureCollection', features: [] }
 const fc = (feats) => ({ type: 'FeatureCollection', features: feats.filter((f) => f && f.geometry) })
 
-export default function MapScene({ site, data }) {
+export default function MapScene({ site, data, onRetry }) {
+  const tick = useModeTick()
   const host = useRef(null)
   const map = useRef(null)
   const [loaded, setLoaded] = useState(false)
@@ -27,7 +30,7 @@ export default function MapScene({ site, data }) {
   const [index, setIndex] = useState(Math.max(0, scenes.length - 1))
   const [playing, setPlaying] = useState(false)
 
-  const steps = scenes.map((s, i) => ({ key: s.id, label: i === 0 ? '기준 장면' : `비교 장면 ${i}`, sub: `${fmtDate(s.date)}${s.segments > 1 ? `(구름으로 ${s.segments}조각)` : ''}`, tick: i === 0 || i === scenes.length - 1 ? fmtDate(s.date) : '' }))
+  const steps = scenes.map((s, i) => ({ key: s.id, label: i === 0 ? '기준 장면' : `비교 장면 ${i}`, sub: fmtDate(s.date), tick: i === 0 || i === scenes.length - 1 ? fmtDate(s.date) : '' }))
   const sceneRows = useMemo(() => (ready && scenes.length ? sceneChanges(data.rows, scenes[0].id, scenes[index]?.id) : []), [ready, data, scenes, index])
   const cnt = (k) => sceneRows.filter((r) => r.verdict === k).length
 
@@ -44,7 +47,9 @@ export default function MapScene({ site, data }) {
   useEffect(() => {
     if (!ready) return undefined
     const opts = { padding: 40, duration: 0 }
-    const m = new maplibregl.Map({ container: host.current, style: STYLE_URL.dark, ...(bounds ? { bounds, fitBoundsOptions: opts } : { center: [site.lon, site.lat], zoom: site.zoom }), attributionControl: { compact: true } })
+    const PAL = readPalette()
+    const light = document.documentElement.dataset.krdsMode === 'light'
+    const m = new maplibregl.Map({ container: host.current, style: light ? STYLE_URL.light : STYLE_URL.dark, ...(bounds ? { bounds, fitBoundsOptions: opts } : { center: [site.lon, site.lat], zoom: site.zoom }), attributionControl: { compact: true } })
     map.current = m
     fitted.current = false
     m.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
@@ -63,7 +68,7 @@ export default function MapScene({ site, data }) {
     const ro = new ResizeObserver(() => { m.resize(); if (bounds && !fitted.current) m.fitBounds(bounds, opts) })
     ro.observe(host.current)
     return () => { ro.disconnect(); setLoaded(false); m.remove() }
-  }, [site, ready, bounds])
+  }, [site, ready, bounds, tick])
 
   useEffect(() => {
     const m = map.current
@@ -73,44 +78,44 @@ export default function MapScene({ site, data }) {
     m.getSource('transects').setData(fc(data.rows.map((r) => ({ type: 'Feature', geometry: r.geometry, properties: { id: r.id, verdict: r.verdict } }))))
   }, [loaded, ready, data, scenes, index])
 
-  const header = <PageHeader title="해안선 지도와 시간 축" desc={site.name} badges={<><TestBadge />{ready && <TideBadge label={data.tide} />}</>} />
-  if (!ready) return <>{header}<SiteState data={data} /></>
-  const cur = scenes[index]
+  const header = <PageHead title={`${site.name} 해안선 지도`} meta={ready ? <><span>장면 {scenes.length}장</span><span>가로선 {data.rows.length}개</span><span>보류 기준 {data.summary.thresholds[0]}{'\u00a0'}m</span></> : null} />
+  if (!ready) return <>{header}<SiteState data={data} onRetry={onRetry} /></>
+  const max = Math.max(data.summary.thresholds[0] * 2, ...sceneRows.map((r) => Math.abs(r.change ?? 0)), 1)
 
   return (
     <>
       {header}
-      <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_400px]">
-        <div className="relative h-[60vh] min-h-[360px] self-start overflow-hidden rounded-md bg-subtle xl:sticky xl:top-2 xl:h-[calc(100vh-140px)] xl:min-h-[520px] w-full">
-          <div ref={host} className="absolute inset-0" role="img" aria-label={`${site.name} 해안선과 가로선 지도`} />
-          {mapError && <div className="absolute inset-x-3 bottom-3"><StateBlock kind="error" title="바탕 지도를 불러오지 못했습니다">해안선과 가로선은 바탕 지도 없이 그립니다.</StateBlock></div>}
-          <div className="absolute left-3 top-3 flex flex-col gap-1 rounded-sm bg-canvas px-3 py-2 shadow-md">
-            {[['bg-sand', '기준 장면 해안선'], ['bg-primary', '선택 장면 해안선'], ['bg-advance', '전진 가로선, 최종 판정'], ['bg-retreat', '후퇴 가로선, 최종 판정'], ['bg-hold', '판정 보류 가로선']].map(([c, t]) => (
-              <span key={t} className="flex items-center gap-2 type-meta text-text-pri"><span className={clsx('h-1 w-5 rounded-full', c)} aria-hidden="true" />{t}</span>
+      <div className="cs-two is-wide-side">
+        <div className="cs-stage">
+          <div ref={host} className="cs-stage-fill" role="img" aria-label={`${site.name} 해안선과 가로선 지도`} />
+          <div className="cs-legend">
+            {[['is-base', '기준 장면 해안선'], ['is-current', '선택 장면 해안선'], ['is-advance', '전진 가로선'], ['is-retreat', '후퇴 가로선'], ['is-hold', '판정 보류 가로선']].map(([c, t]) => (
+              <span key={t}><span className={`cs-swatch ${c}`} aria-hidden="true" />{t}</span>
             ))}
           </div>
+          {mapError && <p className="cs-stage-caption">바탕 지도 없이 해안선과 가로선만 그립니다.</p>}
         </div>
-
-        <aside className="flex min-w-0 flex-col gap-5">
-          <Card>
-            <TimeAxis index={index} onIndex={setIndex} steps={steps} playing={playing} onPlaying={setPlaying}
-              caption="가로선 바다 쪽 시작점에서 해안선까지 거리를 장면마다 재고, 기준 장면과의 차이를 보여 줍니다. 판정 보류 기준은 가로선마다 분석 파일 값을 씁니다." />
-            <p className="mt-2 type-meta text-text-meta">
-              {cur && `${fmtDate(cur.date)} 장면, ${cur.tideCorrected ? '조위 보정' : '조위 미보정'}${cur.segments > 1 ? `, 구름으로 끊긴 해안선 ${cur.segments}조각` : ''}`}
-            </p>
-          </Card>
-          <Card title="이 장면 비교">
-            <div className="grid grid-cols-3 gap-2">
-              <Stat label="전진" value={cnt('advance')} unit="개" tone="advance" />
-              <Stat label="후퇴" value={cnt('retreat')} unit="개" tone="retreat" />
-              <Stat label="보류" value={cnt('hold') + cnt('nodata')} unit="개" tone="hold" />
+        <aside className="cs-col">
+          <Box title="시간 축">
+            <TimeAxis index={index} onIndex={setIndex} steps={steps} playing={playing} onPlaying={setPlaying} />
+          </Box>
+          <ul className="cs-counts" aria-label="선택 장면 비교">
+            <li><strong>{cnt('advance')}</strong>전진</li>
+            <li><strong>{cnt('retreat')}</strong>후퇴</li>
+            <li><strong>{cnt('hold') + cnt('nodata')}</strong>판정 보류</li>
+          </ul>
+          <Box title="장면별 이동 거리" sub="기준 장면 대비" flush foot={HOLD_ACTION}>
+            <div className="cs-table-wrap">
+              <table className="cs-table">
+                <thead><tr><th>가로선</th><th className="is-num">이동</th><th><span className="sr-only">막대</span></th><th>판정</th></tr></thead>
+                <tbody>
+                  {sceneRows.map((r) => (
+                    <tr key={r.id}><td className="cs-num">{r.id}</td><td className="is-num">{signed(r.change)}</td><td style={{ width: '35%' }}><Bar value={r.change} max={max} verdict={r.verdict} /></td><td><Verdict v={r.verdict} /></td></tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            {index === 0 && <p className="mt-2 type-meta text-text-meta">기준 장면끼리 비교라 모든 값이 0입니다.</p>}
-            {cnt('nodata') > 0 && <p className="mt-2 type-meta text-text-meta">{cnt('nodata')}개 가로선은 구름으로 이 장면 해안선을 찾지 못했습니다. {HOLD_ACTION}</p>}
-          </Card>
-          <Card title="장면별 이동 거리">
-            <ChangeBars rows={sceneRows} label="선택 장면 가로선별 이동 거리" />
-          </Card>
+          </Box>
         </aside>
       </div>
     </>

@@ -1,0 +1,17 @@
+/* 피그마 전용 부품 swiper__atomic(1029:33703, 탭 좌우 넘김 장치). 공식 코드에 없어 KRDS 변수로 구현. 갈래 layout. */
+.krds-tab-swipe { display: inline-flex; align-items: stretch; height: var(--krds-size-height-6); }
+.krds-tab-swipe .swipe-btn { display: inline-flex; align-items: center; background-color: var(--krds-color-surface-white); }
+/* circle: 아이콘 칸 패딩 바깥쪽 padding/3(8)(1714:55295, 1714:56186) */
+.krds-tab-swipe.circle.left .swipe-btn, .krds-tab-swipe.dropdown.left .swipe-btn { padding-left: var(--krds-padding-3); }
+.krds-tab-swipe.circle.right .swipe-btn, .krds-tab-swipe.dropdown.right .swipe-btn { padding-right: var(--krds-padding-3); }
+/* square: 아이콘 칸 패딩 바깥 padding/2(4) 안쪽 padding/3(8), 안쪽 세로 선 color/divider/gray-light 1 INSIDE, 아이콘 20(1635:28015, 1635:28026) */
+.krds-tab-swipe.square .swipe-btn { border: 0; }
+.krds-tab-swipe.square.left .swipe-btn { padding: 0 var(--krds-padding-3) 0 var(--krds-padding-2); box-shadow: inset calc(var(--krds-light-border-width-variable-regular) * -1) 0 0 var(--krds-color-divider-gray-light); }
+.krds-tab-swipe.square.right .swipe-btn { padding: 0 var(--krds-padding-2) 0 var(--krds-padding-3); box-shadow: inset var(--krds-light-border-width-variable-regular) 0 0 var(--krds-color-divider-gray-light); }
+.krds-tab-swipe.square .swipe-btn .svg-icon { width: var(--krds-icon--size-medium); height: var(--krds-icon--size-medium); background-color: var(--krds-color-icon-gray); }
+/* dropdown: 원 32(size-height-5), 선 color/border/gray-light 0.8 INSIDE, 아래 화살표 19.2(2271:26409). 0.8 과 19.2 는 피그마가 40 버튼을 0.8 배로 줄인 값이라 KRDS 원본 값 옮김(S6 예외) */
+.krds-tab-swipe .swipe-dropdown { display: inline-flex; align-items: center; justify-content: center; width: var(--krds-size-height-5); height: var(--krds-size-height-5);
+  border-radius: var(--krds-radius-max); background-color: var(--krds-color-action-white); box-shadow: inset 0 0 0 calc(var(--krds-light-border-width-variable-regular) * 0.8) var(--krds-color-border-gray-light); }
+.krds-tab-swipe .swipe-dropdown .svg-icon { width: calc(var(--krds-size-height-5) * 0.6); height: calc(var(--krds-size-height-5) * 0.6); }
+/* 흰색 흐림: 폭 24(size-height-4), 피그마 채움 왼쪽에서 오른쪽으로 color/alpha/base25(25%) → color/alpha/base100(100%), 좌우 변형 모두 같은 방향(1714:55912, 1714:56002) */
+.krds-tab-swipe .swipe-gradient { width: var(--krds-size-height-4); background: linear-gradient(to right, var(--krds-color-alpha-base25) 25%, var(--krds-color-alpha-base100) 100%); }

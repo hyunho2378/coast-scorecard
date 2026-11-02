@@ -1,0 +1,355 @@
+/* 공공 깃랩 app/src/styles.css 사본(2026. 11. 3.). 값은 KRDS 변수만. 앱 전용 규칙은 src/styles.css에 둔다 */
+@tailwind utilities;
+
+html { color-scheme: light; }
+html[data-krds-mode="dark"], html[data-krds-mode="high-contrast"] { color-scheme: dark; }
+body {
+  background: var(--krds-color-background-white);
+  color: var(--krds-color-text-basic);
+  /* D-14 끝절: 본문, 목록, 파일 이름 15(body/small). 행간은 layout.tokens.css의 짝수 px */
+  font-size: var(--krds-font-size-body-small);
+  line-height: var(--rb-lh-15);
+}
+#root { display: flex; flex-direction: column; min-height: 100dvh; }
+
+/* 한국어 줄바꿈(design_rules K1~K5): 어절 단위, 제목은 균형, 본문은 끝줄 보정. 긴 파일명과 주소만 아무 곳에서나 끊는다 */
+body { word-break: keep-all; overflow-wrap: normal; }
+h1, h2, h3, h4, .krds-text-heading-xlarge, .krds-text-heading-large, .krds-text-heading-medium, .krds-text-heading-small { text-wrap: balance; }
+p, li, dd, dt, label { text-wrap: balance; }
+.rb-readme p, .rb-long p { text-wrap: pretty; }
+.rb-break-any, code, pre, td a, .rb-path { overflow-wrap: anywhere; word-break: normal; }
+.rb-phrase { display: inline-block; }
+
+/* 건너뛰기 링크와 초점 */
+.rb-skip { position: absolute; transform: translateY(-200%); padding: var(--krds-padding-6); background: var(--krds-color-background-white); color: var(--krds-color-text-basic); z-index: 200; }
+.rb-skip:focus { transform: translateY(0); }
+:focus-visible { outline: var(--krds-border-width-variable-medium) solid var(--krds-color-border-primary); outline-offset: var(--krds-gap-1); }
+/* 화면 이동 때 본문에 초점을 옮기지만 윤곽선은 그리지 않는다(본문 좌우 파란 띠 원인) */
+#main:focus, #main:focus-visible { outline: none; box-shadow: none; }
+
+/* 공식 배너: 시제품이므로 태극기 그림은 쓰지 않는다 */
+#krds-masthead.rb-masthead .toggle-head .nuri-txt::before { display: none; }
+
+/* 공식 머리글: 로고 자리에 서비스명 글자 */
+#krds-header .header-container .logo.rb-logo { width: auto; height: auto; }
+#krds-header .header-container .logo.rb-logo a {
+  display: inline-flex; align-items: center; width: auto; height: auto; min-height: var(--krds-size-height-7);
+  background-image: none; color: var(--krds-color-text-basic); text-decoration: none;
+  font-size: var(--krds-pc-font-size-heading-small); font-weight: var(--krds-font-weight-bold);
+}
+.rb-mode-options { display: flex; flex-direction: column; gap: var(--krds-gap-4); border: 0; margin: 0; padding: 0; min-width: max-content; }
+.rb-gnb-mode { flex-direction: column; align-items: flex-start; }
+
+.rb-notice { padding-block: var(--krds-padding-6); background: var(--krds-color-surface-information-subtler); }
+#krds-footer .f-logo.rb-f-logo { display: flex; align-items: center; gap: var(--krds-gap-4); width: auto; height: auto; background-image: none; font-size: var(--krds-font-size-body-small); line-height: var(--rb-lh-15); font-weight: var(--krds-font-weight-bold); }
+/* 바닥글 글자는 15(링크)와 13(출처 문장) 두 단계 */
+#krds-footer .inner .f-cnt .f-link .link-go .krds-btn { font-size: var(--krds-font-size-body-small); line-height: var(--rb-lh-15); }
+#krds-footer .inner .f-btm .f-btm-text .f-copy { font-size: var(--krds-font-size-body-xsmall); line-height: var(--rb-lh-13); }
+.rb-main { min-width: 0; padding: 0; }
+
+@media (max-width: 767px) {
+  #krds-header .header-container .logo.rb-logo a { font-size: var(--krds-mobile-font-size-heading-small); min-height: var(--krds-size-height-5); }
+  .rb-main { min-width: 0; padding: 0; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+#krds-masthead .nuri-txt, #krds-header, .krds-main-menu-mobile { word-break: keep-all; }
+/* 바닥글 .inner는 KRDS 원본에서 좌우 여백이 0이라 머리글, 본문과 시작선이 어긋난다. 같은 .inner 여백을 준다 */
+#krds-footer > .inner { padding-inline: var(--krds-contents-padding-x); }
+/* 바닥글 높이를 Figma 기준(1920 168px)에 맞춤. 위아래 여백과 행 사이 간격을 KRDS gap-3(8px)로 줄임(원래 padding-10/gap-9, 많은 정보를 담은 공식 바닥글 기준이라 우리 축소판에는 너무 큼) */
+@media (min-width: 1024px) {
+  #krds-footer > .inner { padding-top: var(--krds-padding-3); padding-bottom: var(--krds-padding-3); gap: var(--krds-gap-3); }
+}
+@media (max-width: 1023px) {
+  #krds-footer > .inner { padding-top: var(--krds-padding-3); padding-bottom: var(--krds-padding-3); gap: var(--krds-gap-3); }
+  #krds-footer .f-cnt { gap: var(--krds-gap-2); }
+}
+
+@media (display-mode: standalone) {
+  /* 홈 화면에 추가해 앱으로 열면 시제품 배너 아래 공간을 줄인다(배너 문구는 유지) */
+  #krds-masthead .toggle-head .inner { padding-block: var(--krds-padding-2); }
+}
+
+/* D-07 청록 면 사용 안 함: KRDS 부품의 secondary(청록) 면은 회색 면으로 바꾼다. 값은 KRDS 변수 안에서만 고른다.
+   대상: 공식 배너, 메인 메뉴 펼침, 모바일 메뉴 왼쪽 단, 달력, 전체 화면 팝업, 표 머리(모두 surface-secondary-subtler를 씀) */
+html[data-krds-mode] {
+  --krds-light-color-surface-secondary-subtler: var(--krds-light-color-surface-gray-subtler);
+}
+/* 어두운 화면은 마우스 올림, 누름, 선택 면도 청록(secondary 90, 80)이라 회색 단계로(80, 70). 글자 대비는 D-01 기준 재확인 */
+html[data-krds-mode="dark"] {
+  --krds-light-color-action-secondary-hover: var(--krds-color-high-contrast-gray-80);
+  --krds-light-color-action-secondary-selected: var(--krds-color-high-contrast-gray-80);
+  --krds-light-color-action-secondary-pressed: var(--krds-color-high-contrast-gray-70);
+  --krds-light-color-action-secondary-on-pressed: var(--krds-color-high-contrast-gray-70);
+}
+
+/* UX-007 4장: 목록 설명은 한 줄 말줄임, 메타 라인은 작은 글자와 연한 색 */
+.rb-clamp-1 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden; text-overflow: ellipsis; }
+.rb-meta { font-size: var(--krds-font-size-body-xsmall); line-height: var(--rb-lh-13); color: var(--krds-color-text-subtle); align-items: center; }
+.rb-meta .value { color: var(--krds-color-text-subtle); }
+.rb-lang { display: inline-flex; align-items: center; gap: var(--krds-gap-2); }
+.rb-lang-dot { display: inline-block; width: var(--krds-number-5); height: var(--krds-number-5); border-radius: 50%; background: var(--krds-color-icon-gray); }
+
+/* D-14 끝절: 목록 항목은 GitHub처럼 촘촘하게. 항목 제목 15 보통, 설명 15, 메타 13. 위아래 여백은 KRDS padding-4.
+   KRDS 부품 변수(제목 글자 크기)를 이 층에서 body/small로 낮춘다 */
+.krds-structured-list, .krds-structured-list.type-full {
+  --krds-structured-list--card-body-title-pc-font-size: var(--krds-font-size-body-small);
+  --krds-structured-list--card-body-title-mobile-font-size: var(--krds-font-size-body-small);
+  --krds-structured-list--full-card-body-gap: var(--krds-gap-3);
+  --krds-structured-list--full-card-body-cont-gap: var(--krds-gap-2);
+  --krds-structured-list--full-card-top-margin: 0;
+}
+/* 도구 카드(GitHub 검색 결과 수준): 제목 15 굵게 링크, 밑줄은 마우스를 올릴 때만, 설명 한 줄 말줄임, 메타 13 한 줄, 위아래 12, 항목 사이 구분선 한 줄 */
+.krds-structured-list .card-body .c-text, .krds-structured-list .card-body .c-text:hover, .krds-structured-list .card-body .c-text:visited { text-decoration: none; }
+.krds-structured-list .card-body .c-text .c-tit { font-weight: var(--rb-fw-title); line-height: var(--rb-lh-15); text-decoration: none; }
+.krds-structured-list .card-body .c-text .c-tit, .krds-structured-list .card-body .c-text .c-tit .span, .krds-structured-list .card-body .c-text:visited .c-tit { text-decoration: none; }
+.krds-structured-list .card-body .c-text:hover .c-tit .span, .krds-structured-list .card-body .c-text:focus-visible .c-tit .span { text-decoration: underline; }
+.krds-structured-list .card-body .c-text .c-tit::after { display: none; }
+.krds-structured-list .structured-item { padding-block: var(--krds-padding-5); }
+.krds-structured-list .structured-item { gap: var(--krds-gap-2) var(--krds-gap-8); }
+.krds-structured-list .structured-item .card-body { gap: var(--krds-gap-1); }
+.krds-structured-list .structured-item .c-txt { font-size: var(--krds-font-size-body-small); line-height: var(--rb-lh-15); }
+.krds-structured-list.type-full .structured-item > .in { padding-block: 0; }
+.krds-structured-list .structured-item .card-body .c-text { gap: var(--krds-gap-1); }
+
+/* 링크: KRDS 링크색(text/primary). 밑줄은 글 속 링크(README)와 마우스를 올릴 때 */
+a.krds-link, .krds-link { color: var(--krds-color-text-primary); text-decoration: none; }
+a.krds-link:hover, .krds-link:hover { text-decoration: underline; }
+
+/* 체크박스와 라디오 이름은 15(KRDS 기본은 17이라 한 화면 글자 단계가 늘어난다). KRDS 부품 변수를 앱 층에서 body/small로 낮춘다 */
+.krds-form-check {
+  --krds-form-check--pc-font-size-medium: var(--krds-font-size-body-small);
+  --krds-form-check--mobile-font-size-medium: var(--krds-font-size-body-small);
+}
+
+/* D-16 1장: 숫자와 날짜 열은 머리와 값 모두 오른쪽 정렬(글자는 왼쪽인데 열만 오른쪽 끝에 붙는 어긋남을 막는다) */
+.krds-table-wrap .tbl.data th.rb-num, .krds-table-wrap .tbl.data td.rb-num,
+.krds-table-wrap .rb-tree.tbl.data thead th.rb-col-date, .krds-table-wrap .rb-tree.tbl.data tbody td.rb-col-date { text-align: end; }
+.rb-one-col { display: flex; flex-direction: column; gap: var(--krds-gap-5); min-width: 0; }
+
+
+/* 검색 화면(GitHub 방식): 필터 열 296, 체크 목록 행 32, 결과 카드는 간격 16과 테두리 */
+.rb-two-col > .rb-aside-col.rb-filter-pc { flex: 0 0 var(--rb-info-w); border-top: 0; }
+.rb-filter-pc > h2 { padding-top: 0; }
+.rb-filter-pc .krds-form-check { min-height: var(--rb-side-item-h); display: flex; align-items: center; }
+.rb-filter-pc fieldset { padding-block: var(--krds-padding-4); }
+.rb-cards { gap: var(--krds-gap-6); border-top: 0 !important; }
+.rb-cards .structured-item { border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light) !important; border-radius: var(--krds-radius-medium2); padding-inline: var(--krds-padding-7); }
+
+/* 파일 보기 막대: 보기 전환(미리보기/코드/Blame)과 크기가 왼쪽, 도구는 오른쪽(GitHub 순서) */
+.rb-code-actions { margin-inline-start: auto; }
+.rb-code-bar { justify-content: flex-start; }
+
+/* 이슈/변경 제안 목록: GitHub처럼 테두리 상자 안에 행(높이 70 안팎). 열림/닫힘은 글자 전환 */
+.rb-row-list { border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); border-radius: var(--krds-radius-medium2); overflow: hidden; }
+.rb-row-list .rb-row { padding: var(--krds-padding-5) var(--krds-padding-7); min-height: var(--krds-number-19); box-sizing: border-box; }
+.rb-row-list .rb-row:last-child { border-bottom: 0; }
+.krds-tab-area.rb-subnav .tab.fill ul li button.btn-tab, .krds-tab-area.rb-subnav .tab.fill ul li.active button.btn-tab { background: none; border: 0; box-shadow: none; color: var(--krds-color-text-subtle); font-weight: var(--krds-font-weight-regular); }
+.krds-tab-area.rb-subnav .tab.fill ul li.active button.btn-tab { color: var(--krds-color-text-basic); font-weight: var(--rb-fw-current); text-decoration: underline; text-underline-offset: var(--krds-number-5); }
+
+/* 목록 머리(검색칸, 상태 전환, 정렬)와 행 상자: GitHub 이슈/변경 제안 목록 구조 */
+.rb-listsearch { display: flex; align-items: center; gap: var(--krds-gap-3); height: var(--krds-number-14); padding: 0 var(--krds-padding-5); border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray); border-radius: var(--krds-radius-medium2); }
+.rb-listsearch-input { flex: 1; min-width: 0; height: 100%; border: 0; background: none; color: var(--krds-color-text-basic); font: inherit; outline: 0; }
+.rb-listsearch:focus-within { outline: var(--krds-number-2) solid var(--krds-color-border-focus, currentColor); outline-offset: var(--krds-number-1); }
+.rb-listbox { border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); border-radius: var(--krds-radius-medium2); overflow: hidden; }
+.rb-listbox .rb-row-list { border: 0; border-radius: 0; }
+.rb-listbox-head { display: flex; align-items: center; justify-content: space-between; gap: var(--krds-gap-5); min-height: var(--krds-number-15); padding: 0 var(--krds-padding-7); background: var(--krds-color-surface-gray-subtler); border-bottom: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); flex-wrap: wrap; }
+.rb-statetabs { display: flex; align-items: center; gap: var(--krds-gap-6); }
+.rb-statetab { display: inline-flex; align-items: center; gap: var(--krds-gap-2); height: var(--krds-number-15); padding: 0; border: 0; background: none; color: var(--krds-color-text-subtle); font: inherit; cursor: pointer; }
+.rb-statetab.active { color: var(--krds-color-text-basic); font-weight: var(--rb-fw-current); }
+.rb-statetab-count { padding: 0 var(--krds-padding-3); border-radius: var(--krds-radius-large2, var(--krds-radius-medium2)); background: var(--krds-color-surface-gray-subtle); font-size: var(--rb-step-1); line-height: var(--rb-lh-1); }
+.rb-brtabs { border-bottom: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); }
+
+/* 브랜치/태그/릴리스 전환 링크와 브랜치 표 */
+.rb-refnav { display: flex; gap: var(--krds-gap-6); }
+.rb-refnav-link { color: var(--krds-color-text-subtle); text-decoration: none; padding: var(--krds-padding-3) 0; border-bottom: var(--krds-number-2) solid transparent; }
+.rb-refnav-link.active { color: var(--krds-color-text-basic); font-weight: var(--rb-fw-current); border-bottom-color: var(--krds-color-border-primary, currentColor); }
+.rb-reftable-wrap { border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); border-radius: var(--krds-radius-medium2); overflow-x: auto; }
+.rb-reftable { width: 100%; border-collapse: collapse; }
+.rb-reftable th, .rb-reftable td { padding: var(--krds-padding-4) var(--krds-padding-7); text-align: left; border-bottom: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); height: var(--krds-number-14); }
+.rb-reftable th { background: var(--krds-color-surface-gray-subtler); color: var(--krds-color-text-subtle); font-weight: var(--rb-fw-current); font-size: var(--rb-step-1); line-height: var(--rb-lh-1); }
+.rb-reftable tr:last-child td { border-bottom: 0; }
+.rb-reftable .rb-pill { margin-inline-start: var(--krds-gap-3); }
+
+/* 빈 위키 */
+.rb-wiki-empty { display: flex; flex-direction: column; align-items: center; gap: var(--krds-gap-5); padding: var(--krds-padding-12) 0; text-align: center; }
+
+/* 커밋 상세: 왼쪽 파일 트리와 변경 본문 */
+.rb-diff-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--krds-gap-6); align-items: start; }
+@media (min-width: 64em) { .rb-diff-layout.has-tree { grid-template-columns: var(--rb-dtree-w) minmax(0, 1fr); } }
+.rb-dtree { position: sticky; top: var(--krds-gap-5); max-height: calc(100vh - var(--krds-number-18) - var(--krds-number-12)); overflow: auto; padding: var(--krds-padding-4); border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); border-radius: var(--krds-radius-medium2); }
+.rb-dtree-list { list-style: none; margin: 0; padding: 0; }
+.rb-dtree-list .rb-dtree-list { padding-inline-start: var(--krds-padding-6); }
+.rb-dtree-dir, .rb-dtree-file { display: flex; align-items: center; gap: var(--krds-gap-3); min-height: var(--rb-side-item-h); padding: 0 var(--krds-padding-3); width: 100%; border: 0; background: none; color: var(--krds-color-text-basic); font: inherit; text-align: left; cursor: pointer; border-radius: var(--krds-radius-small2); }
+.rb-dtree-dir { list-style: none; }
+.rb-dtree-dir::-webkit-details-marker { display: none; }
+.rb-dtree-file:hover, .rb-dtree-dir:hover { background: var(--krds-color-action-secondary-hover); }
+.rb-diff-bar-left { display: flex; align-items: center; gap: var(--krds-gap-5); }
+.rb-dtree-dir, .rb-dtree-file { box-sizing: border-box; }
+.rb-dtree { overflow-x: hidden; }
+
+/* 공통 메뉴(UX-007 12장) */
+.rb-drop { position: relative; display: inline-flex; }
+.rb-menu { position: fixed; z-index: 90; box-sizing: border-box; width: max-content; min-width: var(--rb-menu-min-w); max-width: min(var(--rb-menu-max-w), calc(100vw - var(--rb-menu-edge) * 2)); scroll-margin: var(--rb-menu-edge); overflow-x: hidden; overflow-y: auto; padding: 0; margin: 0; background: var(--krds-color-surface-white, var(--krds-color-surface-gray-subtler)); border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); border-radius: var(--krds-radius-medium2); box-shadow: 0 var(--krds-number-5) var(--krds-number-9) var(--krds-color-alpha-shadow3); }
+.rb-menu ul { list-style: none; margin: 0; padding: 0; }
+.rb-menu li { margin: 0; padding: 0; }
+.rb-menu .item-link, .rb-menu .rb-side-link, .rb-menu .rb-menu-item { display: flex; align-items: center; gap: var(--krds-gap-3); box-sizing: border-box; width: 100%; height: var(--rb-menu-item-h); min-height: var(--rb-menu-item-h); margin: 0; padding: 0 var(--rb-menu-pad); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: var(--rb-step-15); line-height: var(--rb-lh-15); font-weight: var(--rb-fw-regular, 400); color: var(--krds-color-text-basic); text-align: left; text-decoration: none; background: none; border: 0; border-radius: 0; cursor: pointer; }
+.rb-menu .item-link > span, .rb-menu .rb-side-text, .rb-menu .rb-menu-item > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rb-menu .item-link:hover, .rb-menu .rb-side-link:hover, .rb-menu .rb-menu-item:hover, .rb-menu .item-link:focus-visible, .rb-menu .rb-side-link:focus-visible, .rb-menu .rb-menu-item:focus-visible { background: var(--krds-color-surface-gray-subtle); }
+.rb-menu .item-link.active, .rb-menu .rb-side-link.active, .rb-menu .rb-menu-item[aria-checked="true"] { background: var(--krds-color-action-secondary-selected, var(--krds-color-surface-gray-subtle)); font-weight: var(--rb-fw-current); }
+.rb-menu-title { display: flex; align-items: center; height: var(--rb-menu-item-h); margin: 0; padding: 0 var(--rb-menu-pad); white-space: nowrap; color: var(--krds-color-text-subtle); font-size: var(--rb-step-13); line-height: var(--rb-lh-13); }
+.rb-menu-group + .rb-menu-group { border-top: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); }
+
+/* 머리글 로고와 이름 한 덩어리(UX-007 브랜드). 로고 24, 간격 8, 이름 15 굵게 */
+.rb-logo { flex: none; }
+
+/* 바닥글(GitHub식 한 줄): 본문과 같은 컨테이너(1280, 좌우 --rb-page-pad)에 넣고 로고, 링크, 구분선, 문장이 한 왼쪽 선에서 시작한다.
+   첫 줄은 [로고 + 이름]과 링크(간격 24)를 가로로, 둘째 줄은 구분선과 13 글자 문장. 높이는 내용 + 위아래 24 */
+#krds-footer { min-height: 0; padding-inline: var(--rb-page-pad); box-sizing: border-box; }
+#krds-footer > .inner { flex-direction: row; flex-wrap: wrap; align-items: center; column-gap: var(--rb-footer-pad); row-gap: var(--rb-footer-pad); max-width: var(--rb-container-w); margin-inline: auto; padding: var(--rb-footer-pad) 0; box-sizing: border-box; }
+#krds-footer .f-cnt, #krds-footer .f-cnt .f-link, #krds-footer .f-cnt .f-link .link-go { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: var(--rb-footer-pad); margin: 0; padding: 0; width: auto; }
+#krds-footer .f-cnt .f-link .link-go .krds-btn { padding-inline: 0; min-height: var(--rb-lh-15); height: auto; }
+#krds-footer .f-btm { flex: 1 0 100%; margin: 0; padding: var(--rb-footer-pad) 0 0; border-top: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); }
+#krds-footer .f-btm .f-btm-text { margin: 0; padding: 0; }
+@media (max-width: 1023px) { #krds-footer > .inner { padding: var(--rb-footer-pad) 0; gap: var(--rb-footer-pad); } }
+
+
+/* README 안 인라인 코드는 긴 경로도 줄바꿈해 화면 밖으로 나가지 않는다 */
+.rb-md code, .rb-md-code { overflow-wrap: anywhere; }
+.rb-commit-bar, .rb-commit-bar > * { min-width: 0; max-width: 100%; }
+
+
+/* D-19 3장: 목록 항목(제목, 설명, 메타)은 영역 제목과 구분선과 같은 왼쪽 선에서 시작한다(아바타를 없앤 뒤 남은 안쪽 여백 32 제거) */
+#root .krds-structured-list.rb-list:not(.rb-cards) .structured-item { padding-inline: 0; }
+
+/* 아코디언(도움말 등): 제목 앞 글자 모양 표지(▼)는 쓰지 않고 KRDS 꺾쇠만 둔다. 제목과 본문은 같은 왼쪽 여백 16, 본문 위아래 16, 제목과 본문 사이 선 하나.
+   초점 테두리는 outline-offset으로 바깥에만 그려 본문과 겹치지 않게 한다 */
+.krds-accordion summary { display: flex; align-items: center; list-style: none; justify-content: space-between; gap: var(--krds-gap-5); padding: var(--krds-number-7) var(--krds-number-8); cursor: pointer; }
+.krds-accordion details[open] > summary .ico-toggle { transform: rotate(180deg); }
+.krds-accordion summary::-webkit-details-marker { display: none; }
+.krds-accordion summary::marker { content: ""; }
+.krds-accordion summary:hover { background: var(--krds-color-action-secondary-hover); }
+.krds-accordion summary:focus-visible { outline: var(--krds-border-width-variable-medium) solid var(--krds-color-border-primary); outline-offset: var(--krds-number-2); border-radius: var(--krds-radius-medium2); }
+.krds-accordion .accordion-body { padding: var(--krds-number-8); border-top: var(--krds-border-width-static-regular) solid var(--krds-color-divider-gray-light); }
+#root .krds-accordion .accordion-item .accordion-body, #root .krds-accordion .accordion-body { padding: var(--krds-number-8); }
+/* 번호 목록은 번호를 영역 제목과 같은 왼쪽 선에 둔다(번호 없이 안쪽 여백만 남던 문제) */
+#root ol.rb-ordered { list-style: decimal inside; padding-inline-start: 0; margin: 0; }
+#root .krds-accordion .accordion-item > summary, #root .krds-accordion summary { padding: var(--krds-number-7) var(--krds-number-8); min-height: var(--krds-number-14); }
+#root .krds-accordion summary:focus-visible { outline: var(--krds-border-width-variable-medium) solid var(--krds-color-border-primary); outline-offset: var(--krds-number-2); }
+
+/* 표는 자기 상자 안에서 가로로 스크롤한다(쪽 전체가 넓어지지 않게). 배지는 한 줄 */
+.krds-table-wrap, .rb-table-scroll { max-width: 100%; overflow-x: auto; }
+.rb-md .krds-table-wrap { min-width: 0; }
+.rb-pill { white-space: nowrap; flex: none; }
+
+
+/* UX/12 장식 점검: 상태 전환의 개수는 GitHub처럼 알약 없이 숫자만, 이미지 대체 글자는 알약 없이 글자만 */
+.rb-statetab-count { padding: 0; background: none; border-radius: 0; color: var(--krds-color-text-subtle); }
+
+/* UX-007 14장: 정보 패널과 판단 정보는 라벨(13 보조색) 위, 값(15) 아래의 세로 쌍. 긴 글은 3줄(소개 4줄)까지 보이고 '더보기'로 펼친다 */
+.rb-dock-list, .rb-decision-list { display: flex; flex-direction: column; gap: var(--krds-gap-5); margin: 0; }
+.rb-pair { display: flex; flex-direction: column; gap: var(--krds-gap-1); margin: 0; min-width: 0; }
+.rb-pair-label { margin: 0; color: var(--krds-color-text-subtle); font-size: var(--rb-step-13); line-height: var(--rb-lh-13); }
+.rb-pair-value { margin: 0; min-width: 0; font-size: var(--rb-step-15); line-height: var(--rb-lh-15); }
+.rb-fold { display: flex; flex-direction: column; align-items: flex-start; gap: var(--krds-gap-1); min-width: 0; width: 100%; }
+.rb-fold-text { margin: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--rb-fold-lines, 3); line-clamp: var(--rb-fold-lines, 3); overflow: hidden; overflow-wrap: anywhere; }
+.rb-fold-text.is-open { display: block; -webkit-line-clamp: unset; line-clamp: unset; overflow: visible; }
+.rb-fold-btn { padding: 0; border: 0; background: none; white-space: nowrap; font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: var(--krds-number-3); }
+.rb-fold-checks { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--krds-gap-1); }
+.rb-dock-more { margin: 0; }
+
+
+/* D-07, D-15: 어두운 화면의 마우스 올림, 선택, 누름 면이 청록(#0E3139, #113B45)이던 문제. 위 규칙은 light 변수만 덮어 실제 색에 닿지 않았다.
+   실제로 쓰이는 dark 변수와 최종 변수를 함께 회색 단계(80, 70)로 바꾼다 */
+html[data-krds-mode="dark"] {
+  --krds-dark-color-action-secondary-hover: var(--krds-color-high-contrast-gray-80);
+  --krds-dark-color-action-secondary-selected: var(--krds-color-high-contrast-gray-80);
+  --krds-dark-color-action-secondary-pressed: var(--krds-color-high-contrast-gray-70);
+  --krds-color-action-secondary-hover: var(--krds-color-high-contrast-gray-80);
+  --krds-color-action-secondary-selected: var(--krds-color-high-contrast-gray-80);
+  --krds-color-action-secondary-pressed: var(--krds-color-high-contrast-gray-70);
+}
+
+
+/* D-07, D-15: 어두운 화면에서 청록(secondary)으로 풀리던 나머지 면 변수도 회색 단계로(글자 단추의 마우스 올림/누름, 보조 면, 보조 요소 면). 테두리와 구분선의 secondary-light도 회색 */
+html[data-krds-mode="dark"] {
+  --krds-color-button-text-fill-hover: var(--krds-color-high-contrast-gray-80);
+  --krds-color-button-text-fill-pressed: var(--krds-color-high-contrast-gray-70);
+  --krds-color-surface-secondary-subtler: var(--krds-color-high-contrast-gray-90, var(--krds-color-surface-gray-subtler));
+  --krds-color-element-secondary-lighter: var(--krds-color-high-contrast-gray-80);
+  --krds-color-element-secondary-light: var(--krds-color-high-contrast-gray-70);
+  --krds-color-action-secondary-on-pressed: var(--krds-color-high-contrast-gray-70);
+  --krds-color-border-secondary-light: var(--krds-color-high-contrast-gray-70);
+  --krds-color-divider-secondary-light: var(--krds-color-high-contrast-gray-70);
+  --krds-color-icon-secondary-static: var(--krds-color-high-contrast-gray-60, var(--krds-color-high-contrast-gray-70));
+}
+
+/* D-07, D-15: 위 변수들을 KRDS가 읽는 세 이름(light, dark, 최종)에 모두 회색으로 둔다. 어느 이름으로 풀려도 청록이 나오지 않게 한다 */
+html[data-krds-mode="dark"] {
+  --krds-light-color-button-text-fill-hover: var(--krds-color-high-contrast-gray-80);
+  --krds-dark-color-button-text-fill-hover: var(--krds-color-high-contrast-gray-80);
+  --krds-color-button-text-fill-hover: var(--krds-color-high-contrast-gray-80);
+  --krds-light-color-button-text-fill-pressed: var(--krds-color-high-contrast-gray-70);
+  --krds-dark-color-button-text-fill-pressed: var(--krds-color-high-contrast-gray-70);
+  --krds-color-button-text-fill-pressed: var(--krds-color-high-contrast-gray-70);
+  --krds-light-color-element-secondary-lighter: var(--krds-color-high-contrast-gray-80);
+  --krds-dark-color-element-secondary-lighter: var(--krds-color-high-contrast-gray-80);
+  --krds-color-element-secondary-lighter: var(--krds-color-high-contrast-gray-80);
+  --krds-light-color-element-secondary-light: var(--krds-color-high-contrast-gray-70);
+  --krds-dark-color-element-secondary-light: var(--krds-color-high-contrast-gray-70);
+  --krds-color-element-secondary-light: var(--krds-color-high-contrast-gray-70);
+  --krds-light-color-action-secondary-on-pressed: var(--krds-color-high-contrast-gray-70);
+  --krds-dark-color-action-secondary-on-pressed: var(--krds-color-high-contrast-gray-70);
+  --krds-color-action-secondary-on-pressed: var(--krds-color-high-contrast-gray-70);
+  --krds-light-color-border-secondary-light: var(--krds-color-high-contrast-gray-70);
+  --krds-dark-color-border-secondary-light: var(--krds-color-high-contrast-gray-70);
+  --krds-color-border-secondary-light: var(--krds-color-high-contrast-gray-70);
+  --krds-light-color-divider-secondary-light: var(--krds-color-high-contrast-gray-70);
+  --krds-dark-color-divider-secondary-light: var(--krds-color-high-contrast-gray-70);
+  --krds-color-divider-secondary-light: var(--krds-color-high-contrast-gray-70);
+  --krds-light-color-action-secondary-hover: var(--krds-color-high-contrast-gray-80);
+  --krds-dark-color-action-secondary-hover: var(--krds-color-high-contrast-gray-80);
+  --krds-color-action-secondary-hover: var(--krds-color-high-contrast-gray-80);
+  --krds-light-color-action-secondary-selected: var(--krds-color-high-contrast-gray-80);
+  --krds-dark-color-action-secondary-selected: var(--krds-color-high-contrast-gray-80);
+  --krds-color-action-secondary-selected: var(--krds-color-high-contrast-gray-80);
+  --krds-light-color-action-secondary-pressed: var(--krds-color-high-contrast-gray-70);
+  --krds-dark-color-action-secondary-pressed: var(--krds-color-high-contrast-gray-70);
+  --krds-color-action-secondary-pressed: var(--krds-color-high-contrast-gray-70);
+  --krds-light-color-surface-secondary-subtler: var(--krds-color-high-contrast-gray-90);
+  --krds-dark-color-surface-secondary-subtler: var(--krds-color-high-contrast-gray-90);
+  --krds-color-surface-secondary-subtler: var(--krds-color-high-contrast-gray-90);
+}
+
+/* 아이콘 단독 버튼(IconButton): 크기는 짝수 두 가지(32, 40), 아이콘 20/24는 display block, 안쪽 여백과 줄 높이 0이라 아이콘이 버튼 한가운데에 온다.
+   호버와 눌림은 회색 면(청록 금지), 초점은 바깥 outline만 */
+#root .rb-iconbtn, .rb-iconbtn { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; padding: 0; line-height: 0; min-width: 0; min-height: 0; flex: none; background: none; border: var(--krds-border-width-static-regular) solid transparent; border-radius: var(--krds-radius-medium2); color: var(--krds-color-text-basic); cursor: pointer; text-decoration: none; }
+#root .rb-iconbtn.is-small { width: var(--krds-number-12); height: var(--krds-number-12); }
+#root .rb-iconbtn.is-medium { width: var(--krds-number-14); height: var(--krds-number-14); }
+.rb-iconbtn .rb-icon { display: block; flex: none; }
+.rb-iconbtn.is-small .rb-icon { width: var(--krds-number-9); height: var(--krds-number-9); }
+.rb-iconbtn.is-medium .rb-icon { width: var(--krds-number-10); height: var(--krds-number-10); }
+.rb-iconbtn.is-bordered { border-color: var(--krds-color-border-gray); }
+#root .rb-iconbtn:hover { background: var(--krds-color-surface-gray-subtle); }
+#root .rb-iconbtn:active { background: var(--krds-color-border-gray-light); }
+#root .rb-iconbtn:focus-visible { outline: var(--krds-border-width-variable-medium) solid var(--krds-color-border-primary); outline-offset: var(--krds-number-2); background: none; }
+.rb-dock-close { margin-inline-end: calc(var(--krds-number-3) * -1); }
+
+/* D-20 바닥글: 위 묶음(로고 왼쪽, 연락처와 유틸리티 링크 오른쪽), 구분선, 아래 줄(정책 링크 왼쪽, 저작권 오른쪽). 768 이하는 위에서 아래로 같은 순서. 링크 15, 연락처와 저작권 13 */
+#krds-footer > .inner.rb-foot { display: block; max-width: var(--rb-container-w); margin-inline: auto; padding: var(--rb-footer-pad) 0; box-sizing: border-box; }
+.rb-foot-top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--rb-footer-pad); flex-wrap: wrap; }
+.rb-mois-logo-h { display: block; height: var(--krds-number-12); width: auto; flex: none; color: var(--krds-color-text-basic); }
+.rb-foot-info { display: flex; flex-direction: column; align-items: flex-end; gap: var(--krds-gap-3); text-align: end; min-width: 0; }
+.rb-foot-contact { font-style: normal; display: flex; flex-direction: column; gap: var(--krds-gap-1); color: var(--krds-color-text-basic); font-size: var(--rb-step-13); line-height: var(--rb-lh-13); }
+.rb-foot-contact p { margin: 0; }
+.rb-foot-links { display: flex; flex-wrap: wrap; gap: var(--rb-footer-pad); list-style: none; margin: 0; padding: 0; }
+.rb-foot-links a { color: var(--krds-color-text-basic); font-size: var(--rb-step-15); line-height: var(--rb-lh-15); text-decoration: none; }
+.rb-foot-links a:hover, .rb-foot-links a:focus-visible { text-decoration: underline; text-underline-offset: var(--krds-number-3); }
+.rb-foot-links a.is-strong { font-weight: var(--rb-fw-current); }
+.rb-foot-bottom { display: flex; align-items: center; justify-content: space-between; gap: var(--rb-footer-pad); flex-wrap: wrap; margin-top: var(--rb-footer-divider-gap); padding-top: var(--rb-footer-divider-gap); border-top: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); }
+.rb-foot-copy { margin: 0; color: var(--krds-color-text-basic); font-size: var(--rb-step-13); line-height: var(--rb-lh-13); }
+@media (max-width: 1023px) {
+  /* 세로로 쌓일 때: 로고와 주소 사이 12, 정책 링크와 저작권 문장 사이 8(Figma 대조 2026. 10. 31.) */
+  .rb-foot-top { flex-direction: column; align-items: flex-start; gap: var(--krds-number-7); }
+  .rb-foot-info { align-items: flex-start; text-align: start; }
+  .rb-foot-bottom { flex-direction: column; align-items: flex-start; gap: var(--krds-number-5); }
+}

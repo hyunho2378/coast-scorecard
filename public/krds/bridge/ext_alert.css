@@ -1,0 +1,17 @@
+/* KRDS 피그마 전용 부품: Alert (묶음 343:54539). 상태 danger/warning/success/infromation(피그마 철자 그대로 클래스), 크기 +title(기본)/slim */
+.krds-alert { box-sizing:border-box; width:100%; display:flex; flex-direction:column; align-items:flex-start; gap:var(--krds-gap-3);
+  padding:var(--krds-padding-6); border-radius:var(--krds-radius-xlarge2); overflow:hidden; color:var(--krds-color-text-basic);
+  /* 피그마 선 INSIDE: 크기에 더해지지 않게 안쪽 그림자 */
+  box-shadow:inset 0 0 0 var(--krds-border-width-static-regular) var(--krds-alert-border); background-color:var(--krds-alert-surface); }
+.krds-alert.danger { --krds-alert-surface:var(--krds-color-surface-danger-subtler); --krds-alert-border:var(--krds-color-border-danger-light); --krds-alert-text:var(--krds-color-text-danger); --krds-alert-icon:var(--krds-color-icon-danger); }
+.krds-alert.warning { --krds-alert-surface:var(--krds-color-surface-warning-subtler); --krds-alert-border:var(--krds-color-border-warning-light); --krds-alert-text:var(--krds-color-text-warning); --krds-alert-icon:var(--krds-color-icon-warning); }
+.krds-alert.success { --krds-alert-surface:var(--krds-color-surface-success-subtler); --krds-alert-border:var(--krds-color-border-success-light); --krds-alert-text:var(--krds-color-text-success); --krds-alert-icon:var(--krds-color-icon-success); }
+.krds-alert.infromation { --krds-alert-surface:var(--krds-color-surface-information-subtler); --krds-alert-border:var(--krds-color-border-information-light); --krds-alert-text:var(--krds-color-text-information); --krds-alert-icon:var(--krds-color-icon-information); }
+.krds-alert .alert-title { width:100%; display:flex; align-items:center; gap:var(--krds-gap-3); margin:0; color:var(--krds-alert-text); }
+.krds-alert .alert-title > strong { flex:1 1 0; min-width:0; }
+.krds-alert .alert-body { width:100%; box-sizing:border-box; margin:0; padding-left:var(--krds-padding-9); /* 343:54544 padding/9 */ }
+/* 아이콘: 시스템 아이콘(ext_icons.css 두 겹 마스크)의 원 색을 부품 색으로. 피그마 icon_size 24 */
+.krds-alert .svg-icon.ico-sys-danger, .krds-alert .svg-icon.ico-sys-warning, .krds-alert .svg-icon.ico-sys-success, .krds-alert .svg-icon.ico-sys-info {
+  flex-shrink:0; width:var(--krds-size-height-4); height:var(--krds-size-height-4); background-color:var(--krds-alert-icon); }
+.krds-alert.slim { flex-direction:row; align-items:center; border-radius:var(--krds-radius-medium3); }
+.krds-alert.slim > p { flex:1 1 0; min-width:0; margin:0; }

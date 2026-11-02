@@ -1,0 +1,389 @@
+/* 갈래 form 보정 CSS. 피그마 KRDS 키트(FRTpcXB6x7RKMJY4X7w2eX)가 기준이고 공식 코드가 다르게 그리는 곳만 덮는다. */
+
+/* ── 버튼 (피그마 묶음 button 305:2236) ── */
+/* 피그마 primary 는 선이 없다(305:2285, 305:2297, 305:2309). 공식 코드는 선을 기본 채움색(#256EF4)으로 고정해
+   hover, pressed 때 어두운 채움 바깥에 밝은 1px 테두리가 남는다. 선을 투명으로 두면 채움이 그 자리를 덮는다. */
+.krds-btn.primary,
+.krds-btn.primary:hover,
+.krds-btn.primary:active,
+.krds-btn.primary:focus { border-color: transparent; }
+/* 피그마 disabled 는 세 유형 모두 선이 없다(305:2321, 305:2325, 305:2329). 공식 코드는 #B1B8BE 테두리. */
+.krds-btn.primary[disabled], .krds-btn.primary.disabled,
+.krds-btn.secondary[disabled], .krds-btn.secondary.disabled,
+.krds-btn.tertiary[disabled], .krds-btn.tertiary.disabled { border-color: transparent; }
+/* 피그마 minWidth: xlarge 98(305:2237), large 90(305:2285), medium 78(305:2333), small 64(305:2381), xsmall 60(305:2429).
+   피그마 원본도 변수에 연결돼 있지 않은 값이다(KRDS 키트 원본 값 그대로). 공식 코드는 최소 폭이 없어 짧은 글자 버튼이 좁아진다. */
+.krds-btn.xlarge:not(.text):not(.link):not(.icon) { min-width: 9.8rem; }
+.krds-btn.large:not(.text):not(.link):not(.icon) { min-width: 9rem; }
+.krds-btn.medium:not(.text):not(.link):not(.icon) { min-width: 7.8rem; }
+.krds-btn.small:not(.text):not(.link):not(.icon) { min-width: 6.4rem; }
+.krds-btn.xsmall:not(.text):not(.link):not(.icon) { min-width: 6rem; }
+
+/* ── 글자 다듬기 (전역) ──
+   크롬 macOS 기본(auto)은 어두운 바탕 위 밝은 글자를 피그마보다 20~35% 두껍게 그린다(버튼 primary 글자 픽셀 수 비교).
+   antialiased 로 두면 피그마 렌더와 같아진다(button 60변형 같음 57 → 60). 전역 설정이라 krds-bridge.css 로 옮기는 것이 맞다(공통 도구 요청). */
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+/* ── 텍스트 입력 (피그마 묶음 text_input 286:25890) ── */
+/* 입력값 글자색: 피그마 focused, completed, error 는 color/text/basic #1E2124(288:26076, 288:26069, 288:26062).
+   공식 코드는 text-subtle #464C53. 읽기 전용(view, 288:26048)은 피그마도 #464C53 이라 공식 readonly 값을 그대로 둔다. */
+.krds-input { --krds-input--color-text: var(--krds-color-text-basic); }
+/* 레이블 칸: 공식 .form-tit 는 본문 17px 줄 상자(25.5px)를 만들어 15px 레이블(22.5px)보다 3px 높다.
+   피그마 레이블 글자 상자 23px(288:26085). flex 로 두면 줄 상자가 사라져 레이블 높이만 남는다. */
+.form-group .form-tit { display: flex; }
+/* 테두리 안쪽 여백: 피그마 선은 안쪽(INSIDE)이라 글자가 바깥 모서리에서 16px(padding/6) 에 있다(288:26079 x=19164, box x=19148).
+   공식 코드는 테두리 두께만큼 글자가 더 들어간다(1px, focus 와 error 는 2px). 테두리 두께를 패딩에서 뺀다. */
+.krds-input { padding-left: calc(var(--krds-input--padding-x) - 0.1rem); padding-right: calc(var(--krds-input--padding-x) - 0.1rem); }
+.krds-input:focus, .form-conts.is-error .krds-input { padding-left: calc(var(--krds-input--padding-x) - 0.2rem); padding-right: calc(var(--krds-input--padding-x) - 0.2rem); }
+/* 지우기 버튼: 피그마는 focused 에서만 보인다(288:26076, completed 288:26069 에는 없음). 공식 코드는 값이 있으면 늘 보인다. */
+.form-conts[data-delete=true]:not(:focus-within) .btn-delete-input { display: none; }
+/* error 입력값 글자색: 피그마 color/text/basic #1E2124(288:26062). 공식 코드 --krds-input--color-text-error 는 text-subtle. */
+.krds-input { --krds-input--color-text-error: var(--krds-color-text-basic); }
+
+/* ── 셀렉트 (피그마 묶음 selectbox 288:26192) ── */
+/* 레이블 색: 피그마 셀렉트 레이블은 color/text/basic #1E2124(288:26193 의 레이블). 텍스트 입력 레이블(text-subtle)과 다르다. */
+.form-group:has(.krds-form-select) .form-tit { color: var(--krds-color-text-basic); }
+/* error 테두리: 피그마 color/input/border-error #DE3412(288:26215). 공식 코드는 text-point #D63D4A. */
+.krds-form-select.is-error, .is-error .krds-form-select { border-color: var(--krds-form-select--color-border-error); }
+/* error 글자색: 피그마 #464C53(text-subtle, 선택된 값). .completed 와 같이 쓴다(템플릿). */
+/* 읽기 전용(view): 피그마 288:26229 채움 #CDD1D5, 선 #B1B8BE, 글자 #464C53. 공식 코드는 readonly 변수만 있고 규칙이 없다. */
+.krds-form-select[aria-readonly=true] {
+  background-color: var(--krds-form-select--color-background-readonly) !important;
+  border-color: var(--krds-form-select--color-border-readonly);
+  color: var(--krds-form-select--color-text-completed);
+  pointer-events: none;
+}
+/* 글자 시작 위치: 피그마 선은 안쪽이라 글자가 바깥에서 16px. 테두리 두께를 패딩에서 뺀다(1px, focus 와 error 2px). */
+.krds-form-select { padding-left: calc(var(--krds-form-select--padding-default) - 0.1rem); }
+.krds-form-select:focus, .krds-form-select.is-error, .is-error .krds-form-select { padding-left: calc(var(--krds-form-select--padding-default) - 0.2rem); }
+/* disabled 화살표: 피그마 288:26222 화살표는 color/icon/gray #33363D(기본과 같음). 공식 코드는 회색 ico_angle_disabled.svg(#6F757B)로 바꾼다.
+   참고: 공식 ico_angle.svg 의 색은 #2D2D2D 로 피그마 #33363D 와 조금 다르다(그림 파일이라 변수로 바꿀 수 없음, 픽셀 비교는 통과). */
+.krds-form-select[disabled] { background-image: url(../resources/img/component/icon/ico_angle.svg); }
+/* 크롬 기본 스타일이 비활성 select 에 불투명도 0.7 을 준다. 피그마 disabled(288:26222)는 불투명. 색은 KRDS 변수로 이미 정해져 있다. */
+.krds-form-select[disabled] { opacity: 1; }
+
+/* ── 정렬 셀렉트 (피그마 묶음 select_text 288:27269) ── */
+/* xlarge: 피그마에만 있다(1366:15261, 글자 heading/medium 24px Bold, 높이 36, 아이콘 24, 좌우 패딩 4, 간격 2). 공식 코드 large 는 19px 라 다르다.
+   KRDS 변수로만 만든다. */
+.krds-form-select-sort.xlarge {
+  padding: 0 calc(var(--krds-form-select-sorting--padding-left) + var(--krds-gap-1) + var(--krds-form-select-sorting--icon-size-large)) 0 var(--krds-form-select-sorting--padding-left);
+  background-position: center right var(--krds-form-select-sorting--padding-left);
+  background-size: var(--krds-form-select-sorting--icon-size-large) !important;
+  font-size: var(--krds-font-size-heading-medium);
+  font-weight: var(--krds-font-weight-bold);
+}
+/* small: 피그마 313:27117 좌우 패딩 2(padding/1). 공식 코드는 자기 변수 --krds-form-select-sorting--padding-left-small(2px)을 정의만 하고 쓰지 않아 4px 이 된다. */
+.krds-form-select-sort.small {
+  padding: 0 calc(var(--krds-form-select-sorting--padding-left-small) + var(--krds-gap-1) + var(--krds-form-select-sorting--icon-size-small)) 0 var(--krds-form-select-sorting--padding-left-small);
+  background-position: center right var(--krds-form-select-sorting--padding-left-small);
+}
+
+/* ── 체크박스 (피그마 묶음 checkbox 309:25967) ── */
+/* 중간 상태(indeterminate): 피그마에만 있다(309:26066, 309:26146). 채움과 선은 checked 와 같은 KRDS 변수,
+   표시는 흰 가로선(color/element/inverse-static). 선 크기는 피그마 원본 값: large 12x2, medium 10x1.6, 둥근 끝(원본도 변수 없음). */
+.krds-form-check input[type=checkbox].is-indeterminate ~ label:before,
+.krds-form-check input[type=checkbox]:indeterminate ~ label:before {
+  background-color: var(--krds-form-check--checkbox-button-color-element-checked);
+  border-color: var(--krds-form-check--button-color-border-checked);
+}
+.krds-form-check input[type=checkbox].is-indeterminate ~ label:after,
+.krds-form-check input[type=checkbox]:indeterminate ~ label:after {
+  background-color: var(--krds-form-check--checkbox-check-color-element-checked);
+  /* 피그마 선: 둥근 끝(ROUND), 길이 10, 두께 1.6, 체크 영역 12 가운데. 마스크 모양이라 색이 아니다(색은 위 변수). */
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cline x1='1' y1='6' x2='11' y2='6' stroke='black' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cline x1='1' y1='6' x2='11' y2='6' stroke='black' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  -webkit-mask-size: contain; mask-size: contain;
+}
+.krds-form-check.large input[type=checkbox].is-indeterminate ~ label:after,
+.krds-form-check.large input[type=checkbox]:indeterminate ~ label:after {
+  /* 피그마 large: 길이 12, 두께 2, 체크 영역 16 가운데, 둥근 끝 */
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cline x1='2' y1='8' x2='14' y2='8' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cline x1='2' y1='8' x2='14' y2='8' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.krds-form-check input[type=checkbox].is-indeterminate:disabled ~ label:after,
+.krds-form-check input[type=checkbox]:indeterminate:disabled ~ label:after {
+  background-color: var(--krds-form-check--checkbox-check-color-element-disabled);
+}
+/* 레이블 글자색: 피그마 color/text/bolder #131416(309:25966 레이블). 공식 코드 text-basic #1E2124. */
+.krds-form-check { --krds-form-check--color-text: var(--krds-color-text-bolder); }
+/* 비활성 부가 설명: 피그마 color/text/disabled #8A949E(309:25986). 공식 코드는 비활성에도 #464C53. */
+.krds-form-check input[type=checkbox]:disabled ~ .krds-form-check-cnt .krds-form-check-p,
+.krds-form-check input[type=radio]:disabled ~ .krds-form-check-cnt .krds-form-check-p { color: var(--krds-color-text-disabled); }
+/* 세로 배치: 공식 .krds-form-check 는 블록이라 inline-flex 레이블 아래 본문 17px 줄 상자가 생겨 부가 설명이 4.5px 내려간다.
+   피그마 label 프레임은 세로 오토레이아웃(gap 4, 309:25966). flex 세로로 두면 레이블 높이만 남는다. */
+.krds-form-check { display: flex; flex-direction: column; }
+/* 비활성 단추 테두리: 피그마 color/border/disabled #B1B8BE(309:25986 checkbox__item). 공식 코드 #8A949E. */
+.krds-form-check { --krds-form-check--button-color-border-disabled: var(--krds-color-border-disabled); }
+/* 레이블 없는 체크 단추(피그마 checkbox__item 306:26713): 단추 크기만. 공식 label 의 위쪽 여백(button-margin-top 3px)과 gap 을 없앤다. */
+.krds-form-check.no-label > label { gap: 0; }
+.krds-form-check.no-label.no-label > input[type=checkbox] ~ label:before,
+.krds-form-check.no-label.no-label > input[type=radio] ~ label:before { margin-top: 0; }
+.krds-form-check.medium.no-label > input[type=checkbox] ~ label:after { top: calc((var(--krds-form-check--button-size-medium) - var(--krds-form-check--checkbox-check-size-medium)) / 2); }
+.krds-form-check.large.no-label > input[type=checkbox] ~ label:after { top: calc((var(--krds-form-check--button-size-large) - var(--krds-form-check--checkbox-check-size-large)) / 2); }
+/* 레이블 없는 라디오 단추(피그마 radio_button__item 313:27161): 점을 단추 가운데로(위쪽 여백 3px 제외). */
+.krds-form-check.medium.no-label > input[type=radio] ~ label:after { top: calc((var(--krds-form-check--button-size-medium) - var(--krds-form-check--radio-check-size-medium)) / 2); }
+.krds-form-check.large.no-label > input[type=radio] ~ label:after { top: calc((var(--krds-form-check--button-size-large) - var(--krds-form-check--radio-check-size-large)) / 2); }
+
+/* ── 라디오 목록 (피그마 radio_button__list 315:27045) ── */
+/* 세로 간격: 피그마 medium gap/6 20px, large gap/7 24px. 공식 .krds-check-area 는 크기 구분 없이 gap-6. */
+.krds-check-area.chk-column.large { gap: var(--krds-gap-7); }
+
+/* ── 정렬 라디오 (피그마 radio_button__sorting__atomic 1055:38347) ── */
+/* 공식 코드는 이 부품을 구조화 목록 scss(.w-sort-btn, 버튼)에만 두고 컴파일 CSS 에 넣지 않았다. 피그마 값과 KRDS 변수로 만든다.
+   피그마: 좌우 패딩 medium padding/2 4, small padding/1 2, 모서리 radius/small2 4, 글자 label/medium, small 은 label/small,
+   채움 action/secondary(기본), -hover, -pressed, -selected(선택), 선택 글자는 underline/medium, underline/small. */
+.krds-sort-radio { display: inline-flex; position: relative; }
+.krds-sort-radio > input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.krds-sort-radio > label {
+  display: inline-flex; align-items: center; gap: var(--krds-gap-1);
+  padding: 0 var(--krds-padding-2); border-radius: var(--krds-radius-small2);
+  background-color: var(--krds-color-action-secondary); color: var(--krds-color-text-basic);
+  font-size: var(--krds-font-size-label-medium); line-height: var(--krds-line-height-base); cursor: pointer;
+}
+.krds-sort-radio.small > label { padding: 0 var(--krds-padding-1); font-size: var(--krds-font-size-label-small); }
+.krds-sort-radio > label:hover { background-color: var(--krds-color-action-secondary-hover); }
+.krds-sort-radio > label:active { background-color: var(--krds-color-action-secondary-pressed); }
+.krds-sort-radio > input:checked + label { background-color: var(--krds-color-action-secondary-selected); text-decoration: underline; }
+.krds-sort-radio > input:focus-visible + label { box-shadow: var(--krds-box-shadow-outline); }
+/* 선택 밑줄 위치: 피그마 underline 글자 스타일의 밑줄은 크롬 기본(auto)보다 2px 아래(1055:38393, 1055:38396 픽셀 측정). */
+.krds-sort-radio > input:checked + label { text-underline-offset: 0.3rem; text-decoration-thickness: 0.15rem; } /* 피그마 픽셀 측정: 두께 1.5 */
+/* 체크박스와 라디오 줄 높이: 피그마 item 프레임은 단추 + 위아래 3px(medium 20+6=26, large 24+6=30, 313:27199, 309:25966).
+   공식 코드 줄 높이는 글자 줄(25.5, 28.5)이라 0.5~1.5px 낮고, 세로 목록에서 줄마다 밀린다(radio_button__list 315:27045). */
+.krds-form-check.medium > label { min-height: calc(var(--krds-form-check--button-size-medium) + var(--krds-form-check--button-margin-top) * 2); }
+.krds-form-check.large > label { min-height: calc(var(--krds-form-check--button-size-large) + var(--krds-form-check--button-margin-top) * 2); }
+.krds-form-check.no-label > label { min-height: 0; }
+
+/* ── 버튼 아이콘 ── */
+/* 공식 svg-icon 클래스가 없는 피그마 아이콘: 피그마 아이콘 SVG 를 마스크로 쓴다(템플릿이 mask-image 를 넣음). 색은 공식 버튼 아이콘 색 변수 그대로. */
+.svg-icon.f2c-ico { display: inline-block; flex-shrink: 0; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center; -webkit-mask-size: contain; mask-size: contain; }
+
+/* ── 텍스트 버튼 (피그마 묶음 button_text 300:26102) ── */
+/* 테두리: 피그마 선은 투명(color/border/transparency)이고 안쪽(INSIDE)이라 폭에 들어가지 않는다. 공식 .krds-btn 은 투명 테두리 1px 이
+   바깥에 더해져 2px 넓다(nav 갈래가 헤더에서 같은 차이 확인). 테두리를 없애도 공식 포커스 표시는 box-shadow 라 영향 없다. */
+.krds-btn.text { border-width: 0; }
+/* 높이와 정렬: 피그마는 고정 높이(xsmall 20 size-height/3, small 24 /4, medium 32 /5, large 40 /6) 가운데 정렬(305:1430, 305:1446).
+   공식 코드는 inline-block + 위아래 패딩으로 높이를 만들어 0.5px 씩 어긋난다. 공식 크기 변수를 최소 높이로, 줄바꿈 허용은 그대로 둔다. */
+.krds-btn.text { display: inline-flex; align-items: center; }
+.krds-btn.text.xsmall { padding-top: 0; padding-bottom: 0; min-height: var(--krds-button--size-height-xsmall); }
+.krds-btn.text.small { padding-top: 0; padding-bottom: 0; min-height: var(--krds-button--size-height-small); }
+.krds-btn.text.medium { padding-top: 0; padding-bottom: 0; min-height: var(--krds-button--size-height-medium); }
+.krds-btn.text.large { padding-top: 0; padding-bottom: 0; min-height: var(--krds-button--size-height-large); }
+.krds-btn.text.xlarge { padding-top: 0; padding-bottom: 0; min-height: var(--krds-button--size-height-xlarge); }
+.krds-btn.text:is(.xsmall, .small, .medium, .large, .xlarge) .svg-icon { margin-bottom: 0; } /* 공식 크기별 음수 아래 여백(inline-block 정렬용)을 없앤다. 가운데 정렬은 inline-flex 가 한다 */
+/* 모서리: 피그마 large radius/medium1 6, medium, small, xsmall radius/small3 4. 공식은 일반 버튼 값(8, 6, 6, 4). */
+.krds-btn.text { --krds-button--radius-large: var(--krds-radius-medium1); --krds-button--radius-medium: var(--krds-radius-small3); --krds-button--radius-small: var(--krds-radius-small3); --krds-button--radius-xsmall: var(--krds-radius-small3); }
+/* xsmall: 피그마 305:1478 은 높이 20 고정 상자에 15px 글자 줄(22.5)이 위아래로 넘친다(글자 상자 23). 공식은 글자 줄만큼 커진다.
+   공식 height:auto !important 를 덮어야 해서 !important. 글자는 가운데 정렬이라 넘침은 위아래 1.25px 씩. */
+.krds-btn.text.xsmall { height: var(--krds-button--size-height-xsmall) !important; }
+
+/* ── 텍스트 영역 (피그마 묶음 text_area 343:43306) ── */
+/* 공식 오류: textarea.krds-input 의 line-height 가 var(--krds-transition-base)(".4s ease-in-out", 애니메이션 값)라 무효가 된다. 피그마 150%. */
+/* 글자: 피그마 label/medium 17px(343:43350). 공식은 입력칸 large 기본값 19px. 모서리: 피그마 radius/medium2 6, 공식 8. */
+textarea.krds-input {
+  line-height: var(--krds-line-height-base);
+  font-size: var(--krds-font-size-label-medium);
+  border-radius: var(--krds-radius-medium2);
+  padding-left: calc(var(--krds-input--textarea-padding-x) - 0.1rem);
+  padding-right: calc(var(--krds-input--textarea-padding-x) - 0.1rem);
+}
+/* 테두리 두께만큼 안쪽 여백을 뺀다(피그마 선은 안쪽): focus 와 error 는 2px. 위아래도 같은 이유. */
+textarea.krds-input { padding-top: calc(var(--krds-input--textarea-padding-y) - 0.1rem); padding-bottom: calc(var(--krds-input--textarea-padding-y) - 0.1rem); }
+textarea.krds-input:focus, .form-conts.is-error textarea.krds-input {
+  padding: calc(var(--krds-input--textarea-padding-y) - 0.2rem) calc(var(--krds-input--textarea-padding-x) - 0.2rem);
+}
+
+/* ── 입력 안내 문구 (피그마 input_message__atomic 1408:38848) ── */
+/* 피그마 hint(1408:38883)는 아이콘이 없다. 공식 [class^=form-hint]::before 는 일반 안내 문구에도 정보 아이콘을 그린다. */
+.form-group .form-hint::before { display: none; }
+
+/* ── 토글 스위치 (피그마 toggle_switch 306:27125) ── */
+/* 줄 높이: 공식은 레이블 줄 높이를 단추 높이(24, 20)로 둬 글자 줄(28.5, 25.5)보다 작다. 피그마는 글자 상자(29, 26) 가운데에 단추(306:27142 단추 y 2.5). */
+.krds-form-toggle-switch.medium [type=checkbox] ~ label,
+.krds-form-toggle-switch.large [type=checkbox] ~ label,
+.krds-form-toggle-switch [type=checkbox] ~ label { line-height: var(--krds-line-height-base); }
+/* 비활성 글자색: 피그마 color/text/disabled #8A949E(306:27150). 공식은 변수(--…-color-text-disabled)만 있고 규칙에서 쓰지 않는다. */
+.krds-form-toggle-switch [type=checkbox]:disabled ~ label { color: var(--krds-form-toggle-switch--color-text-disabled); }
+/* 손잡이(i)는 absolute top:0 인데 공식 .switch-toggle 은 위치 기준이 아니라 레이블 위쪽에 붙는다(레이블이 단추 높이일 때만 맞았다). */
+.krds-form-toggle-switch [type=checkbox] ~ label .switch-toggle { position: relative; flex-shrink: 0; }
+
+/* ── 태그 (피그마 tag 306:26553, tag__list 1037:36138) ── */
+/* 줄바꿈: 공식 태그는 줄바꿈을 막지 않아 좁은 칸에서 "#" 와 "태그"가 두 줄로 나뉜다(keep-all 과 겹침). 피그마는 한 줄. */
+.krds-tag-wrap .krds-btn-tag { white-space: nowrap; }
+/* 테두리: 피그마 선은 안쪽(color/border/gray-light, INSIDE, 306:26554)이라 폭에 들어가지 않는다. 공식은 1px 씩 바깥에 더해진다. 좌우 패딩에서 뺀다. */
+.krds-tag-wrap.small .krds-btn-tag { padding-left: calc(var(--krds-btn-tag--padding-x-small) - 0.1rem); padding-right: calc(var(--krds-btn-tag--padding-x-small) - 0.1rem); }
+.krds-tag-wrap.medium .krds-btn-tag { padding-left: calc(var(--krds-btn-tag--padding-x-medium) - 0.1rem); padding-right: calc(var(--krds-btn-tag--padding-x-medium) - 0.1rem); }
+.krds-tag-wrap.large .krds-btn-tag { padding-left: calc(var(--krds-btn-tag--padding-x-large) - 0.1rem); padding-right: calc(var(--krds-btn-tag--padding-x-large) - 0.1rem); }
+/* 작은 링크 태그 밑줄: 피그마 small 링크 태그는 기본 상태도 underline/xsmall(1611:29147). large, medium 은 기본 상태 밑줄 없음(공식과 같음).
+   피그마 원본의 다른 크기와 어긋나 키트 오류로 의심되지만 피그마를 따른다. */
+.krds-tag-wrap.small .krds-btn-tag.link { text-decoration: underline; text-underline-offset: var(--krds-font-underline-offset); }
+/* hover, pressed: 피그마는 선이 없다(306:26557, 306:26560, 1611:29135 등 전부). 공식은 테두리를 유지한다. 투명으로 두면 채움이 그 자리를 덮는다. */
+.krds-tag-wrap .krds-btn-tag:hover, .krds-tag-wrap .krds-btn-tag:active { border-color: transparent; }
+/* 링크 태그 밑줄: 피그마 underline 글자 스타일의 밑줄 두께 1.5px. 공식은 글꼴 기본 두께와 0.3rem 위치. */
+.krds-tag-wrap .krds-btn-tag.link:hover, .krds-tag-wrap .krds-btn-tag.link:active, .krds-tag-wrap.small .krds-btn-tag.link { text-decoration-thickness: 0.15rem; text-underline-offset: 0.25rem; } /* 피그마 픽셀 측정: 두께 1.5, 공식 위치보다 0.5px 위 */
+
+/* ── 링크 (피그마 button_link 306:26203) ── */
+/* 방문한 링크: 공식 :visited 규칙과 같은 모양을 클래스로도 쓸 수 있게(목록에서 읽은 항목 표시, 검증용). 색 변수는 공식 그대로. */
+.krds-btn.link.is-visited { color: var(--krds-light-color-link-visited); }
+.krds-btn.link.is-visited .svg-icon { background-color: var(--krds-light-color-link-visited); }
+.krds-btn.link.is-visited .underline.hidden-underline { text-decoration-color: inherit; }
+[data-krds-mode=high-contrast] .krds-btn.link.is-visited { color: var(--krds-high-contrast-color-link-visited); }
+/* 배치: 피그마 링크는 가로 오토레이아웃(가운데, 간격 large, medium gap/2 4, small gap/1 2, 좌우 패딩 2)이고 선은 투명 안쪽(306:26204 등).
+   공식은 inline-block(간격 없음) + 바깥 1px 투명 테두리라 폭이 2px 크고 아이콘이 글자에 붙는다. 텍스트 버튼과 같은 방식으로 맞춘다. */
+.krds-btn.link { display: inline-flex; align-items: center; border-width: 0; gap: var(--krds-gap-2); }
+.krds-btn.link.small, .krds-btn.link.xsmall { gap: var(--krds-gap-1); }
+.krds-btn.link:is(.xsmall, .small, .medium, .large, .xlarge) .svg-icon, .krds-btn.link .svg-icon { margin-bottom: 0; }
+/* 공식 순서 오류: .krds-btn.link.basic 의 글자색 규칙이 비활성 규칙보다 뒤에 있고 특이도가 같아 subtle 비활성 링크가 #1E2124 로 남는다.
+   피그마 subtle, subtle_none disabled 는 #8A949E(306:26203 묶음). */
+.krds-btn.link.basic.disabled, .krds-btn.link.basic[disabled] { color: var(--krds-button--color-link-text-disabled); }
+/* 밑줄 두께: 피그마 underline/small 은 1px, large, medium 은 1.5px(306:26203 픽셀 측정). 크롬 기본은 글꼴 기준이라 small 도 1.5px. */
+.krds-btn.link.small .underline, .krds-btn.link.xsmall .underline { text-decoration-thickness: 0.1rem; }
+
+/* ── 칩 (피그마 chip__single 317:5069, chip__multi 306:26726. 크기 값 "samll" 은 피그마 오타라 small 로 읽음) ── */
+/* 체크 표시 크기: 피그마 large 20(element 20), medium 16, small 12. 공식 large 는 icon--size-small 16. */
+.krds-form-chip { --krds-form-chip--check-size-large: var(--krds-icon--size-medium); }
+/* 테두리: 피그마 선은 안쪽(INSIDE). 공식 1px 테두리만큼 좌우 패딩을 뺀다(높이는 공식이 고정 높이라 그대로). */
+.krds-form-chip.small input[type=checkbox] ~ label, .krds-form-chip.small input[type=radio] ~ label { padding-left: calc(var(--krds-form-chip--padding-x-small) - 0.1rem); padding-right: calc(var(--krds-form-chip--padding-x-small) - 0.1rem); }
+.krds-form-chip.medium input[type=checkbox] ~ label, .krds-form-chip.medium input[type=radio] ~ label { padding-left: calc(var(--krds-form-chip--padding-x-medium) - 0.1rem); padding-right: calc(var(--krds-form-chip--padding-x-medium) - 0.1rem); }
+.krds-form-chip.large input[type=checkbox] ~ label, .krds-form-chip.large input[type=radio] ~ label { padding-left: calc(var(--krds-form-chip--padding-x-large) - 0.1rem); padding-right: calc(var(--krds-form-chip--padding-x-large) - 0.1rem); }
+
+/* ── C9 (부모 공통 규칙): 피그마는 한 줄 글자 상자 높이를 정수로 올린다(25.5 → 26, 22.5 → 23). 행간 150% 는 그대로 두고 최소 높이만 올림. ── */
+.krds-btn.link { min-height: round(up, 1lh, 1px); }
+.krds-sort-radio > label { min-height: round(up, 1lh, 1px); }
+/* medium 링크 밑줄 위치: C9 로 글자 상자를 26 으로 올리면 피그마 밑줄(중심 22px)보다 0.5px 아래가 된다. 0.25rem 로. */
+.krds-btn.link.medium .underline { text-underline-offset: 0.25rem; }
+
+/* ── 날짜 입력 (피그마 date_input 343:43744) ── */
+/* 달력 단추 위치: 피그마 아이콘은 오른쪽에서 16(padding/6, 343:43745 아이콘 x 320). 공식은 padding-7 20. */
+.calendar-input .krds-btn { right: var(--krds-padding-6); }
+/* 아이콘 크기: 피그마 large 24, medium 20, small 16. 공식은 입력칸 크기와 관계없이 24. */
+.calendar-input .krds-input.datepicker.medium ~ .krds-btn .svg-icon { width: var(--krds-icon--size-medium); height: var(--krds-icon--size-medium); }
+.calendar-input .krds-input.datepicker.small ~ .krds-btn .svg-icon { width: var(--krds-icon--size-small); height: var(--krds-icon--size-small); }
+/* 아이콘 색: 피그마 기본 color/icon/gray #33363D, disabled 와 view 는 color/icon/disabled-on #6D7882(343:43777, 343:43785). 공식은 글자색 #1E2124. */
+.calendar-input .form-btn-datepicker .svg-icon { background-color: var(--krds-color-icon-gray); }
+.calendar-input .krds-input:disabled ~ .form-btn-datepicker .svg-icon,
+.calendar-input .krds-input[readonly] ~ .form-btn-datepicker .svg-icon { background-color: var(--krds-color-icon-disabled-on); }
+/* 읽기 전용(view): 공식은 날짜 입력의 readonly 를 일부러 흰 바탕으로 되돌린다(.krds-input[readonly].datepicker). 피그마 view 는 회색 바탕(343:43785). */
+.calendar-input .krds-input[readonly].datepicker {
+  background-color: var(--krds-input--color-surface-readonly);
+  border-color: var(--krds-input--color-border-readonly);
+  color: var(--krds-input--color-text-readonly);
+}
+/* 입력 오른쪽 여백: 피그마 글자 상자는 아이콘 앞 간격 8 까지(16 + 아이콘 + 8). 공식은 20 x 2 + 24. */
+.calendar-input .krds-input.datepicker { padding-right: calc(var(--krds-padding-6) + var(--krds-icon--size-large) + var(--krds-gap-3)); }
+/* 칩 뒤 아이콘(피그마 Icon 속성, icon/face_sad 724:15655): 크기 large 24, medium 20, small 16, 색 color/icon/gray. 공식 칩에는 아이콘 자리가 없다. */
+.krds-form-chip .krds-form-chip-outline .svg-icon { flex-shrink: 0; background-color: var(--krds-color-icon-gray); width: var(--krds-icon--size-medium); height: var(--krds-icon--size-medium); }
+.krds-form-chip.large .krds-form-chip-outline .svg-icon { width: var(--krds-icon--size-large); height: var(--krds-icon--size-large); }
+.krds-form-chip.small .krds-form-chip-outline .svg-icon { width: var(--krds-icon--size-small); height: var(--krds-icon--size-small); }
+.krds-form-chip input:disabled ~ .krds-form-chip-outline .svg-icon { background-color: var(--krds-color-icon-disabled-on); }
+
+/* ── 파일 업로드 목록 항목 (피그마 file_upload__atomic__pc 343:55064, __mo 359:45385) ── */
+/* 테두리: 피그마 선은 안쪽이라 높이 58(16 + 글자 26 + 16). 공식은 테두리(1px, 오류 2px)가 바깥에 더해진다. 패딩에서 뺀다. */
+.krds-file-upload .file-list .upload-list > li { padding: calc(var(--krds-file-upload--list-padding) - var(--krds-file-upload--border-width)); }
+.krds-file-upload .file-list .upload-list > li.is-error { padding: calc(var(--krds-file-upload--list-padding) - var(--krds-file-upload--border-medium)); }
+/* 모바일(767px 이하): 피그마 __mo 위아래 패딩 12(359:45385). 공식 모바일 위아래 패딩 변수에서 테두리 두께를 뺀다(위 규칙이 공식 모바일 규칙을 덮지 않게). */
+@media (max-width: 767px) {
+  .krds-file-upload .file-list .upload-list > li { padding-top: calc(var(--krds-file-upload--mobile-list-padding-y) - var(--krds-file-upload--border-width)); padding-bottom: calc(var(--krds-file-upload--mobile-list-padding-y) - var(--krds-file-upload--border-width)); }
+  .krds-file-upload .file-list .upload-list > li.is-error { padding-top: calc(var(--krds-file-upload--mobile-list-padding-y) - var(--krds-file-upload--border-medium)); padding-bottom: calc(var(--krds-file-upload--mobile-list-padding-y) - var(--krds-file-upload--border-medium)); }
+}
+
+/* ── 스피너 (피그마 spinner 343:42756) ── */
+/* 크기: 피그마 large 48, medium 32, small 20. 공식은 크기 하나(--krds-spinner--size: size-height-3 = 20). 크기 변수만 바꾼다. */
+.krds-spinner.medium { --krds-spinner--size: var(--krds-size-height-5); }
+.krds-spinner.large { --krds-spinner--size: var(--krds-size-height-7); }
+
+/* ── 단계 표시기 (피그마 step_indicator__pc 343:53899, 단계 조각 step_indicator__atomic 343:53442) ── */
+/* 바깥 여백: 공식은 margin-bottom 72px(--krds-step--layout-gap)을 부품에 붙인다. 피그마 부품에는 없다(부품 사이 간격은 화면 오토레이아웃 몫). 폭은 부모를 채운다(Type=full 1200). */
+.krds-step-wrap { margin-bottom: 0; width: 100%; }
+/* Type=fixed: 피그마 단계 칸 폭 120 고정(840 = 7 x 120). 피그마 원본도 변수 없음. */
+.krds-step-wrap.fixed { width: auto; }
+.krds-step-wrap.fixed > li { flex: 0 0 12rem; }
+/* 글자 묶음: 피그마는 동그라미 20 아래 간격 8(gap/3), 오른쪽 여백 24(padding/8), "1단계"와 제목 사이 2(gap/1). 공식은 위 32, 오른쪽 32, 간격 0. */
+.krds-step-wrap > li > span { padding-top: calc(var(--krds-step--circle-size-default) + var(--krds-gap-3)); padding-right: var(--krds-padding-8); gap: var(--krds-gap-1); }
+/* 잇는 선: 피그마 두께 1.6(343:53443 Line 12, 원본도 변수 없음). 공식 0.3rem. 동그라미 가운데 높이에 둔다. */
+.krds-step-wrap > li::after { height: 0.16rem; top: calc(var(--krds-step--circle-size-default) / 2 - 0.08rem); }
+/* 현재 단계 동그라미: 피그마는 파란 20 원 안에 흰 선 1.6(지름 14 원의 선)과 파란 속(343:53436). 흰 고리가 반지름 6.2~7.8 에 오도록
+   바깥 선 2.2, 속 점 12.4(원본 값에서 계산, 변수 없음). 공식은 바깥 선 3, 속 점 12. */
+.krds-step-wrap > li.active > span::before { border-width: 0.22rem; }
+.krds-step-wrap { --krds-step--circle-size-active: 1.24rem; }
+/* 행간: 연결 CSS 의 반올림 행간은 선언된 요소의 글자 크기로 계산되고 자식에는 px 로 물려 내려간다. 13px "1단계"가 부모 17px 기준 26 을 받아
+   피그마 20 보다 크다. 글자 요소에 다시 선언해 자기 크기(13 → 20, 15 → 23)로 계산되게 한다. */
+.krds-step-wrap > li .step, .krds-step-wrap > li .step-tit { line-height: var(--krds-line-height-base); }
+/* 단계 칸 높이: li 가 list-item(블록)이라 안쪽 flex span 아래에 줄 상자 여분(2px)이 생긴다(75 대 피그마 73). li 를 flex 로. */
+.krds-step-wrap > li { display: flex; flex-direction: column; }
+/* 아직 안 한 단계의 span::after(내용 빈 장식)는 공식에서 위치 지정이 없어 flex 항목이 되고, 위 gap 2 가 한 번 더 붙는다. 흐름에서 뺀다(done, active 는 공식이 이미 absolute). */
+.krds-step-wrap > li > span::after { position: absolute; }
+/* 고리 두께: 피그마 large 4, medium 3, small 2(343:42757 Ellipse 선, 원본도 변수 없음). 공식은 늘 2(border-width medium). */
+.krds-spinner.medium { --krds-spinner--border-width: 0.3rem; }
+.krds-spinner.large { --krds-spinner--border-width: 0.4rem; }
+/* 참고: 피그마 스피너는 호(80° ~ 188°)가 그려진 정지 그림이고 코드는 돌아가는 고리라 호 위치는 비교 대상이 아니다(검증 때 애니메이션 정지). */
+
+/* ── 툴팁 (피그마 tooltip__plan 3331:128231, tooltip__rich 3331:45986) ── */
+/* 미리보기: 공식 말풍선은 position:fixed + JS 위치. 부품 그림을 코드로 둘 때만 .is-static 으로 흐름 안에 둔다. */
+.krds-tooltip-popover.is-static { position: relative; display: inline-flex; top: auto; left: auto; transform: none; }
+/* 닫기 그림(피그마 icon/close 16, 글자와 간격 gap/3 8). 지침 충돌로 장식(aria-hidden)만. */
+.krds-tooltip-popover { gap: var(--krds-gap-3); align-items: flex-start; }
+.krds-tooltip-popover .tooltip-deco-close { flex-shrink: 0; width: var(--krds-icon--size-small); height: var(--krds-icon--size-small); margin-top: calc((1lh - var(--krds-icon--size-small)) / 2); background-color: currentColor; }
+.krds-tooltip-popover.tooltip-box { flex-direction: row; }
+/* 화살표: 피그마 tooltip__plan 은 16x8 삼각형(돌린 정사각형 한 변 11.31), 중심이 모서리에서 24 + 8 = 32, 밑변이 말풍선 안쪽 3px(3331:128232).
+   tooltip__rich 는 22x12(한 변 15.56), 중심 24 + 11 = 35(3331:45987). 공식은 8px(박스 12px), 중심 24, 밑변이 말풍선 경계. 피그마 원본 값(변수 없음). */
+.krds-tooltip-popover::before { --tooltip-arrow-size: 1.131rem; }
+.krds-tooltip-popover.tooltip-box::before { --tooltip-arrow-size: 1.556rem; }
+.krds-tooltip-popover.top::before { top: calc(100% - 0.3rem - var(--tooltip-arrow-size) / 2); }
+.krds-tooltip-popover.bottom::before { top: calc(0.3rem - var(--tooltip-arrow-size) / 2); }
+.krds-tooltip-popover.bottom.left::before, .krds-tooltip-popover.top.left::before { left: calc(var(--krds-tooltip--popover-margin-x) + var(--tooltip-arrow-size) * 0.7071); }
+.krds-tooltip-popover.bottom.right::before, .krds-tooltip-popover.top.right::before { left: calc(100% - var(--krds-tooltip--popover-margin-x) - var(--tooltip-arrow-size) * 0.7071); }
+/* 미리보기 여백: 피그마 Direction=top(화살표 위)은 말풍선이 y 6 에서 시작한다(3331:128259). 흐름 안 미리보기에서만 화살표 자리를 비운다. */
+.krds-tooltip-popover.is-static.bottom { margin-top: 0.6rem; }
+.krds-tooltip-popover.is-static.tooltip-box.bottom { margin-top: 1.1rem; } /* rich 는 y 11(3331:45994 쪽) */
+/* Direction=left(화살표 왼쪽, 3331:128231 의 left 변형)는 말풍선이 x 6 에서 시작 */
+.krds-tooltip-popover.is-static:not(.top):not(.bottom):not(.right) { margin-left: 0.6rem; }
+
+/* ── 맥락적 도움말 (피그마 contextual_help 343:54748, contextual_help_trigger 1249:53394) ── */
+/* 미리보기: 공식 말풍선은 absolute + JS 로 열린다. 부품 그림을 코드로 둘 때만 .is-static 으로 열어 흐름 안에 둔다. */
+.krds-contextual-help .tooltip-popover.is-static { display: block; position: relative; left: auto; right: auto; top: auto; bottom: auto; margin: 0; transform: none; }
+/* 테두리: 피그마 선은 안쪽(con box 343:54749, 높이 168). 공식 1px 테두리만큼 패딩을 뺀다. */
+.krds-contextual-help .tooltip-popover { padding: calc(var(--krds-contextual-help--popover-padding) - 0.1rem); }
+/* 그림자: 피그마 말풍선에는 효과가 없다(343:54749 con box). 공식은 shadow2 계열을 준다. */
+.krds-contextual-help .tooltip-popover { box-shadow: none; }
+/* 닫기 위치: 피그마는 제목 줄(26) 가운데(y 29 = 24 + 5), 오른쪽 24. 공식은 위 끝(24)에 붙는다. */
+.krds-contextual-help .tooltip-popover .tooltip-close { top: calc(var(--krds-contextual-help--popover-padding) + 0.5rem); right: var(--krds-contextual-help--popover-padding); }
+/* 미리보기 여백: 피그마 Direction=top(화살표 위) 은 말풍선이 y 11 에서 시작(343:54748 top 변형). */
+.krds-contextual-help.bottom .tooltip-popover.is-static { margin-top: 1.1rem; }
+/* 트리거 단추: 피그마 24 틀에 아이콘 20(1249:53393), 색 color/icon/gray. hover, pressed 채움은 공식 icon 단추 규칙을 따른다. */
+.krds-btn.icon.tooltip-btn .svg-icon.f2c-ico.f2c-ico { width: var(--krds-icon--size-medium); height: var(--krds-icon--size-medium); background-color: var(--krds-color-icon-gray); }
+/* 트리거 상태: 피그마 모서리 4, hover color/action/secondary-hover, pressed -pressed(1249:53395, 1249:53406). 공식 아이콘 단추는 채움이 없다. */
+.krds-btn.icon.tooltip-btn { border-radius: var(--krds-radius-small2); background-color: var(--krds-color-action-secondary); }
+.krds-btn.icon.tooltip-btn:hover { background-color: var(--krds-color-action-secondary-hover); }
+.krds-btn.icon.tooltip-btn:active { background-color: var(--krds-color-action-secondary-pressed); }
+
+/* ── 코치마크 (피그마 coach_mark 3985:95855) ── */
+/* 미리보기: 공식 말풍선은 대상 위 absolute + translateY. 부품 그림을 코드로 둘 때만 .is-static 으로 흐름 안에(폭은 피그마 360 = 공식 최대 폭). */
+.krds-coach-mark .coach-balloon.is-static { position: relative; top: auto; right: auto; transform: none; width: var(--krds-coach-mark--popover-max-width); }
+.krds-coach-mark .coach-balloon.is-static.top-arrow { margin-top: 1rem; }
+/* 배치: 피그마는 세로(글자 묶음, 간격 32, 단추 줄), 테두리 2 는 안쪽이라 글자가 바깥에서 24. */
+.krds-coach-mark .coach-balloon { flex-direction: column; padding: calc(var(--krds-coach-mark--popover-padding) - 0.2rem); }
+/* 단계 제목: 피그마 body/small-bold 15 Bold, color/text/basic, 아래 12(gap/4). 공식은 label-xsmall 13, text-subtle, 아래 8. */
+.krds-coach-mark .coach-balloon .coach-tit { font-size: var(--krds-font-size-body-small); font-weight: var(--krds-font-weight-bold); color: var(--krds-coach-mark--popover-color-text-basic); margin-bottom: var(--krds-gap-4); line-height: var(--krds-line-height-base); }
+.krds-coach-mark .coach-balloon .desc { line-height: var(--krds-line-height-base); }
+/* 단추 줄: 피그마 글자 묶음과 간격 32(gap/8), 숫자 칸 84x40 다음 단추 묶음(오른쪽 정렬, 간격 16 gap/5). 공식 위 16, 간격 12. */
+.krds-coach-mark .coach-balloon .coach-controls { margin-top: var(--krds-gap-8); align-items: center; }
+.krds-coach-mark .coach-balloon .btn-wrap { flex: 1 1 auto; gap: var(--krds-gap-5); }
+/* 숫자 칸: 피그마 carousel__number 84x40, "1" 은 color/text/primary, "/" 앞뒤 4(gap/2). 공식은 글자색 기본, 앞뒤 2. 84 는 피그마 원본 값. */
+.krds-coach-mark .coach-balloon .coach-controls .num { flex: 0 0 8.4rem; height: var(--krds-size-height-6); line-height: var(--krds-line-height-base); }
+.krds-coach-mark .coach-balloon .coach-controls .num strong { color: var(--krds-color-text-primary); }
+.krds-coach-mark .coach-balloon .coach-controls .num strong::after { margin: 0 var(--krds-gap-2); color: var(--krds-coach-mark--popover-color-text-basic); }
+/* 화살표: 피그마 22x12(돌린 정사각형 한 변 15.56, 선 2), 중심이 모서리에서 24 + 11(3985:95856). 공식 16, 오른쪽 24 고정. 피그마 원본 값. */
+.krds-coach-mark .coach-balloon.is-static::after { --krds-coach-mark--bubble-arrow-size: 1.556rem; }
+.krds-coach-mark .coach-balloon.arrow-left::after { left: calc(2.4rem + 1.1rem - var(--krds-coach-mark--bubble-arrow-size) / 2); right: auto; }
+.krds-coach-mark .coach-balloon.arrow-center::after { left: calc(50% - var(--krds-coach-mark--bubble-arrow-size) / 2); right: auto; }
+.krds-coach-mark .coach-balloon.arrow-right::after { right: calc(2.4rem + 1.1rem - var(--krds-coach-mark--bubble-arrow-size) / 2); left: auto; }
+.krds-coach-mark .coach-balloon.top-arrow::after { top: auto; bottom: 100%; margin-top: 0; margin-bottom: calc(var(--krds-coach-mark--bubble-arrow-size) / -2); transform: rotate(225deg); }
+
+/* ── 버튼 테두리 안쪽 처리 (코치마크에서 발견, button 묶음 전체에 적용) ── */
+/* 피그마 버튼 선은 안쪽(INSIDE)이라 폭 = 좌우 패딩 + 글자. 공식 .krds-btn 은 1px 테두리가 바깥에 더해져 2px 넓다.
+   짧은 글자는 최소 폭(위 규칙)이 정해서 드러나지 않지만, 긴 글자에서는 단추 줄이 넘쳐 옆 텍스트 단추가 두 줄로 접힌다(coach_mark 3985:95856). */
+.krds-btn:is(.primary, .secondary, .tertiary).xlarge { padding-left: calc(var(--krds-button--padding-x-xlarge) - 0.1rem); padding-right: calc(var(--krds-button--padding-x-xlarge) - 0.1rem); }
+.krds-btn:is(.primary, .secondary, .tertiary).large { padding-left: calc(var(--krds-button--padding-x-large) - 0.1rem); padding-right: calc(var(--krds-button--padding-x-large) - 0.1rem); }
+.krds-btn:is(.primary, .secondary, .tertiary).medium { padding-left: calc(var(--krds-button--padding-x-medium) - 0.1rem); padding-right: calc(var(--krds-button--padding-x-medium) - 0.1rem); }
+.krds-btn:is(.primary, .secondary, .tertiary).small { padding-left: calc(var(--krds-button--padding-x-small) - 0.1rem); padding-right: calc(var(--krds-button--padding-x-small) - 0.1rem); }
+.krds-btn:is(.primary, .secondary, .tertiary).xsmall { padding-left: calc(var(--krds-button--padding-x-xsmall) - 0.1rem); padding-right: calc(var(--krds-button--padding-x-xsmall) - 0.1rem); }

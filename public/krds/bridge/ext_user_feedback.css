@@ -1,0 +1,26 @@
+/* KRDS 피그마 전용 부품: User feedback 만족도 조사 (묶음 724:15059 pc, 725:16228 mo). Type default/answer_yes/answer_no.
+   선택 칩은 chip__single 템플릿(form 갈래, 묶음 name, 뒤쪽 얼굴 아이콘 포함), 체크박스는 checkbox 템플릿, 입력칸은 textarea 템플릿, 버튼은 button 템플릿 */
+.krds-user-feedback { box-sizing:border-box; width:100%; display:flex; flex-direction:column; align-items:stretch; gap:var(--krds-gap-8);
+  padding:var(--krds-padding-card-large); background-color:var(--krds-color-surface-gray-subtler); border-radius:var(--krds-radius-xlarge2); }
+.krds-user-feedback.mo { padding:var(--krds-padding-8); }
+.krds-user-feedback .feedback-head { box-sizing:border-box; display:flex; align-items:center; gap:var(--krds-gap-5); margin:0; padding:0; border:0; min-width:0; }
+.krds-user-feedback.mo .feedback-head { flex-direction:column; align-items:stretch; }
+.krds-user-feedback .feedback-head > .feedback-title { flex:1 1 0; min-width:0; margin:0; color:var(--krds-color-text-bolder); } /* 공식 CSS 가 legend 를 sr-only 로 숨겨 p 로 그린다 */
+.krds-user-feedback .feedback-choices { flex-shrink:0; display:flex; align-items:center; gap:var(--krds-gap-5); margin:0; }
+.krds-user-feedback.mo .feedback-choices { width:100%; }
+.krds-user-feedback.mo .feedback-choices > .krds-form-chip { flex:1 1 0; min-width:0; }
+.krds-user-feedback .feedback-choices .krds-form-chip.large input[type=radio] ~ label { min-width:calc(var(--krds-size-height-11) + var(--krds-size-height-9)); /* 피그마 minWidth 144(변수 없음) = 80 + 64 */ }
+.krds-user-feedback.mo .feedback-choices .krds-form-chip.large input[type=radio] ~ label { width:100%; min-width:0; justify-content:center; } /* 725:16235 FILL, 가운데 정렬 */
+.krds-user-feedback .feedback-questions { display:flex; flex-direction:column; align-items:flex-end; gap:var(--krds-gap-7);
+  padding-top:var(--krds-padding-9); box-shadow:inset 0 var(--krds-border-width-static-regular) 0 0 var(--krds-color-divider-gray); /* 위쪽 INSIDE 선 */ }
+.krds-user-feedback .feedback-q { align-self:stretch; display:flex; align-items:flex-start; gap:var(--krds-gap-5); margin:0; padding:0; border:0; min-width:0; }
+.krds-user-feedback .feedback-q > .q-num { flex-shrink:0; color:var(--krds-color-text-basic); }
+.krds-user-feedback .feedback-q > .q-body { flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:flex-start; gap:var(--krds-gap-5); }
+.krds-user-feedback .feedback-q .q-text { align-self:stretch; margin:0; padding:0; color:var(--krds-color-text-basic); }
+.krds-user-feedback .feedback-q .q-checks { display:flex; flex-direction:column; align-items:flex-start; gap:var(--krds-gap-6); }
+.krds-user-feedback .feedback-q .q-body > .form-group, .krds-user-feedback .feedback-q .q-body > div { align-self:stretch; }
+.krds-user-feedback .feedback-actions { display:flex; align-items:center; gap:var(--krds-gap-5); }
+/* 칩 체크 표시: 피그마 chip__single large 의 element 20x20(I725:15797;317:5091), 공식 large 칩은 16(icon--size-small). 피그마 값 */
+.krds-user-feedback .krds-form-chip.large input[type=radio] ~ label:before { width:var(--krds-size-height-3); height:var(--krds-size-height-3); }
+/* 하단 버튼 폭 120 고정(피그마 725:14648 FIXED, 변수 연결 없음, KRDS 단계에 120 없음) */
+.krds-user-feedback .feedback-actions > .krds-btn { width:12rem; }

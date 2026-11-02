@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import AppShell from './shell/AppShell.jsx'
 import { useRoute } from './shell/route.js'
 import { loadConfig, loadRules, loadSite } from './lib/data.js'
-import { StateBlock, Button } from './ui/index.jsx'
+import { Box, ErrorLine, Loading } from './ui/index.jsx'
 import GlobeScene from './scenes/GlobeScene.jsx'
 import SitesScreen from './screens/SitesScreen.jsx'
 import CardScreen from './screens/CardScreen.jsx'
@@ -17,42 +17,38 @@ export default function App() {
   const [error, setError] = useState(null)
   const [siteData, setSiteData] = useState({})
   const [rules, setRules] = useState({ status: 'loading' })
+  const [checks, setChecks] = useState({})
 
+  const readSite = (s, r) => {
+    setSiteData((m) => ({ ...m, [s.id]: { status: 'loading' } }))
+    loadSite(s, r?.data?.site_rules?.[s.id]).then((d) => setSiteData((m) => ({ ...m, [s.id]: d })))
+      .catch((e) => setSiteData((m) => ({ ...m, [s.id]: { status: 'error', message: String(e) } })))
+  }
   const boot = () => {
     setError(null)
-    loadConfig().then((c) => {
-      setCfg(c)
-      c.sites.forEach((s) => {
-        setSiteData((m) => ({ ...m, [s.id]: { status: 'loading' } }))
-        loadSite(s).then((d) => setSiteData((m) => ({ ...m, [s.id]: d }))).catch((e) => setSiteData((m) => ({ ...m, [s.id]: { status: 'error', message: String(e) } })))
-      })
+    Promise.all([loadConfig(), loadRules()]).then(([c, r]) => {
+      setCfg(c); setRules(r)
+      c.sites.forEach((s) => readSite(s, r))
     }).catch((e) => setError(String(e)))
-    loadRules().then(setRules)
   }
   useEffect(boot, [])
 
-  if (error) {
-    return (
-      <div className="mx-auto max-w-text p-6">
-        <StateBlock kind="error" title="설정 파일을 읽지 못했습니다" action={<Button variant="primary" onClick={boot}>다시 읽기</Button>}>{error}</StateBlock>
-      </div>
-    )
-  }
-  if (!cfg) return <div className="mx-auto max-w-text p-6"><StateBlock kind="loading">사업지 설정을 읽고 있습니다.</StateBlock></div>
+  if (error) return <main className="rb-panel-in"><Box flush><ErrorLine onRetry={boot}>사업지 설정 파일을 읽지 못했습니다.</ErrorLine></Box></main>
+  if (!cfg) return <main className="rb-panel-in"><Box flush><Loading /></Box></main>
 
   const site = cfg.sites.find((s) => s.id === route.site) || cfg.sites[0]
   const data = siteData[site.id]
-  const onSite = (id) => go(route.screen, id)
-  const common = { site, data, rules }
+  const retry = () => readSite(site, rules)
+  const common = { site, data, rules, onRetry: retry }
 
   return (
-    <AppShell screen={route.screen} onGo={(id) => go(id)} sites={cfg.sites} siteData={siteData} siteId={site.id} onSite={onSite}>
-      {route.screen === 'globe' && <GlobeScene sites={cfg.sites} omm={cfg.omm} schedule={cfg.schedule} onPick={(s) => go('card', s.id)} />}
+    <AppShell screen={route.screen} onGo={(id) => go(id)} sites={cfg.sites} siteId={site.id} onSite={(id) => go(route.screen, id)}>
+      {route.screen === 'globe' && <GlobeScene sites={cfg.sites} omm={cfg.omm} onPick={(s) => go('card', s.id)} />}
       {route.screen === 'sites' && <SitesScreen sites={cfg.sites} siteData={siteData} onOpen={(id) => go('card', id)} />}
       {route.screen === 'card' && <CardScreen key={site.id} {...common} />}
       {route.screen === 'map' && <MapScene key={site.id} {...common} />}
       {route.screen === 'compare' && <CompareScene key={site.id} {...common} />}
-      {route.screen === 'storm' && <StormScreen sites={cfg.sites} siteData={siteData} storms={cfg.storms} onOpen={(id) => go('map', id)} />}
+      {route.screen === 'storm' && <StormScreen sites={cfg.sites} siteData={siteData} checks={checks} setChecks={setChecks} onOpen={(id) => go('map', id)} />}
       {route.screen === 'sources' && <SourcesScreen sites={cfg.sites} siteData={siteData} rules={rules} />}
     </AppShell>
   )

@@ -1,106 +1,160 @@
-// 담당자 콘솔 셸. 1024 이상은 왼쪽 메뉴 고정, 그보다 좁으면 메뉴 단추로 여는 서랍
+// 전역 틀. 공공 깃랩 D-21 배치(상단 바 48, 왼쪽 세로 바 240, 오른쪽 둥근 판)를 따른다.
+// 왼쪽 세로 바 맨 위는 사업지 선택(공공 깃랩 프로젝트 이름 자리), 그 아래 묶음 두 개.
+// 768 미만은 왼쪽 세로 바를 숨기고 상단 바의 메뉴 단추로 연다
 import { useEffect, useRef, useState } from 'react'
-import clsx from 'clsx'
-import { Globe2, ListChecks, Map, Menu, Columns2, FileText, BookOpen, LayoutGrid, X } from 'lucide-react'
+import { BookOpen, Check, ChevronsUpDown, Columns2, FileText, Globe2, List, ListChecks, Map, Menu, Monitor, X } from 'lucide-react'
 import { NAV } from './route.js'
+import { MODES, useScreenMode } from './screenMode.js'
 
-const ICON = { globe: Globe2, sites: LayoutGrid, card: FileText, map: Map, compare: Columns2, storm: ListChecks, sources: BookOpen }
-const DOT = { ready: 'bg-primary', loading: 'bg-text-ter', empty: 'bg-text-ter', error: 'bg-danger' }
-const SITE_SCREENS = ['card', 'map', 'compare']
+const ICON = { globe: Globe2, sites: List, storm: ListChecks, sources: BookOpen, card: FileText, map: Map, compare: Columns2 }
+const ALL = ['globe', 'sites', 'storm', 'sources']
+const SITE = ['card', 'map', 'compare']
 
-function NavList({ screen, onGo }) {
-  return (
-    <ul className="flex flex-col gap-1">
-      {NAV.map((n) => {
-        const Icon = ICON[n.id]
-        const on = n.id === screen
-        return (
-          <li key={n.id}>
-            <a href={`#/${n.id}`} onClick={(e) => { e.preventDefault(); onGo(n.id) }} aria-current={on ? 'page' : undefined}
-              className={clsx('pressable flex min-h-11 items-center gap-3 rounded-sm px-3 type-strong', on ? 'bg-primary-soft text-primary-text' : 'text-text-sec hover:bg-canvas hover:text-text-pri')}>
-              <Icon size={18} aria-hidden="true" />
-              <span>{n.label}</span>
-            </a>
-          </li>
-        )
-      })}
-    </ul>
-  )
+function usePopover() {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+  const btn = useRef(null)
+  useEffect(() => {
+    if (!open) return undefined
+    const first = ref.current?.querySelector('[aria-checked="true"], [aria-current="true"], button')
+    first?.focus()
+    const onDown = (e) => { if (!ref.current?.contains(e.target) && !btn.current?.contains(e.target)) setOpen(false) }
+    const onKey = (e) => {
+      if (e.key === 'Escape') { setOpen(false); btn.current?.focus() }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        const items = [...ref.current.querySelectorAll('button')]
+        const i = items.indexOf(document.activeElement)
+        const next = items[(i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]
+        next?.focus(); e.preventDefault()
+      }
+    }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => { document.removeEventListener('mousedown', onDown); document.removeEventListener('keydown', onKey) }
+  }, [open])
+  return { open, setOpen, ref, btn }
 }
 
-function Brand() {
+function SitePick({ sites, siteId, onSite }) {
+  const p = usePopover()
+  const cur = sites.find((s) => s.id === siteId) || sites[0]
   return (
-    <div className="px-3">
-      <p className="type-h3 text-text-pri">해안선 성적표</p>
-      <p className="type-meta text-text-meta">연안정비사업 사후관리 콘솔</p>
+    <div className="cs-sitepick">
+      <button ref={p.btn} type="button" className="cs-sitepick-btn" aria-haspopup="menu" aria-expanded={p.open} onClick={() => p.setOpen(!p.open)}>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span className="cs-sitepick-name">{cur?.name}</span>
+          <span className="cs-sitepick-sub">{cur ? `${cur.region}, ${cur.country}` : ''}</span>
+        </span>
+        <ChevronsUpDown size={16} aria-hidden="true" className="cs-side-icon" />
+      </button>
+      {p.open && (
+        <ul ref={p.ref} className="cs-pop" role="menu" aria-label="사업지 선택">
+          {sites.map((s) => (
+            <li key={s.id} role="none">
+              <button type="button" role="menuitemradio" aria-checked={s.id === siteId} onClick={() => { onSite(s.id); p.setOpen(false); p.btn.current?.focus() }}>
+                <span className="cs-pop-check">{s.id === siteId && <Check size={16} aria-hidden="true" />}</span>{s.name}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
 
-export default function AppShell({ screen, onGo, sites, siteData, siteId, onSite, children }) {
-  const [open, setOpen] = useState(false)
-  const closeRef = useRef(null)
-  const menuBtn = useRef(null)
-  const showSites = SITE_SCREENS.includes(screen)
+function ModeMenu() {
+  const [mode, setMode] = useScreenMode()
+  const p = usePopover()
+  return (
+    <div className="rb-gbar-drop">
+      <button ref={p.btn} type="button" className="rb-gbar-btn" aria-haspopup="menu" aria-expanded={p.open} onClick={() => p.setOpen(!p.open)}>
+        <Monitor size={20} aria-hidden="true" /><span className="rb-gbar-btn-text">화면 설정</span>
+      </button>
+      {p.open && (
+        <ul ref={p.ref} className="cs-pop is-right" role="menu" aria-label="화면 설정">
+          {MODES.map(([k, label]) => (
+            <li key={k} role="none">
+              <button type="button" role="menuitemradio" aria-checked={mode === k} onClick={() => { setMode(k); p.setOpen(false); p.btn.current?.focus() }}>
+                <span className="cs-pop-check">{mode === k && <Check size={16} aria-hidden="true" />}</span>{label}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
 
+function Item({ id, screen, onGo }) {
+  const n = NAV.find((x) => x.id === id)
+  const Icon = ICON[id]
+  return (
+    <li>
+      <a href={`#/${id}`} className={`rb-side-link${screen === id ? ' active' : ''}`} aria-current={screen === id ? 'page' : undefined}
+        onClick={(e) => { e.preventDefault(); onGo(id) }}>
+        <Icon size={16} aria-hidden="true" className="cs-side-icon" />
+        <span className="rb-side-text">{n.label}</span>
+      </a>
+    </li>
+  )
+}
+
+export default function AppShell({ screen, onGo, sites, siteId, onSite, children }) {
+  const [open, setOpen] = useState(false)
+  const toggle = useRef(null)
+  const side = useRef(null)
   useEffect(() => {
     if (!open) return undefined
-    closeRef.current?.focus()
-    const onKey = (e) => { if (e.key === 'Escape') { setOpen(false); menuBtn.current?.focus() } }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    side.current?.querySelector('button, a')?.focus()
+    const onKey = (e) => { if (e.key === 'Escape') { setOpen(false); toggle.current?.focus() } }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
   }, [open])
-
   const go = (id) => { setOpen(false); onGo(id) }
 
   return (
-    <div className="flex min-h-screen bg-page lg:h-screen">
-      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-toast focus:rounded-sm focus:bg-primary focus:px-4 focus:py-2 focus:text-text-inverse">본문 바로가기</a>
-      <nav aria-label="주 메뉴" className="hidden w-rail shrink-0 flex-col gap-6 bg-rail px-3 py-6 lg:flex">
-        <Brand />
-        <NavList screen={screen} onGo={go} />
-        <p className="mt-auto px-3 type-meta text-text-meta">모든 판정 값은 시험값입니다.</p>
-      </nav>
-
-      {open && (
-        <div className="fixed inset-0 z-drawer lg:hidden">
-          <div className="animate-fade-in absolute inset-0 bg-page/80" onClick={() => setOpen(false)} aria-hidden="true" />
-          <nav aria-label="주 메뉴" role="dialog" aria-modal="true" className="animate-slide-in-left absolute inset-y-0 left-0 flex w-rail flex-col gap-6 bg-rail px-3 py-5 shadow-lg">
-            <div className="flex items-center justify-between">
-              <Brand />
-              <button ref={closeRef} type="button" onClick={() => { setOpen(false); menuBtn.current?.focus() }} aria-label="메뉴 닫기"
-                className="pressable inline-flex h-11 w-11 items-center justify-center rounded-sm text-text-sec hover:bg-canvas"><X size={20} aria-hidden="true" /></button>
+    <>
+      <a href="#main" className="rb-skip">본문 바로가기</a>
+      <div className="rb-top">
+        <header className="rb-gbar">
+          <div className="rb-gbar-in">
+            <div className="rb-gbar-left">
+              <button ref={toggle} type="button" className="rb-gbar-btn rb-gbar-navtoggle" aria-label={open ? '메뉴 닫기' : '메뉴 열기'} aria-expanded={open} onClick={() => setOpen(!open)}>
+                {open ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
+              </button>
+              <a href="#/globe" className="rb-gbar-brand" onClick={(e) => { e.preventDefault(); go('globe') }}>
+                <span className="rb-gbar-mark" aria-hidden="true">해</span>
+                <span className="rb-gbar-brand-text">해안선 성적표</span>
+              </a>
             </div>
-            <NavList screen={screen} onGo={go} />
+            <span />
+            <div className="rb-gbar-right"><ModeMenu /></div>
+          </div>
+        </header>
+      </div>
+      <div className="rb-shell has-side">
+        <div className="rb-side-wrap">
+          {open && <div className="rb-side-dim" onClick={() => setOpen(false)} aria-hidden="true" />}
+          <nav ref={side} className={`rb-side${open ? ' is-open' : ''}`} aria-label="주 메뉴">
+            <div className="rb-side-scroll">
+              <SitePick sites={sites} siteId={siteId} onSite={onSite} />
+              <div className="rb-side-groups">
+                <div className="rb-side-group">
+                  <p className="rb-side-title">선택한 사업지</p>
+                  <ul>{SITE.map((id) => <Item key={id} id={id} screen={screen} onGo={go} />)}</ul>
+                </div>
+                <div className="rb-side-group">
+                  <p className="rb-side-title">전체 사업지</p>
+                  <ul>{ALL.map((id) => <Item key={id} id={id} screen={screen} onGo={go} />)}</ul>
+                </div>
+              </div>
+            </div>
           </nav>
         </div>
-      )}
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <div className="flex min-h-topbar items-center gap-3 bg-page px-4 py-2 md:px-6">
-          <button ref={menuBtn} type="button" onClick={() => setOpen(true)} aria-label="메뉴 열기"
-            className="pressable inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-sm bg-canvas text-text-pri lg:hidden"><Menu size={20} aria-hidden="true" /></button>
-          <p className="shrink-0 type-strong text-text-pri lg:hidden">해안선 성적표</p>
-          {showSites ? (
-            <div role="group" aria-label="사업지 선택" className="no-scrollbar -my-1 flex min-w-0 flex-1 gap-2 overflow-x-auto py-1">
-              {sites.map((s) => {
-                const st = siteData[s.id]?.status || 'loading'
-                const on = s.id === siteId
-                return (
-                  <button key={s.id} type="button" onClick={() => onSite(s.id)} aria-pressed={on}
-                    className={clsx('pressable inline-flex min-h-11 shrink-0 items-center gap-2 rounded-sm px-3 type-strong', on ? 'bg-primary text-text-inverse' : 'bg-canvas text-text-sec hover:bg-mute hover:text-text-pri')}>
-                    <span className={clsx('h-2 w-2 rounded-full', on ? 'bg-text-inverse' : DOT[st])} aria-hidden="true" />
-                    {s.name}
-                  </button>
-                )
-              })}
-            </div>
-          ) : <span className="flex-1" />}
-        </div>
-        <main id="main" tabIndex={-1} className="min-h-0 flex-1 overflow-y-auto px-4 pb-8 pt-2 md:px-6 lg:px-8">
-          <div key={screen} className="page-enter mx-auto flex h-full max-w-page flex-col gap-5">{children}</div>
+        <main id="main" tabIndex={-1} className="rb-panel">
+          <div className="rb-panel-in">{children}</div>
         </main>
       </div>
-    </div>
+    </>
   )
 }

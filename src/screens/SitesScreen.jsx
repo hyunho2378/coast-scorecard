@@ -1,54 +1,50 @@
-// 사업지 목록. 사업지마다 자료 상태와 판정 가능 비율을 한 장으로 보여 준다
-import { ChevronRight } from 'lucide-react'
-import { PageHeader, TestBadge, TideBadge, Chip, StateBlock } from '../ui/index.jsx'
+// 사업지 목록. GitHub 저장소 목록처럼 한 줄에 한 사업지
+import { Box, Empty, ErrorLine, PageHead, pct } from '../ui/index.jsx'
 import { fmtDate } from '../lib/ledger.js'
 
-const pct = (v) => `${Math.round(v * 100)}%`
-
-export default function SitesScreen({ sites, siteData, onOpen }) {
+function Cells({ d }) {
+  if (!d || d.status === 'loading') return <td colSpan={5}><span className="cs-skel" style={{ width: 'calc(var(--krds-number-21) * 2)' }} aria-label="불러오는 중" /></td>
+  if (d.status === 'error') return <td colSpan={5} className="cs-verdict is-retreat">분석 파일을 읽지 못했습니다.</td>
+  if (d.status === 'empty') return <td colSpan={5} className="is-sub">해안선 파일 없음</td>
+  const s = d.summary
   return (
     <>
-      <PageHeader title="사업지 목록" badges={<TestBadge />} desc={`연결한 사업지 ${sites.length}곳입니다. 사업지를 누르면 판정 카드를 엽니다.`} />
-      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
-        {sites.map((s) => {
-          const d = siteData[s.id] || { status: 'loading' }
-          return (
-            <li key={s.id}>
-              <button type="button" onClick={() => onOpen(s.id)} className="pressable flex h-full w-full flex-col gap-4 rounded-md bg-canvas p-5 text-left shadow-sm hover:bg-mute">
-                <div className="flex w-full items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="type-h3 text-text-pri">{s.name}</p>
-                    <p className="type-meta text-text-meta">{s.region}, {s.country}</p>
-                  </div>
-                  <ChevronRight size={20} aria-hidden="true" className="mt-0.5 shrink-0 text-text-sec" />
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Chip>{s.kind}</Chip>
-                  {d.status === 'ready' && <TideBadge label={d.tide} />}
-                </div>
-                {d.status === 'ready' ? (
-                  <div className="grid w-full grid-cols-3 gap-2">
-                    <div><p className="type-caption text-text-sec">가로선</p><p className="type-h2 text-text-pri tabular-nums">{d.summary.total}</p></div>
-                    <div><p className="type-caption text-text-sec">판정 가능</p><p className="type-h2 text-primary-text tabular-nums">{d.summary.judgeable}<span className="ml-1 type-meta text-text-meta">{pct(d.summary.judgeableRatio)}</span></p></div>
-                    <div><p className="type-caption text-text-sec">판정 보류</p><p className="type-h2 text-hold-text tabular-nums">{d.summary.held}<span className="ml-1 type-meta text-text-meta">{pct(d.summary.heldRatio)}</span></p></div>
-                  </div>
-                ) : d.status === 'loading' ? (
-                  <p className="type-body-sm text-text-sec">자료 불러오는 중</p>
-                ) : d.status === 'error' ? (
-                  <p className="type-body-sm text-danger-text">자료를 읽지 못했습니다</p>
-                ) : (
-                  <p className="type-body-sm text-text-sec">분석 자료 없음</p>
-                )}
-                <p className="type-meta text-text-meta">
-                  {d.status === 'ready' ? `비교 기간 ${fmtDate(d.period.from)}부터 ${fmtDate(d.period.to)}까지, 장면 ${d.scenes.length}장` : '비교 기간 미정'}
-                  {' '}{s.completion ? `준공 ${fmtDate(s.completion)}` : '준공일 미확인'}
-                </p>
-              </button>
-            </li>
-          )
-        })}
-      </ul>
-      {!sites.length && <StateBlock kind="empty">사업지 설정 파일에 사업지가 없습니다.</StateBlock>}
+      <td className="is-num">{s.total}</td>
+      <td className="is-num">{s.judgeable}<span className="is-sub"> {pct(s.judgeableRatio)}</span></td>
+      <td className="is-num">{s.held}</td>
+      <td className="is-num">{s.thresholds[0]}{'\u00a0'}m</td>
+      <td className="is-num">{fmtDate(d.period.from)}부터 {fmtDate(d.period.to)}까지</td>
+    </>
+  )
+}
+
+export default function SitesScreen({ sites, siteData, onOpen }) {
+  const ready = sites.filter((s) => siteData[s.id]?.status === 'ready')
+  const total = ready.reduce((a, s) => a + siteData[s.id].summary.total, 0)
+  return (
+    <>
+      <PageHead title="사업지 목록" meta={<><span>사업지 {sites.length}곳</span>{ready.length > 0 && <span>가로선 {total}개</span>}</>} />
+      <Box flush>
+        {sites.length ? (
+          <div className="cs-table-wrap">
+            <table className="cs-table">
+              <thead><tr><th>사업지</th><th>사업 내용</th><th className="is-num">가로선</th><th className="is-num">판정 가능</th><th className="is-num">판정 보류</th><th className="is-num">보류 기준</th><th className="is-num">비교 기간</th></tr></thead>
+              <tbody>
+                {sites.map((s) => (
+                  <tr key={s.id}>
+                    <td>
+                      <button type="button" className="cs-rowlink" onClick={() => onOpen(s.id)}>{s.name}</button>
+                      <span className="is-sub"> {s.region}, {s.country}</span>
+                    </td>
+                    <td className="is-sub">{s.kind}</td>
+                    <Cells d={siteData[s.id]} />
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : <Empty>연결한 사업지가 없습니다.</Empty>}
+      </Box>
     </>
   )
 }

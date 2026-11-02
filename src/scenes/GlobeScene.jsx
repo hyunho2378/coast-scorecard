@@ -3,9 +3,12 @@ import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { json2satrec, propagate, gstime, eciToGeodetic, degreesLat, degreesLong } from 'satellite.js'
-import { PAL } from '../lib/palette.js'
-import { PageHeader, Chip } from '../ui/index.jsx'
-import { prefersReducedMotion } from '../miri/motion/useReducedMotion.js'
+import { readPalette } from '../lib/palette.js'
+import { useModeTick } from '../shell/screenMode.js'
+import { Box, PageHead } from '../ui/index.jsx'
+
+const prefersReducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches
+let PAL = {}
 
 const R_KM = 6371
 const SPEED = 120 // 모의 시계 배속
@@ -46,7 +49,8 @@ function satPoint(rec, date) {
   return toVec(degreesLat(gd.latitude), degreesLong(gd.longitude), 1 + gd.height / R_KM)
 }
 
-export default function GlobeScene({ sites, omm, schedule, onPick }) {
+export default function GlobeScene({ sites, omm, onPick }) {
+  const tick = useModeTick()
   const host = useRef(null)
   const pinRefs = useRef({})
   const api = useRef(null)
@@ -54,6 +58,7 @@ export default function GlobeScene({ sites, omm, schedule, onPick }) {
   const [flying, setFlying] = useState(null)
 
   useEffect(() => {
+    PAL = readPalette()
     const el = host.current
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -171,7 +176,7 @@ export default function GlobeScene({ sites, omm, schedule, onPick }) {
       renderer.dispose()
       renderer.domElement.remove()
     }
-  }, [sites, omm])
+  }, [sites, omm, tick])
 
   const pick = (site) => {
     if (flying) return
@@ -183,81 +188,46 @@ export default function GlobeScene({ sites, omm, schedule, onPick }) {
 
   return (
     <>
-    <PageHeader title="사업지 지구본" desc="위성 궤도와 연결한 사업지를 한 화면에 봅니다. 핀을 누르면 그 사업지의 판정 카드로 갑니다." badges={<Chip tone="sand">촬영 일정 샘플</Chip>} />
-    <div className="grid min-h-0 flex-1 grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-      <div className="relative min-h-[420px] overflow-hidden rounded-md bg-subtle" data-figma="globe-stage">
-        <div ref={host} className="absolute inset-0" />
-        <div className="pointer-events-none absolute inset-0">
-          {sites.map((s) => (
-            <button
-              key={s.id}
-              ref={(n) => { pinRefs.current[s.id] = n }}
-              type="button"
-              onClick={() => pick(s)}
-              className="pressable pointer-events-auto absolute left-0 top-0 flex items-center gap-2 rounded-sm bg-canvas px-3 py-2 shadow-md"
-              style={{ visibility: 'hidden' }}
-            >
-              <span className="type-strong text-text-pri whitespace-nowrap">{s.name}</span>
-            </button>
-          ))}
-        </div>
-        <p className="absolute bottom-3 left-3 rounded-sm bg-canvas px-3 py-1 type-meta text-text-sec tabular-nums">
-          모의 시계 {SPEED}배속 {fmt(simTime)}
-        </p>
-        {flying && (
-          <p className="absolute right-3 top-3 rounded-md bg-page px-3 py-2 type-strong text-text-pri shadow-md">사업지로 이동 중</p>
-        )}
-      </div>
-
-      <aside className="flex min-h-0 flex-col gap-4 overflow-auto">
-        <section className="rounded-md bg-canvas p-5">
-          <h2 className="type-h3 text-text-pri">사업지 {sites.length}곳</h2>
-          <p className="mt-1 type-body-sm text-text-sec">핀을 누르면 사업지로 확대한 뒤 판정 카드로 넘어갑니다.</p>
-          <ul className="mt-3 flex flex-col gap-2">
+      <PageHead title="사업지 지구본" meta={<><span>사업지 {sites.length}곳</span><span>위성 {omm.omm.length}기</span><span className="cs-num">모의 시계 {SPEED}배속 {fmt(simTime)}</span></>} />
+      <div className="cs-two">
+        <div className="cs-stage">
+          <div ref={host} className="cs-stage-fill" />
+          <div className="cs-stage-fill" style={{ pointerEvents: 'none' }}>
             {sites.map((s) => (
-              <li key={s.id}>
-                <button type="button" onClick={() => pick(s)} className="pressable flex w-full items-center justify-between gap-3 rounded-sm bg-mute px-3 py-3 text-left hover:bg-line-def">
-                  <span>
-                    <span className="block type-strong text-text-pri">{s.name}</span>
-                    <span className="block type-meta text-text-meta">{s.region}, {s.country}</span>
-                  </span>
-                  <span className="type-caption text-primary-text">판정 카드</span>
-                </button>
-              </li>
+              <button key={s.id} ref={(n) => { pinRefs.current[s.id] = n }} type="button" onClick={() => pick(s)} className="cs-pinlabel" style={{ visibility: 'hidden' }}>
+                {s.name}
+              </button>
             ))}
-          </ul>
-        </section>
-
-        <section className="rounded-md bg-canvas p-5">
-          <h2 className="type-h3 text-text-pri">위성 궤도</h2>
-          <ul className="mt-2 flex flex-col gap-1">
-            {omm.omm.map((o, i) => (
-              <li key={o.NORAD_CAT_ID} className="flex items-center gap-2 type-body-sm text-text-pri">
-                <span className="h-2 w-4 rounded-full" style={{ background: PAL.sats[i % PAL.sats.length] }} aria-hidden="true" />
-                {o.OBJECT_NAME}
-                <span className="ml-auto type-meta text-text-meta tabular-nums">NORAD {o.NORAD_CAT_ID}</span>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-2 type-meta text-text-meta">궤도 요소는 CelesTrak GP 자료를 2026. 11. 3. 한 번 받아 둔 정적 파일입니다. 화면은 외부 호출 없이 이 파일로 궤도를 계산합니다.</p>
-        </section>
-
-        <section className="rounded-md bg-canvas p-5">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="type-h3 text-text-pri">다음 촬영 일정</h2>
-            <span className="rounded-sm bg-sand px-2 py-1 type-caption text-text-inverse">{schedule.label}</span>
           </div>
-          <ul className="mt-2 flex flex-col gap-1">
-            {schedule.items.map((it) => (
-              <li key={it.date + it.mission} className="flex justify-between type-body-sm text-text-pri tabular-nums">
-                <span>{it.mission}</span><span>{it.date.split('-').map(Number).join('. ')}.</span>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-2 type-meta text-text-meta">공개 재방문 주기로 만든 예시 일정입니다. 실제 촬영 계획 조회 결과와 다릅니다.</p>
-        </section>
-      </aside>
-    </div>
+          {flying && <p className="cs-stage-caption" role="status">사업지로 이동합니다.</p>}
+        </div>
+        <aside className="cs-col">
+          <Box title="사업지" sub={`${sites.length}곳`} flush>
+            <table className="cs-table">
+              <tbody>
+                {sites.map((s) => (
+                  <tr key={s.id}>
+                    <td><button type="button" className="cs-rowlink" onClick={() => pick(s)}>{s.name}</button></td>
+                    <td className="is-sub">{s.country}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Box>
+          <Box title="위성 궤도" flush foot="궤도 요소: CelesTrak GP(2026. 11. 3. 받음)">
+            <table className="cs-table">
+              <tbody>
+                {omm.omm.map((o, i) => (
+                  <tr key={o.NORAD_CAT_ID}>
+                    <td><span className={`cs-swatch is-sat${i % 3}`} aria-hidden="true" style={{ marginInlineEnd: 'var(--krds-gap-3)' }} />{o.OBJECT_NAME}</td>
+                    <td className="is-num is-sub">{o.NORAD_CAT_ID}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Box>
+        </aside>
+      </div>
     </>
   )
 }

@@ -1,17 +1,11 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" data-krds-mode="dark">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>연안정비사업 성적표</title>
-    <link rel="icon" href="data:," />
-    <script>
-      // 개발 확인용 오류 수집. 화면에는 아무것도 그리지 않고 window.__errs 에만 쌓는다
-      window.__errs = []
-      window.addEventListener('error', function (e) { window.__errs.push('error ' + e.message) })
-      window.addEventListener('unhandledrejection', function (e) { window.__errs.push('rejection ' + String(e.reason)) })
-      ;['error', 'warn'].forEach(function (k) { var f = console[k]; console[k] = function () { window.__errs.push(k + ' ' + Array.prototype.join.call(arguments, ' ').slice(0, 300)); f.apply(console, arguments) } })
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>해안선 성적표</title>
+    <link rel="stylesheet" href="/krds/resources/css/component/krds-built.css" />
+    <link rel="stylesheet" href="/krds/bridge/krds-bridge.css" />
   </head>
   <body>
     <div id="root"></div>

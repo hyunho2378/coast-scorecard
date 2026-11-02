@@ -1,0 +1,379 @@
+/* D-08 전역 틀. 공공 깃랩 배치(상단 바 + 왼쪽 메뉴 + 본문). 값은 KRDS 변수만. */
+
+/* 상단 바 */
+.rb-gbar {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  box-sizing: border-box;
+  height: var(--rb-header-h);
+  background: var(--krds-color-surface-gray-subtler);
+  border-bottom: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light);
+}
+/* Figma: 왼쪽 묶음, 검색칸, 오른쪽 묶음 3칸. 좌우 묶음 너비가 같아 검색칸이 가운데에 온다 */
+.rb-gbar-in {
+  display: grid;
+  grid-template-columns: minmax(var(--rb-gbar-side), 1fr) minmax(0, var(--rb-gbar-search-w)) minmax(var(--rb-gbar-right), 1fr);
+  align-items: center;
+  column-gap: 0;
+  padding-inline: var(--rb-page-pad);
+  height: 100%;
+}
+.rb-gbar-left { display: flex; align-items: center; gap: var(--krds-gap-3); flex: none; }
+.rb-gbar-brand { display: flex; align-items: center; gap: var(--krds-gap-3); color: var(--krds-color-text-basic); text-decoration: none; flex: none; }
+.rb-gbar-mark {
+  display: grid;
+  place-items: center;
+  width: var(--krds-size-height-4);
+  height: var(--krds-size-height-4);
+  border-radius: var(--krds-radius-medium2);
+  background: var(--krds-color-element-primary);
+  color: var(--krds-color-text-inverse-static);
+  font-weight: var(--krds-font-weight-bold);
+}
+.rb-gbar-brand-text { font-weight: var(--krds-font-weight-bold); }
+.rb-gbar-btn {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  gap: var(--krds-gap-2);
+  padding: var(--krds-padding-3);
+  border: 0;
+  border-radius: var(--krds-radius-medium2);
+  background: none;
+  color: var(--krds-color-text-basic);
+  text-decoration: none;
+  cursor: pointer;
+}
+.rb-gbar-btn:hover { background: var(--krds-color-action-secondary-hover); }
+.rb-gbar-btn.active { background: var(--krds-color-action-secondary-selected); }
+.rb-gbar-navtoggle { display: none; }
+.rb-gbar-searchlink { display: none; }
+.rb-gbar-explore { flex: none; }
+
+/* 검색 또는 이동 */
+.rb-gbar-search {
+  display: flex;
+  align-items: center;
+  gap: var(--krds-gap-2);
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  padding-inline: var(--krds-padding-4);
+  border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light);
+  border-radius: var(--krds-radius-medium3);
+  background: var(--krds-color-surface-white);
+  color: var(--krds-color-text-subtle);
+}
+.rb-gbar-search { height: var(--rb-search-h); }
+.rb-gbar-search:focus-within { border-color: var(--krds-color-border-primary); }
+.rb-gbar-search input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: none;
+  color: var(--krds-color-text-basic);
+}
+.rb-gbar-search input:focus { outline: none; }
+.rb-gbar-search input::-webkit-search-cancel-button { appearance: none; }
+.rb-gbar-kbd {
+  flex: none;
+  padding: var(--krds-padding-1) var(--krds-padding-2);
+  border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light);
+  border-radius: var(--krds-radius-small2);
+  color: var(--krds-color-text-subtle);
+  font-size: var(--krds-font-size-detail-small);
+}
+.rb-gbar-right { display: flex; align-items: center; justify-content: flex-end; gap: var(--krds-gap-2); flex: none; min-width: var(--rb-gbar-right); }
+.rb-gbar-drop { position: relative; }
+.rb-gbar-menu { position: absolute; right: 0; top: 100%; z-index: 70; min-width: var(--krds-size-width-menu, 24ch); }
+
+/* D-21 시스템 머리 띠(공공 깃랩 맨 위 한 줄): 높이 24, primary 채움, 흰 글자 13, 가운데 */
+.rb-sysband {
+  display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+  min-height: var(--rb-masthead-h); padding-inline: var(--rb-page-pad);
+  background: var(--krds-color-element-primary); color: var(--krds-color-text-inverse-static);
+  font-size: var(--krds-font-size-body-xsmall); line-height: var(--rb-lh-13); text-align: center;
+}
+.rb-sysband a { color: inherit; text-decoration: none; }
+.rb-sysband a:hover { text-decoration: underline; }
+.rb-gbar-area { font-weight: var(--krds-font-weight-bold); white-space: nowrap; }
+.rb-gbar-sideopen { flex: none; }
+
+/* D-21 본문 틀: 왼쪽 세로 바 240 + 오른쪽 둥근 판(회색 바탕 위 흰 판, 모서리 8). 판 안 컨테이너 최대 1280 가운데, 좌우 24 */
+.rb-shell { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; width: 100%; box-sizing: border-box; flex: 1; padding: 0 var(--rb-panel-gap) var(--rb-panel-gap); background: var(--krds-color-surface-gray-subtler); }
+.rb-shell.has-side { grid-template-columns: var(--rb-sidebar-w) minmax(0, 1fr); padding-left: 0; }
+.rb-panel {
+  min-width: 0; box-sizing: border-box; min-height: calc(100dvh - var(--rb-header-h) - var(--rb-masthead-h) - var(--rb-top-extra) - var(--rb-panel-gap));
+  display: flex; flex-direction: column;
+  background: var(--krds-color-surface-white);
+  border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light);
+  border-radius: var(--rb-panel-radius);
+}
+.rb-shell.is-bare { padding: 0; }
+.rb-shell.is-bare .rb-panel { border: 0; border-radius: 0; }
+.rb-panel-in { flex: 1; width: 100%; max-width: calc(var(--rb-container-w) + var(--rb-panel-pad-x) * 2); margin-inline: auto; box-sizing: border-box; padding: var(--rb-panel-pad-y) var(--rb-panel-pad-x); display: flex; flex-direction: column; gap: var(--rb-section-gap); }
+.rb-main { width: 100%; min-width: 0; padding: 0; }
+.rb-top { position: sticky; top: 0; z-index: 60; }
+#root .rb-top .rb-gbar { position: static; }
+.rb-side-wrap { min-width: 0; align-self: start; position: sticky; z-index: 20; top: calc(var(--rb-header-h) + var(--rb-masthead-h) + var(--rb-top-extra)); }
+.rb-side {
+  box-sizing: border-box; width: var(--rb-sidebar-w);
+  /* D-21 7장: 사이드바 아래 끝 = 본문 판 아래 끝(화면 아래 8 위) */
+  height: calc(100dvh - var(--rb-header-h) - var(--rb-masthead-h) - var(--rb-top-extra) - var(--rb-panel-gap));
+  display: flex; flex-direction: column;
+  padding: 0 var(--rb-side-pad-x) var(--rb-side-pad-x);
+  background: var(--krds-color-surface-gray-subtler);
+}
+.rb-side-scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: var(--krds-gap-1); scrollbar-width: thin; }
+.rb-side-dim { display: none; }
+.rb-side ul { list-style: none; margin: 0; padding: 0; }
+.rb-side-title { margin: 0; padding: var(--krds-padding-3) var(--rb-side-item-pad-x) var(--krds-padding-2); font-size: var(--krds-font-size-body-xsmall); line-height: var(--rb-lh-13); font-weight: var(--krds-font-weight-bold); color: var(--krds-color-text-basic); }
+.rb-side-groups { display: flex; flex-direction: column; gap: var(--krds-gap-1); }
+.rb-side-group { display: flex; flex-direction: column; }
+.rb-side-group.is-extra { margin-top: var(--krds-gap-3); padding-top: var(--krds-gap-3); border-top: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); }
+/* D-14 끝절: 항목 높이 32, 글자 15 보통. 현재 항목만 굵게 + 회색 면 */
+.rb-side-link, .rb-side-group-btn {
+  display: flex; align-items: center; gap: var(--krds-gap-3);
+  box-sizing: border-box; width: 100%; min-height: var(--rb-side-item-h);
+  padding: 0 var(--rb-side-item-pad-x); margin: 0;
+  font-size: var(--krds-font-size-body-small); line-height: var(--rb-lh-15); font-weight: var(--krds-font-weight-regular);
+  border: 0; border-radius: var(--krds-radius-medium2); background: none; cursor: pointer; text-align: left;
+  color: var(--krds-color-text-basic); text-decoration: none;
+}
+.rb-side-link.is-sub { padding-left: calc(var(--rb-side-item-pad-x) + var(--krds-size-height-2) + var(--krds-gap-3)); }
+.rb-side-link:hover, .rb-side-group-btn:hover { background: var(--krds-color-action-secondary-hover); }
+.rb-side-link.active { background: var(--krds-color-action-secondary-selected); font-weight: var(--rb-fw-current); }
+.rb-side-text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rb-side-count { flex: none; font-size: var(--krds-font-size-body-xsmall); line-height: var(--rb-lh-13); color: var(--krds-color-text-subtle); }
+.rb-side-group-btn > .rb-icon:last-child { width: var(--krds-number-8); height: var(--krds-number-8); color: var(--krds-color-text-subtle); }
+.rb-side-group-btn[aria-expanded="true"] > .rb-icon:last-child { transform: none; }
+.rb-side-project { font-weight: var(--krds-font-weight-bold); }
+.rb-side-foot { flex: none; padding-top: var(--krds-padding-3); border-top: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); }
+.rb-side-hide { color: var(--krds-color-text-basic); }
+.rb-tip {
+  position: fixed; z-index: 100; transform: translateY(-50%);
+  margin-left: var(--krds-gap-3); padding: var(--krds-padding-2) var(--krds-padding-3);
+  max-width: var(--rb-sidebar-w); pointer-events: none;
+  background: var(--krds-color-surface-white); color: var(--krds-color-text-basic);
+  border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray); border-radius: var(--krds-radius-medium2);
+  font-size: var(--krds-font-size-body-xsmall); line-height: var(--rb-lh-13);
+}
+
+/* 본문 */
+.rb-main { min-width: 0; padding: 0; }
+
+@media (max-width: 1023px) {
+  .rb-gbar-in { display: flex; gap: var(--krds-gap-3); }
+  .rb-gbar-left, .rb-gbar-right { width: auto; }
+  .rb-gbar-right { margin-left: auto; }
+  .rb-gbar-btn-text { display: none; }
+  .rb-main { min-width: 0; padding: 0; }
+}
+
+@media (max-width: 767px) {
+  /* D-17 5장: 768 미만은 왼쪽 메뉴를 숨기고 머리글의 메뉴 버튼으로 연다 */
+  .rb-shell, .rb-shell.has-side { grid-template-columns: minmax(0, 1fr); padding: 0; }
+  .rb-panel { border: 0; border-radius: 0; }
+  .rb-side-wrap { position: static; z-index: auto; }
+  .rb-gbar-navtoggle { display: inline-flex; }
+  .rb-side {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: 90;
+    width: var(--rb-sidebar-w);
+    max-width: 100%;
+    height: 100dvh;
+    transform: translateX(-100%);
+    transition: transform var(--krds-duration-medium, 0.2s) ease;
+  }
+  .rb-side.is-open { transform: translateX(0); }
+  .rb-side-dim { display: block; position: fixed; inset: 0; z-index: 80; background: var(--krds-color-background-dim); }
+  .rb-gbar-in { padding: var(--krds-padding-3) var(--krds-padding-4); }
+  /* 좁은 화면에서는 검색칸 대신 검색 아이콘을 둔다(GitHub 모바일과 같다) */
+  .rb-gbar-search { display: none; }
+  .rb-gbar-searchlink { display: inline-flex; }
+  .rb-gbar-right { margin-left: auto; }
+  .rb-main { min-width: 0; padding: 0; }
+}
+
+/* 목록 줄: 긴 기관 이름이 넘치지 않게 */
+.rb-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--krds-gap-3); min-width: 0; }
+.rb-row > * { min-width: 0; overflow-wrap: anywhere; }
+.krds-structured-list .structured-item { min-width: 0; }
+/* Figma 상자 기준: 브레드크럼은 내용 폭만 차지한다 */
+.krds-breadcrumb-wrap { width: fit-content; max-width: 100%; }
+/* KRDS 기본 위 여백은 화면 틀에서 이미 주므로 뺀다(Figma 상자 기준) */
+.krds-breadcrumb-wrap { padding-top: 0; margin: 0; }
+
+/* 프로젝트 경로(만든 사람 / 프로젝트 / 화면): 공공 깃랩처럼 슬래시로 나눈다. Figma 경로 상자와 같은 폭을 맞추려고 구분자 아이콘 대신 글자를 쓴다 */
+.krds-breadcrumb-wrap.is-path .breadcrumb li:not(:last-child)::after {
+  content: "/";
+  width: auto;
+  height: auto;
+  margin-left: 0;
+  background: none;
+  -webkit-mask: none;
+  mask: none;
+  transform: none;
+  color: var(--krds-color-text-subtle);
+}
+.krds-breadcrumb-wrap.is-path .breadcrumb { gap: var(--krds-gap-2); }
+.krds-breadcrumb-wrap.is-path .breadcrumb li { gap: var(--krds-gap-2); }
+.krds-breadcrumb-wrap.is-path .breadcrumb li .txt { padding: 0; }
+.krds-breadcrumb-wrap.is-path .breadcrumb li a.txt { text-decoration: none; }
+/* 프로젝트 경로는 모바일에서도 접지 않고 전체를 보인다(KRDS 모바일 규칙은 마지막 칸만 남긴다). Figma 360 경로 상자가 전체 폭이다 */
+@media (max-width: 767px) {
+  .krds-breadcrumb-wrap.is-path .breadcrumb li:not(.home):not(:last-child) {
+    position: static !important; width: auto !important; height: auto !important; padding: 0 !important;
+    margin: 0 !important; overflow: visible !important; clip: auto !important; white-space: normal !important; border: 0 !important;
+  }
+  .krds-breadcrumb-wrap.is-path .breadcrumb li:not(.home):not(:nth-child(2)):last-child::before,
+  .krds-breadcrumb-wrap.is-path .breadcrumb li:not(.home):not(:nth-child(2)):last-child::after { display: none !important; content: none !important; }
+  .krds-breadcrumb-wrap.is-path .breadcrumb li:not(.home):not(:nth-child(2)):last-child .txt { order: 0 !important; }
+}
+
+/* 360 Figma: 머리글 아래 24, 검색 아이콘은 오른쪽(로그인 묶음 바로 앞) */
+@media (max-width: 767px) {
+  .rb-gbar-searchlink { margin-left: auto; }
+  .rb-gbar-right { margin-left: 0; }
+  /* Figma 상자 기준: 검색 아이콘 버튼 44×40(아이콘 20 + 좌우 padding-5 12, 위아래 padding-4 10) */
+  .rb-gbar-searchlink { padding: var(--krds-padding-4) var(--krds-padding-5); gap: 0; }
+}
+
+/* 머리글 경로(만든 사람 / 이름)와 오른쪽 묶음 */
+.rb-gbar-path { display: inline-flex; align-items: center; gap: var(--krds-gap-2); min-width: 0; white-space: nowrap; color: var(--krds-color-text-subtle); }
+.rb-gbar-pathlink { color: var(--krds-color-text-subtle); text-decoration: none; overflow: hidden; text-overflow: ellipsis; max-width: calc(var(--krds-number-21) * 2); }
+.rb-gbar-pathlink.is-name { color: var(--krds-color-text-basic); font-weight: var(--rb-fw-title); }
+.rb-gbar-pathlink:hover { text-decoration: underline; }
+.rb-gbar-icon { padding-inline: var(--krds-padding-4); }
+.rb-gbar-cta { white-space: nowrap; flex: none; }
+.rb-gbar-right { min-width: 0; flex: none; }
+
+
+/* ---------- D-21 상단 바(48): [펼침 단추][로고][영역 이름]  [검색 480 가운데]  [등록][로그인] ---------- */
+#root .rb-gbar { padding-inline: 0; background: var(--krds-color-surface-gray-subtler); border-bottom: 0; }
+#root .rb-gbar-in { display: grid; grid-template-columns: minmax(max-content, 1fr) minmax(var(--rb-gbar-search-min), var(--rb-gbar-search-w)) minmax(max-content, 1fr); column-gap: var(--krds-gap-5); align-items: center; max-width: none; height: 100%; padding-inline: var(--rb-gbar-pad-x); }
+#root .rb-gbar-left { display: flex; align-items: center; gap: var(--krds-gap-3); min-width: 0; }
+#root .rb-gbar-brand { display: flex; align-items: center; flex: none; }
+#root .rb-gbar-right { display: flex; justify-content: flex-end; align-items: center; gap: var(--krds-gap-2); min-width: 0; }
+#root .rb-gbar-search { width: 100%; height: var(--rb-search-h); }
+#root .rb-gbar .rb-gbar-navtoggle, #root .rb-gbar .rb-gbar-searchlink { display: none; }
+@media (max-width: 1023px) {
+  #root .rb-gbar-in { display: flex; gap: var(--krds-gap-3); }
+  #root .rb-gbar-left, #root .rb-gbar-right { flex: none; }
+  #root .rb-gbar-search { flex: 1 1 auto; min-width: 0; width: auto; max-width: var(--rb-gbar-search-w); margin-inline: auto; }
+}
+@media (max-width: 767px) {
+  #root .rb-gbar-in { gap: var(--krds-gap-2); padding-inline: var(--krds-padding-2); }
+  #root .rb-gbar .rb-gbar-navtoggle, #root .rb-gbar .rb-gbar-searchlink { display: inline-flex; }
+  #root .rb-gbar-search { display: none; }
+  #root .rb-gbar-searchlink { margin-inline-start: auto; }
+  #root .rb-gbar-area { display: none; }
+  #root .rb-gbar-right { gap: var(--krds-gap-1); }
+}
+
+/* D-21 7장: 바닥글은 본문 컨테이너 안(왼쪽, 오른쪽 끝이 본문과 같다), 판 맨 아래 */
+#root .rb-panel-in > #krds-footer { width: 100%; margin-top: auto; padding-inline: 0; background: none; border-top: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); }
+#root .rb-panel-in > #krds-footer > .inner { max-width: none; width: 100%; padding-inline: 0; }
+
+/* ---------- D-22 모션: transform, opacity, grid-template-rows, margin-left(판)만 ---------- */
+@media (min-width: 768px) {
+  .rb-shell.has-side { display: block; padding-left: var(--rb-panel-gap); }
+  .rb-shell.has-side > .rb-side-wrap {
+    position: fixed; left: 0; top: calc(var(--rb-header-h) + var(--rb-masthead-h) + var(--rb-top-extra)); z-index: 20; width: var(--rb-sidebar-w);
+    transform: translateX(0); visibility: visible;
+    transition: transform var(--rb-motion-base) var(--rb-motion-ease), visibility 0s linear 0s;
+  }
+  .rb-shell.has-side > .rb-panel { margin-left: var(--rb-sidebar-w); transition: margin-left var(--rb-motion-base) var(--rb-motion-ease); }
+  .rb-shell.has-side.is-side-hidden > .rb-side-wrap {
+    transform: translateX(-100%); visibility: hidden;
+    transition: transform var(--rb-motion-exit-base) var(--rb-motion-exit-ease), visibility 0s linear var(--rb-motion-exit-base);
+  }
+  .rb-shell.has-side.is-side-hidden > .rb-panel { margin-left: 0; transition-timing-function: var(--rb-motion-exit-ease); transition-duration: var(--rb-motion-exit-base); }
+  .rb-side-scroll { transition: opacity var(--rb-motion-fast) var(--rb-motion-ease); }
+  .rb-shell.is-side-hidden .rb-side-scroll, .rb-shell.is-side-hidden .rb-side-foot { opacity: 0; }
+}
+.rb-gbar-sideopen { animation: rb-fade-in var(--rb-motion-base) var(--rb-motion-ease) both; }
+/* 묶음 접기: 0fr ↔ 1fr */
+.rb-side-fold { display: grid; grid-template-rows: 0fr; opacity: 0; visibility: hidden; transition: grid-template-rows var(--rb-motion-base) var(--rb-motion-ease), opacity var(--rb-motion-base) var(--rb-motion-ease), visibility 0s linear var(--rb-motion-base); }
+.rb-side-fold > ul { min-height: 0; overflow: hidden; }
+.rb-side-fold.is-open { grid-template-rows: 1fr; opacity: 1; visibility: visible; transition: grid-template-rows var(--rb-motion-base) var(--rb-motion-ease), opacity var(--rb-motion-base) var(--rb-motion-ease), visibility 0s linear 0s; }
+/* 항목 상태: 호버 120, 눌림 한 단계, 초점 링 */
+.rb-side-link, .rb-side-group-btn { transition: background-color var(--rb-motion-fast) var(--rb-motion-ease); }
+.rb-side-link:active, .rb-side-group-btn:active { background: var(--krds-color-action-secondary-pressed); }
+.rb-side-link:focus-visible, .rb-side-group-btn:focus-visible { outline: var(--krds-border-width-variable-medium) solid var(--krds-color-border-primary); outline-offset: calc(var(--krds-number-1) * -2); }
+.rb-side-link.active { transition: none; }
+/* 메뉴와 드롭다운: 8 위로 올라오며 나타남 */
+.rb-menu { animation: rb-rise var(--rb-motion-base) var(--rb-motion-ease) both; }
+/* 툴팁: 400 지연 뒤 나타남 */
+.rb-tip { animation: rb-fade-in var(--rb-motion-fast) var(--rb-motion-ease) var(--rb-tip-delay) both; }
+/* 페이지 이동: 상단 바와 사이드바는 그대로. 본문 투명도 애니메이션은 클릭마다 깜빡여 보여 쓰지 않는다(2026. 10. 31. 측정) */
+/* 목록 행과 파일 표 행 호버 */
+.rb-prow, .rb-tree tbody tr { transition: background-color var(--rb-motion-fast) var(--rb-motion-ease); }
+.rb-prow:hover, .rb-tree tbody tr:hover { background: var(--krds-color-surface-gray-subtler); }
+@keyframes rb-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rb-rise { from { opacity: 0; transform: translateY(var(--rb-menu-rise)); } to { opacity: 1; transform: none; } }
+/* 모바일 서랍 280 */
+@media (max-width: 767px) { .rb-side { transition: transform var(--rb-motion-slow) var(--rb-motion-ease); } }
+/* 단축키 목록 */
+.rb-keys-list { display: flex; flex-direction: column; gap: var(--krds-gap-2); margin: 0; }
+.rb-keys-row { display: grid; grid-template-columns: calc(var(--krds-number-12) * 2) minmax(0, 1fr); gap: var(--krds-gap-4); align-items: baseline; }
+.rb-keys-row dt, .rb-keys-row dd { margin: 0; }
+/* 공공 깃랩 03: '추가 기능' 아래 구분선 */
+.rb-side-group.has-sep { padding-bottom: var(--krds-gap-3); margin-bottom: var(--krds-gap-3); border-bottom: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); }
+/* 더보기 펼침: 펼친 글이 opacity로 이어서 나타난다(D-22, 높이 직접 애니메이션 금지) */
+.rb-fold-text.is-open { animation: rb-fade-in var(--rb-motion-base) var(--rb-motion-ease) both; }
+.rb-menu.is-leaving { animation: rb-sink var(--rb-motion-exit-base) var(--rb-motion-exit-ease) both; pointer-events: none; }
+@keyframes rb-sink { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(var(--rb-menu-rise)); } }
+/* D-22 토스트(KRDS 토스트 자리, 오른쪽 아래, 4초) */
+.rb-toasts { position: fixed; right: var(--rb-panel-gap); bottom: var(--rb-panel-gap); z-index: 120; display: flex; flex-direction: column; gap: var(--krds-gap-2); pointer-events: none; }
+.rb-toast { padding: var(--krds-padding-4) var(--krds-padding-5); border-radius: var(--krds-radius-medium2); background: var(--krds-color-surface-inverse); color: var(--krds-color-text-inverse); font-size: var(--krds-font-size-body-small); line-height: var(--rb-lh-15); animation: rb-rise var(--rb-motion-base) var(--rb-motion-ease) both; }
+
+/* 공공 깃랩 52: 머리 띠는 한 줄 말줄임. 모바일 상단 바는 로고, 메뉴, 검색, 화면 설정, 사람 아이콘(로그인) */
+.rb-sysband > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+#root .rb-gbar .rb-gbar-user { display: none; }
+@media (max-width: 767px) {
+  #root .rb-gbar .rb-gbar-cta { display: none; }
+  #root .rb-gbar .rb-gbar-user { display: inline-flex; }
+  #root .rb-gbar-left .rb-gbar-brand { order: -1; }
+}
+
+/* 공공 깃랩 점검 중 저장된 자료 안내(머리 띠 아래 한 줄, 공지 띠와 같은 모양) */
+.rb-snapband { display: flex; align-items: center; justify-content: center; min-height: var(--rb-masthead-h); padding-inline: var(--rb-gbar-pad-x); background: var(--rb-status-warning); color: var(--krds-color-text-basic-static, var(--krds-color-light-gray-90)); font-size: var(--krds-font-size-body-xsmall); line-height: var(--rb-lh-13); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 공공 깃랩 51b: 상단 검색 대화창(검색칸 아래, 같은 폭) */
+.rb-gsearch { position: relative; min-width: 0; width: 100%; }
+#root .rb-gsearch .rb-gsearch-panel { position: absolute; left: 0; right: 0; top: calc(100% + var(--krds-number-2)); z-index: 80; max-height: 60dvh; overflow-y: auto; }
+.rb-gsearch-panel .item-link .rb-avatar { width: var(--krds-number-9); height: var(--krds-number-9); font-size: var(--krds-font-size-body-xsmall); }
+@media (max-width: 1023px) { #root .rb-gbar-in > .rb-gsearch { flex: 1 1 auto; min-width: 0; max-width: var(--rb-gbar-search-w); margin-inline: auto; } }
+@media (max-width: 767px) { #root .rb-gbar-in > .rb-gsearch { display: none; } }
+
+/* 공공 깃랩 03, 15, 25: 현재 항목은 회색 면 + 본문색 굵게 + 사이드바 왼쪽 끝 세로 막대. 고정됨과 묶음 안에 같은 항목이 있으면 둘 다 표시(공공 깃랩 원래 동작) */
+.rb-side-link { position: relative; }
+.rb-side-link.active { color: var(--krds-color-text-basic); background: var(--krds-color-action-secondary-selected); font-weight: var(--krds-font-weight-bold); }
+.rb-side-link.active::before { content: ""; position: absolute; left: calc(var(--rb-side-pad-x) * -1); top: var(--krds-number-3); bottom: var(--krds-number-3); width: var(--krds-number-2); border-radius: var(--krds-radius-max); background: var(--krds-color-text-basic); }
+/* 탭 줄(KRDS tab line): 활성 탭 글자와 밑줄이 secondary(청록)로 풀리던 것. 글자는 본문색 굵게, 밑줄은 primary 50(공공 깃랩 01 파란 밑줄) */
+#root .krds-tab-area .tab ul li.active .btn-tab, #root .krds-tab-area .tab ul li .btn-tab[aria-selected="true"] { color: var(--krds-color-text-basic); font-weight: var(--krds-font-weight-bold); }
+#root .krds-tab-area .tab ul li.active .btn-tab::before, #root .krds-tab-area .tab ul li .btn-tab[aria-selected="true"]::before { background-color: var(--rb-status-primary); }
+/* KRDS tab line 변수의 청록(secondary)을 primary 50과 본문색으로 */
+#root .krds-tab-area { --krds-tab--line-button-color-line-active: var(--rb-status-primary); }
+#root .krds-tab-area { --krds-tab--line-button-color-text-active: var(--krds-color-text-basic); }
+/* D-07: KRDS secondary(청록)의 활성 면과 글자 변수를 KRDS primary 50과 본문색으로(탭, 선택 표시 등 KRDS 부품 전체) */
+html, html[data-krds-mode="dark"], html[data-krds-mode="light"] {
+  --krds-light-color-action-secondary-active: var(--krds-color-light-primary-50);
+  --krds-dark-color-action-secondary-active: var(--krds-color-light-primary-50);
+  --krds-color-action-secondary-active: var(--krds-color-light-primary-50);
+  --krds-light-color-text-secondary: var(--krds-light-color-text-basic);
+  --krds-dark-color-text-secondary: var(--krds-dark-color-text-basic);
+  --krds-color-text-secondary: var(--krds-color-text-basic);
+}
+/* 현재 항목 왼쪽 막대가 스크롤 상자에 잘리지 않게, 사이드바 좌우 여백을 스크롤 상자와 바닥 묶음 안쪽으로 옮긴다 */
+#root .rb-side { padding-inline: 0; }
+#root .rb-side-scroll, #root .rb-side-foot { padding-inline: var(--rb-side-pad-x); }
+/* 묶음 접기 상자가 현재 항목 왼쪽 막대(상자 밖 8)를 자르지 않게 자르는 선을 바깥으로 8 넓힌다(접힌 동안은 투명이라 보이지 않는다) */
+#root .rb-side-fold > ul { overflow: clip; overflow-clip-margin: var(--rb-side-pad-x); }
+/* Figma 대조(2026. 10. 31.): 경로 줄 13 / 줄 높이 20, 경로 → 본문 간격 24(layout/crumb-title-gap) */
+#root .krds-breadcrumb-wrap.is-path, #root .krds-breadcrumb-wrap.is-path .breadcrumb, #root .krds-breadcrumb-wrap.is-path li, #root .krds-breadcrumb-wrap.is-path li::after, #root .krds-breadcrumb-wrap.is-path .txt { font-size: var(--krds-font-size-body-xsmall); line-height: var(--rb-lh-13); min-height: 0; }
+#root .rb-page > .krds-breadcrumb-wrap.is-path { margin-bottom: calc(var(--layout-crumb-title-gap) - var(--rb-rhythm)); }

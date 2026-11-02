@@ -26,13 +26,13 @@ async function firstImage(urls) {
 }
 
 export async function loadConfig() {
-  const [sites, schedule, omm] = await Promise.all(
-    ['/config/sites.json', '/data/acquisition.json', '/data/omm.json'].map((u) => fetch(u).then((r) => {
+  const [sites, omm] = await Promise.all(
+    ['/config/sites.json', '/data/omm.json'].map((u) => fetch(u).then((r) => {
       if (!r.ok) throw new Error(`${u} 응답 ${r.status}`)
       return r.json()
     }))
   )
-  return { sites: sites.sites, schedule, omm }
+  return { sites: sites.sites, omm }
 }
 
 export async function loadRules() {

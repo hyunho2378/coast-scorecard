@@ -1,0 +1,7 @@
+/* KRDS 피그마 전용 부품: Top button (묶음 4171:163147). 공식 코드에는 아이콘 마스크(.svg-icon.ico-go-top)만 있다. */
+.krds-top-btn { display:inline-flex; flex-direction:column; align-items:center; justify-content:center; box-sizing:border-box;
+  width:var(--krds-size-height-8); height:var(--krds-size-height-8); /* basic 56 */
+  background-color:var(--krds-color-action-white); border:var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light);
+  border-radius:var(--krds-radius-medium3); box-shadow:var(--krds-shadow-2); color:var(--krds-color-text-basic); cursor:pointer; padding:0; }
+.krds-top-btn.label { width:var(--krds-size-height-9); height:var(--krds-size-height-9); /* label 64 */ }
+.krds-top-btn .svg-icon.ico-go-top { width:var(--krds-size-height-4); height:var(--krds-size-height-4); background-color:var(--krds-color-icon-gray); }

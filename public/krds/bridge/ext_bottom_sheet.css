@@ -1,0 +1,19 @@
+/* KRDS 피그마 전용 부품: Bottom sheet (묶음 1545:35095 bottom_sheet, 5120:3302 bottom_sheet__atomic).
+   home_indicator__atomic(1574:71103, 기기 홈 막대)은 만들지 않는다(웹은 기기 크롬을 가져오지 않는다, 사용자 확정). 대신 아래 안전 영역은 env(safe-area-inset-bottom). */
+.krds-bottom-sheet-dim { box-sizing:border-box; width:100%; align-self:stretch; /* 화면에서는 열릴 때 position:fixed; inset:0 으로 띄운다(화면 담당) */ display:flex; flex-direction:column; justify-content:flex-end; align-items:stretch;
+  padding-top:var(--krds-gap-12); /* 1574:66803 paddingTop gap/12(80), flexible 은 80 변수 없음 → 같은 값 */ background-color:var(--krds-color-background-dim); }
+.krds-bottom-sheet { box-sizing:border-box; width:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:stretch; overflow:hidden;
+  background-color:var(--krds-color-surface-white-subtle); border-radius:var(--krds-radius-xlarge2) var(--krds-radius-xlarge2) 0 0; padding-bottom:env(safe-area-inset-bottom, 0); }
+.krds-bottom-sheet.fixed { flex:1 1 0; min-height:0; }
+.krds-bottom-sheet-head { box-sizing:border-box; width:100%; display:flex; align-items:center; gap:var(--krds-gap-5);
+  padding:var(--krds-padding-8) var(--krds-padding-6) var(--krds-padding-6); border-radius:var(--krds-radius-xlarge2) var(--krds-radius-xlarge2) 0 0; }
+.krds-bottom-sheet-head > h2 { flex:1 1 0; min-width:0; margin:0; color:var(--krds-color-text-basic); display:flex; align-items:center; gap:var(--krds-gap-3); }
+.krds-bottom-sheet-close { flex-shrink:0; display:inline-flex; width:var(--krds-size-height-4); height:var(--krds-size-height-4); padding:0; border:0; background:none; cursor:pointer; }
+.krds-bottom-sheet-close .svg-icon.ico-close { width:var(--krds-size-height-4); height:var(--krds-size-height-4); background-color:var(--krds-color-icon-gray);
+  -webkit-mask:url(icons/close.svg) no-repeat center / contain; mask:url(icons/close.svg) no-repeat center / contain; }
+.krds-bottom-sheet-body { box-sizing:border-box; width:100%; display:flex; align-items:flex-start; padding:var(--krds-padding-6); overflow:auto; }
+.krds-bottom-sheet.fixed .krds-bottom-sheet-body { flex:1 1 0; min-height:0; }
+.krds-bottom-sheet-foot { box-sizing:border-box; width:100%; display:flex; align-items:center; gap:var(--krds-gap-3);
+  padding:var(--krds-padding-8) var(--krds-padding-6) var(--krds-padding-6); }
+.krds-bottom-sheet-foot.fixed-height { height:calc(var(--krds-padding-8) + var(--krds-size-height-7) + var(--krds-padding-6)); } /* 5120:3313 단독 변형 높이 88 고정(변수 없음) = 위 패딩 24 + 버튼 48 + 아래 패딩 16 */
+.krds-bottom-sheet-foot > * { flex:1 1 0; min-width:0; }

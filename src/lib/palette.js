@@ -1,16 +1,13 @@
-// 지도와 지구본 그래픽 색. 값은 src/tokens.js 에서만 가져온다
-import { colors, globe } from '../tokens.js'
+// 그래픽 색: tokens.js의 KRDS 변수 이름을 실행 중 실제 값으로 바꾼다. 화면 모드를 바꾸면 다시 읽는다
+import { graphic } from '../tokens.js'
 
-export const PAL = {
-  ocean: globe.ocean,
-  land: globe.land,
-  graticule: globe.graticule,
-  pin: colors.sand.DEFAULT,
-  base: colors.sand.DEFAULT,
-  current: colors.primary.DEFAULT,
-  advance: colors.advance.DEFAULT,
-  retreat: colors.retreat.DEFAULT,
-  hold: colors.hold.DEFAULT,
-  halo: colors.page,
-  sats: globe.sats
+function read(name) {
+  if (typeof document === 'undefined') return ''
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+}
+
+export function readPalette() {
+  const out = {}
+  for (const [k, v] of Object.entries(graphic)) out[k] = Array.isArray(v) ? v.map(read) : read(v)
+  return out
 }

@@ -1,0 +1,21 @@
+/* D-05 generated. KRDS primitive only. */
+:root{
+  --repo-syntax-keyword: var(--krds-color-light-primary-60);
+  --repo-syntax-string: var(--krds-color-light-success-60);
+  --repo-syntax-number: var(--krds-color-light-warning-60);
+  --repo-syntax-comment: var(--krds-color-light-gray-60);
+  --repo-syntax-function: var(--krds-color-light-secondary-60);
+  --repo-syntax-type: var(--krds-color-light-information-60);
+  --repo-syntax-tag: var(--krds-color-light-point-60);
+  --repo-syntax-deleted: var(--krds-color-light-danger-60);
+}
+html[data-krds-mode="dark"]{
+  --repo-syntax-keyword: var(--krds-color-high-contrast-primary-30);
+  --repo-syntax-string: var(--krds-color-high-contrast-success-30);
+  --repo-syntax-number: var(--krds-color-high-contrast-warning-30);
+  --repo-syntax-comment: var(--krds-color-high-contrast-gray-30);
+  --repo-syntax-function: var(--krds-color-high-contrast-secondary-30);
+  --repo-syntax-type: var(--krds-color-high-contrast-information-30);
+  --repo-syntax-tag: var(--krds-color-high-contrast-point-30);
+  --repo-syntax-deleted: var(--krds-color-high-contrast-danger-30);
+}
