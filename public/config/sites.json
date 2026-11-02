@@ -25,7 +25,11 @@
         "after": [
           "/ext/poc2/hwajinpo/after.png"
         ]
-      }
+      },
+      "labelOffset": [
+        14,
+        -62
+      ]
     },
     {
       "id": "banam",
@@ -51,7 +55,11 @@
         "after": [
           "/ext/poc2/banam/after.png"
         ]
-      }
+      },
+      "labelOffset": [
+        14,
+        -22
+      ]
     },
     {
       "id": "jinjin",
@@ -77,7 +85,11 @@
         "after": [
           "/ext/poc2/jinjin/after.png"
         ]
-      }
+      },
+      "labelOffset": [
+        14,
+        18
+      ]
     },
     {
       "id": "aneho",
@@ -103,7 +115,11 @@
         "after": [
           "/ext/poc2/aneho/after.png"
         ]
-      }
+      },
+      "labelOffset": [
+        12,
+        -12
+      ]
     },
     {
       "id": "sandmotor",
@@ -129,7 +145,11 @@
         "after": [
           "/ext/poc2/sandmotor/after.png"
         ]
-      }
+      },
+      "labelOffset": [
+        12,
+        -34
+      ]
     }
   ]
 }
