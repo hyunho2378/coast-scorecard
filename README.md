@@ -20,7 +20,7 @@ NAPI_RS_FORCE_WASI=1 npm run dev
 공공 깃랩 2차 리빌딩(`07. 청년 공공 AX 서포터즈/2차_리빌딩/app`)의 KRDS 기초를 그대로 가져옴. 색과 글자, 간격, 반경은 KRDS CSS 변수에서만 옴
 
 - `public/krds/resources/css`, `fonts`, `img`, `public/krds/bridge`: KRDS 공식 CSS와 글꼴, 아이콘
-- `src/krds/dark.generated.css`, `syntax.generated.css`: KRDS 어두운 화면 변수(바탕 #131416 규칙)
+- `src/krds/dark.generated.css`, `syntax.generated.css`: KRDS 어두운 화면 변수(공공 깃랩 바탕 규칙)
 - `src/krds/layout.tokens.css`, `status.tokens.css`: 공공 깃랩 화면 뼈대 값과 상태 색 계단
 - `src/krds/base.css`: 공공 깃랩 `styles.css`
 - `src/krds/shell.css`: 공공 깃랩 `components/Layout/shell.css`(상단 바, 왼쪽 세로 바, 둥근 판)
