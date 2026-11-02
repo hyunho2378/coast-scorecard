@@ -133,13 +133,14 @@ export function ChangeBars({ rows, label = '가로선별 전후 변화' }) {
   const vals = rows.map((r) => Math.abs(r.change ?? 0))
   const thr = Math.max(0, ...rows.map((r) => r.threshold || 0))
   const max = Math.max(thr * 2, ...vals, 1)
+  const longId = rows.some((r) => String(r.id).length > 4)
   return (
     <figure>
       <figcaption className="sr-only">{label}</figcaption>
       <div className="mb-2 flex justify-between type-meta text-text-meta"><span>육지 쪽 후퇴</span><span>바다 쪽 전진</span></div>
       <ul className="flex flex-col gap-1">
         {rows.map((r) => (
-          <li key={r.id} className="grid grid-cols-[64px_minmax(0,1fr)_104px] items-center gap-2">
+          <li key={r.id} className={clsx('grid items-center gap-2', longId ? 'grid-cols-[112px_minmax(0,1fr)_104px]' : 'grid-cols-[64px_minmax(0,1fr)_104px]')}>
             <span className="type-meta text-text-sec tabular-nums">가로선 {r.id}</span>
             <span className="relative h-3 rounded-full bg-mute" aria-hidden="true">
               <span className="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-line-strong" />

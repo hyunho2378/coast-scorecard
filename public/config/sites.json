@@ -29,6 +29,9 @@
       "labelOffset": [
         14,
         -62
+      ],
+      "typeRules": [
+        "seasonal"
       ]
     },
     {
@@ -59,6 +62,11 @@
       "labelOffset": [
         14,
         -22
+      ],
+      "typeRules": [
+        "structures",
+        "nourishment",
+        "seasonal"
       ]
     },
     {
@@ -89,6 +97,11 @@
       "labelOffset": [
         14,
         18
+      ],
+      "typeRules": [
+        "structures",
+        "nourishment",
+        "seasonal"
       ]
     },
     {
@@ -119,6 +132,9 @@
       "labelOffset": [
         12,
         -12
+      ],
+      "typeRules": [
+        "seasonal"
       ]
     },
     {
@@ -149,6 +165,10 @@
       "labelOffset": [
         12,
         -34
+      ],
+      "typeRules": [
+        "nourishment",
+        "seasonal"
       ]
     }
   ]

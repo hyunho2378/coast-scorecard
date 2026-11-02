@@ -67,3 +67,29 @@ for (const id of ['hwajinpo', 'banam', 'jinjin', 'aneho', 'sandmotor']) {
     for (const r of tr) assert.ok(typeof r.threshold === 'number')
   })
 }
+
+const RULES = {
+  site_rules: { a: { holdThresholdM: 57.2, surveyAvailable: true, judgeableCount: 17 }, b: { holdThresholdM: 10, surveyAvailable: false } },
+  sensitivity: [
+    { errorM: 13.2, errorKind: '단일 시점 위치 RMSE', gradeChange: [{ W0_m: 20, boundary_band_beachwidth_change_m: 36.6, p_grade_change: 0.609 }], targetFitScore: { b: { runs: [{ true_score: 28.8, p05: 22.5, p95: 31.2 }] } } },
+    { errorM: 42.3, errorKind: '두 시점 변화량 RMSE', gradeChange: [{ W0_m: 20, boundary_band_beachwidth_change_m: 39.2, p_grade_change: 0.631 }], targetFitScore: {} }
+  ],
+  type_rules: { structures: { label: '돌제, 잠제, 이안제', app_wording: '구조물 지구: 배후 구간과 하류 인접 구간 함께 표시' } }
+}
+test('등급 민감도: 측량 대조 사업지는 변화량 오차 항목', async () => {
+  const { gradeSensitivity } = await import('../src/lib/loader-core.js')
+  assert.equal(gradeSensitivity(RULES, 'a').bandM, 39.2)
+  const b = gradeSensitivity(RULES, 'b')
+  assert.equal(b.bandM, 36.6); assert.equal(b.targetFit.p05, 22.5)
+  assert.equal(gradeSensitivity(null, 'a'), null)
+})
+test('보류 기준 대조: 규칙 파일과 가로선 파일 값이 다르면 same=false', async () => {
+  const { holdRuleCheck } = await import('../src/lib/loader-core.js')
+  assert.equal(holdRuleCheck(RULES, 'a', { thresholds: [26.4] }).same, false)
+  assert.equal(holdRuleCheck(RULES, 'b', { thresholds: [10] }).same, true)
+  assert.equal(holdRuleCheck(RULES, 'z', { thresholds: [10] }), null)
+})
+test('사업 유형 해석 규칙', async () => {
+  const { typeRulesFor } = await import('../src/lib/loader-core.js')
+  assert.deepEqual(typeRulesFor(RULES, ['structures', 'none']).map((x) => x.label), ['돌제, 잠제, 이안제'])
+})

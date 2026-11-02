@@ -3,7 +3,7 @@ import { useMemo, useRef, useState } from 'react'
 import { Copy, Check } from 'lucide-react'
 import { Card, Chip, PageHeader, TestBadge, TideBadge, Stat, SiteState, ChangeBars, DefList, TestNotice, StateBlock, Button, RESPONSIBILITY, HOLD_ACTION } from '../ui/index.jsx'
 import { ledgerText, fmtDate } from '../lib/ledger.js'
-import { rulesForSite, bandOf } from '../lib/loader-core.js'
+import { gradeSensitivity, holdRuleCheck, typeRulesFor } from '../lib/loader-core.js'
 import { isJudgeable } from '../lib/judge.js'
 
 const pct = (v) => `${Math.round(v * 100)}%`
@@ -24,8 +24,9 @@ export default function CardScreen({ site, data, rules }) {
   const rows = data.rows
   const held = rows.filter((r) => !isJudgeable(r.verdict))
   const text = ledgerText({ site, rows, period: data.period, tide: data.tide, today })
-  const entry = rulesForSite(rules?.data, site.id)
-  const band = bandOf(entry)
+  const sens = gradeSensitivity(rules?.data, site.id)
+  const holdCheck = holdRuleCheck(rules?.data, site.id, s)
+  const typeRules = typeRulesFor(rules?.data, site.typeRules)
   const thr = s.thresholds.length ? s.thresholds.map((t) => `${t} m`).join(', ') : '기준 없음'
 
   const copy = async () => {
@@ -61,6 +62,25 @@ export default function CardScreen({ site, data, rules }) {
             {s.nodata > 0 && <p className="mt-2 type-meta text-text-meta">판정 보류 가운데 {s.nodata}개는 구름으로 해안선을 찾지 못한 가로선입니다.</p>}
           </Card>
 
+          {holdCheck && !holdCheck.same && (
+            <StateBlock kind="hold" title="판정 보류 기준 갱신 대기">
+              <p>가로선 파일 기준 {holdCheck.fileM.join(', ')} m로 판정한 화면입니다. 새 규칙 파일의 이 사업지 기준은 {holdCheck.ruleM} m(판정 가능 {holdCheck.ruleJudgeable}개)이며, 가로선 파일을 다시 만들면 이 화면 값이 바뀝니다.</p>
+            </StateBlock>
+          )}
+
+          {typeRules.length > 0 && (
+            <Card title="사업 유형별 해석 규칙">
+              <ul className="flex flex-col gap-2">
+                {typeRules.map((t) => (
+                  <li key={t.label} className="rounded-sm bg-mute px-4 py-3">
+                    <p className="type-caption text-text-sec">{t.label}</p>
+                    <p className="type-body-sm text-text-pri">{t.text}</p>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
+
           <Card title="별표 10 예비 지표" eyebrow="연안정비사업 효과평가 항목 대응">
             <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
               <div className="rounded-sm bg-mute px-4 py-3">
@@ -75,15 +95,20 @@ export default function CardScreen({ site, data, rules }) {
               </div>
               <div className="rounded-sm bg-mute px-4 py-3 md:col-span-2">
                 <p className="type-caption text-text-sec">위성 오차로 등급이 바뀔 수 있는 폭</p>
-                {band ? (
-                  <p className="type-h2 text-text-pri tabular-nums">±{band.value} m</p>
+                {sens?.bandM ? (
+                  <>
+                    <p className="type-h2 text-text-pri tabular-nums">해빈폭 변화 ±{sens.bandM} m</p>
+                    <p className="type-meta text-text-meta">
+                      위성 오차 {sens.errorM} m({sens.errorKind}) 기준입니다. 사업 전 해빈폭 {sens.w0} m 가정에서 해빈폭 점수 등급이 바뀔 확률 {Math.round(sens.pGradeChange * 100)}%입니다.
+                      {sens.targetFit && ` 목표해안선 적합도 점수는 오차 범위 안에서 ${sens.targetFit.p05}점부터 ${sens.targetFit.p95}점까지 움직입니다(모의 계산).`}
+                    </p>
+                  </>
                 ) : (
-                  <p className="type-h2 text-text-sec">계산 중</p>
+                  <>
+                    <p className="type-h2 text-text-sec">계산 중</p>
+                    <p className="type-meta text-text-meta">{rules?.status === 'ok' ? '민감도 파일에 이 사업지 값이 없습니다.' : '민감도 계산 파일이 들어오면 채웁니다.'}</p>
+                  </>
                 )}
-                <p className="type-meta text-text-meta">
-                  {rules?.status === 'ok' ? (band ? '민감도 계산 파일 값입니다.' : '민감도 파일에 이 사업지 항목이 없습니다.') : '민감도 계산 파일이 들어오면 채웁니다.'}
-                </p>
-                {entry && !band && <pre className="mt-2 overflow-x-auto rounded-sm bg-canvas p-3 type-meta text-text-sec">{JSON.stringify(entry, null, 2)}</pre>}
               </div>
             </div>
           </Card>

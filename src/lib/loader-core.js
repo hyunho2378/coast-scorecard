@@ -83,3 +83,37 @@ export function bandOf(entry) {
   }
   return null
 }
+
+// sensitivity_and_rules.json(poc4) 형식. 측량 대조가 있는 사업지는 두 시점 변화량 오차, 없는 곳은 단일 시점 위치 오차 항목을 쓴다.
+// 등급 경계 폭은 사업 전 해빈폭 20 m 가정의 해빈폭 점수 경계 폭(m)과 등급 변경 확률
+export function gradeSensitivity(rules, siteId) {
+  const list = Array.isArray(rules?.sensitivity) ? rules.sensitivity : null
+  if (!list || !list.length) return null
+  const site = rules.site_rules?.[siteId] || null
+  const entry = (site?.surveyAvailable && list.find((s) => String(s.errorKind || '').includes('변화량'))) || list[0]
+  const gc = (entry.gradeChange || []).find((g) => g.W0_m === 20 && typeof g.boundary_band_beachwidth_change_m === 'number')
+  const tf = entry.targetFitScore?.[siteId]?.runs?.[0] || null
+  if (!gc && !tf) return null
+  return {
+    errorM: entry.errorM, errorKind: entry.errorKind,
+    bandM: gc ? gc.boundary_band_beachwidth_change_m : null,
+    pGradeChange: gc ? gc.p_grade_change : null,
+    w0: gc ? gc.W0_m : null,
+    targetFit: tf ? { score: tf.true_score, p05: tf.p05, p95: tf.p95 } : null
+  }
+}
+
+// 규칙 파일의 사업지 보류 기준과 가로선 파일 값 비교. 다르면 화면에 함께 보인다
+export function holdRuleCheck(rules, siteId, summary) {
+  const r = rules?.site_rules?.[siteId]
+  if (!r || typeof r.holdThresholdM !== 'number') return null
+  const fileT = summary?.thresholds || []
+  const same = fileT.length === 1 && Math.abs(fileT[0] - r.holdThresholdM) < 0.05
+  return { ruleM: r.holdThresholdM, fileM: fileT, same, ruleJudgeable: r.judgeableCount, basis: r.basis || '' }
+}
+
+export function typeRulesFor(rules, keys) {
+  const t = rules?.type_rules
+  if (!t) return []
+  return (keys || []).map((k) => t[k]).filter(Boolean).map((x) => ({ label: x.label, text: x.app_wording || x.text }))
+}
