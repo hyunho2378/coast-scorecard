@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
-import { fetchJsonOptional, normalizeShorelines, normalizeTransects, tideLabel, periodOf, rulesForSite, bandOf } from '../src/lib/loader-core.js'
+import { fetchJsonOptional, normalizeShorelines, normalizeTransects, periodOf, rulesForSite, bandOf } from '../src/lib/loader-core.js'
 
 const POC2 = process.env.COAST_POC2_DIR || '/Users/juhyunho/.aside/u/0/sessions/2026-11-03_jTs26DB0VbkJB83T/artifacts/erosion_poc2'
 const fakeRes = (status, body, type = 'application/json') => ({ ok: status < 400, status, headers: { get: () => type }, json: async () => body })
@@ -41,11 +41,6 @@ test('가로선: 파일의 hold 와 기준을 그대로 쓴다', () => {
   ] })
   assert.deepEqual(rows.map((r) => r.verdict), ['hold', 'retreat', 'nodata'])
   assert.equal(rows[0].change, 15); assert.equal(rows[1].threshold, 26.4)
-  assert.equal(tideLabel(rows), '조위 일부 보정(1/3)')
-})
-test('조위 표시 보정과 미보정', () => {
-  assert.equal(tideLabel([{ tideCorrected: true }]), '조위 보정')
-  assert.equal(tideLabel([{ tideCorrected: false }]), '조위 미보정')
 })
 test('비교 기간과 사용 연도', () => {
   const p = periodOf([{ date: '2025-01-07' }, { date: '2021-12-24' }, { date: '2022-01-28' }])

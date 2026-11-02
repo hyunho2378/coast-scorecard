@@ -31,6 +31,21 @@ export function normalizeShorelines(fc) {
   }).filter((s) => s.id)
 }
 
+// 같은 해 장면끼리 모든 쌍의 거리 차이. 파일에 samepair_absdiff_m 가 없을 때 쓴다
+export function pairsFromDist(dist) {
+  if (!dist) return null
+  const by = {}
+  for (const [scene, v] of Object.entries(dist)) {
+    const y = String(scene).match(/_(\d{4})\d{4}/)?.[1]
+    if (!y || typeof v !== 'number') continue
+    ;(by[y] = by[y] || []).push(v)
+  }
+  const out = {}
+  let n = 0
+  for (const xs of Object.values(by)) for (let i = 0; i < xs.length; i += 1) for (let j = i + 1; j < xs.length; j += 1) out[`p${n++}`] = Math.abs(xs[i] - xs[j])
+  return out
+}
+
 // 가로선 정리. 판정은 파일의 change_m, hold, hold_threshold_m 를 그대로 쓴다
 export function normalizeTransects(fc) {
   return (fc?.features || []).map((f) => {
@@ -40,21 +55,13 @@ export function normalizeTransects(fc) {
     return {
       id: p.id, change, threshold,
       hold: typeof p.hold === 'boolean' ? p.hold : undefined,
-      tideCorrected: p.tide_corrected === true,
       dist: p.dist_m || null,
+      samepair: p.samepair_absdiff_m || pairsFromDist(p.dist_m),
+      jarkusId: p.jarkus_id ?? null,
       verdict: verdictOf(change, threshold, typeof p.hold === 'boolean' ? p.hold : undefined),
       geometry: f.geometry
     }
   })
-}
-
-// 조위 표시: 가로선 값 기준. 모두 보정이면 보정, 모두 미보정이면 미보정, 섞이면 일부 보정
-export function tideLabel(rows) {
-  if (!rows.length) return '조위 미보정'
-  const n = rows.filter((r) => r.tideCorrected).length
-  if (n === rows.length) return '조위 보정'
-  if (n === 0) return '조위 미보정'
-  return `조위 일부 보정(${n}/${rows.length})`
 }
 
 export function periodOf(scenes) {
@@ -116,4 +123,29 @@ export function typeRulesFor(rules, keys) {
   const t = rules?.type_rules
   if (!t) return []
   return (keys || []).map((k) => t[k]).filter(Boolean).map((x) => ({ label: x.label, text: x.app_wording || x.text }))
+}
+
+// 조위 환산 위치 표(Sand Motor)로 가로선별 같은 계절 장면쌍 차이를 만든다.
+// 환산 위치 = 위성 위치 - (평균고조위 - 촬영 시각 수위) / 경사. 같은 해 장면끼리 모든 쌍의 차이
+export function samepairFromCorrected(rows, corrected) {
+  if (!Array.isArray(corrected) || !corrected.length) return rows
+  const pos = {}
+  for (const r of corrected) {
+    if (r.sat_cs == null || !r.slope) continue
+    const v = r.sat_cs - (r.mhw_m_nap - r.wl_m_nap) / r.slope
+    const k = String(r.transect)
+    pos[k] = pos[k] || {}
+    const per = String(r.period || String(r.scene).match(/_(\d{4})\d{4}/)?.[1])
+    ;(pos[k][per] = pos[k][per] || []).push(v)
+  }
+  return rows.map((t) => {
+    const by = pos[String(t.jarkusId)]
+    if (!by) return { ...t, samepair: {} }
+    const out = {}
+    let n = 0
+    for (const xs of Object.values(by)) {
+      for (let i = 0; i < xs.length; i += 1) for (let j = i + 1; j < xs.length; j += 1) out[`p${n++}`] = Math.abs(xs[i] - xs[j])
+    }
+    return { ...t, samepair: out }
+  })
 }

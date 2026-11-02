@@ -1,5 +1,5 @@
 {
-  "note": "사업지 목록과 자료 파일. files 항목은 앞에서부터 읽고 처음 열리는 파일을 씀. /ext/poc2/ 주소는 vite.config.js가 erosion_poc2 폴더에 연결함. 판정 보류 기준은 각 가로선의 hold, hold_threshold_m 속성을 씀. completion은 확인된 준공일만 적고, 없으면 null",
+  "note": "사업지 목록과 자료 파일. files 항목은 앞에서부터 읽고 처음 열리는 파일을 씀. /ext/poc2/ 주소는 vite.config.js가 erosion_poc2 폴더에 연결함. 판정 보류 기준은 sensitivity_and_rules.json의 site_rules 값을 씀",
   "sites": [
     {
       "id": "hwajinpo",
@@ -11,7 +11,6 @@
       "zoom": 14.6,
       "kind": "연안침식 모니터링 지점",
       "completion": null,
-      "completionNote": "정비사업 지구가 아닌 침식 관찰 지점이라 준공일이 없습니다.",
       "files": {
         "shorelines": [
           "/ext/poc2/hwajinpo/shorelines.geojson"
@@ -44,7 +43,6 @@
       "zoom": 14.8,
       "kind": "잠제, 돌제, 해빈복원",
       "completion": null,
-      "completionNote": "공공데이터포털 연안정비 사업정보 이력의 완료일이 2019. 5. 6.과 2023. 12. 2.로 서로 다릅니다.",
       "files": {
         "shorelines": [
           "/ext/poc2/banam/shorelines.geojson"
@@ -79,7 +77,6 @@
       "zoom": 14.8,
       "kind": "잠제, 해빈복원",
       "completion": null,
-      "completionNote": "공공데이터포털 연안정비 사업정보 이력의 완료일이 2019. 7. 24.과 2023. 12. 4.로 서로 다릅니다.",
       "files": {
         "shorelines": [
           "/ext/poc2/jinjin/shorelines.geojson"
@@ -114,7 +111,6 @@
       "zoom": 13.2,
       "kind": "해안 보호 사업 지역",
       "completion": null,
-      "completionNote": "사업 준공 자료를 아직 열어 확인하지 못했습니다.",
       "files": {
         "shorelines": [
           "/ext/poc2/aneho/shorelines.geojson"
@@ -147,7 +143,6 @@
       "zoom": 13.0,
       "kind": "대규모 양빈",
       "completion": null,
-      "completionNote": "사업 준공 자료를 아직 열어 확인하지 못했습니다.",
       "files": {
         "shorelines": [
           "/ext/poc2/sandmotor/shorelines.geojson"
@@ -160,6 +155,9 @@
         ],
         "after": [
           "/ext/poc2/sandmotor/after.png"
+        ],
+        "corrected": [
+          "/ext/poc2/sites/sandmotor_spring_vs_jarkus_rows.json"
         ]
       },
       "labelOffset": [

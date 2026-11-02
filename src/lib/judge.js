@@ -72,3 +72,39 @@ export function stormOrder(sites) {
   }
   return out.sort((a, b) => Math.abs(b.change) - Math.abs(a.change) || String(a.siteId).localeCompare(String(b.siteId)) || a.id - b.id)
 }
+
+// 판정 보류 기준은 규칙 파일(sensitivity_and_rules.json site_rules)이 정답이다.
+// 기준 = max(사업지 같은 계절 장면쌍 차이 90퍼센타일, 공개 측량 대조 오차, 10 m).
+// 변화가 기준 이하이거나 그 가로선의 같은 계절 장면쌍 차이가 기준을 넘으면 보류한다
+export function ruleVerdict(change, threshold, samepair) {
+  if (change === null || change === undefined || Number.isNaN(change)) return 'nodata'
+  if (typeof threshold !== 'number') return 'hold'
+  if (Math.abs(change) <= threshold) return 'hold'
+  const pairs = Object.values(samepair || {}).filter((v) => typeof v === 'number')
+  if (!pairs.length || pairs.some((v) => v > threshold)) return 'hold'
+  return change > 0 ? 'advance' : 'retreat'
+}
+
+export function applySiteRule(rows, rule) {
+  if (!rule || typeof rule.holdThresholdM !== 'number') return rows
+  const t = rule.holdThresholdM
+  return rows.map((r) => ({ ...r, threshold: t, verdict: ruleVerdict(r.change, t, r.samepair) }))
+}
+
+// 별표 10(해양수산부 고시 제2025-181호) 점수 식
+export const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v))
+// 평균 해빈폭: 10 + 10 x (사업후 - 사업전) / 사업전, 최대 20, 최소 10
+export function beachWidthScore(w0, change) {
+  if (!(w0 > 0) || typeof change !== 'number') return null
+  return round1(clamp(10 + 10 * (change / w0), 10, 20))
+}
+// 목표해안선 적합도: 20 + 20 x (B - A), 최대 40, 최소 20
+export function targetFitScore(a, b) {
+  if (typeof a !== 'number' || typeof b !== 'number') return null
+  return round1(clamp(20 + 20 * (b - a), 20, 40))
+}
+export const GRADES = [['A', 85], ['B', 75], ['C', 65], ['D', 55], ['E', -Infinity]]
+export function gradeOf(total) {
+  if (typeof total !== 'number') return null
+  return GRADES.find(([, min]) => total >= min)[0]
+}
