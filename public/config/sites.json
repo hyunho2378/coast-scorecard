@@ -1,0 +1,103 @@
+{
+  "note": "사업지 목록과 자료 파일 선언. files의 각 항목은 앞에서부터 차례로 읽고, 처음 열리는 파일을 씀. /ext/poc2/ 주소는 vite.config.js가 erosion_poc2 폴더에 연결함",
+  "sites": [
+    {
+      "id": "hwajinpo",
+      "name": "고성 화진포 해수욕장",
+      "region": "강원 고성군",
+      "country": "대한민국",
+      "lat": 38.4745,
+      "lon": 128.442,
+      "zoom": 14.6,
+      "files": {
+        "shorelines": [
+          "/ext/poc2/hwajinpo/shorelines.geojson",
+          "/data/sites/hwajinpo/shorelines.geojson"
+        ],
+        "transects": [
+          "/ext/poc2/hwajinpo/transects.geojson",
+          "/data/sites/hwajinpo/transects.geojson"
+        ],
+        "before": [
+          "/ext/poc2/hwajinpo/before.png",
+          "/data/sites/hwajinpo/before_20170413.png"
+        ],
+        "after": [
+          "/ext/poc2/hwajinpo/after.png",
+          "/data/sites/hwajinpo/after_20250426.png"
+        ],
+        "overlay": [
+          "/data/sites/hwajinpo/shoreline_overlay_2017_2025.png"
+        ]
+      },
+      "source": [
+        "Sentinel-2 L2A NDWI 경계 개념 증명값",
+        "2017년 봄 2장면, 2025년 봄 2장면"
+      ],
+      "labelOffset": [
+        12,
+        -34
+      ]
+    },
+    {
+      "id": "maengbang",
+      "name": "삼척 맹방 해수욕장",
+      "region": "강원 삼척시",
+      "country": "대한민국",
+      "lat": 37.3925,
+      "lon": 129.247,
+      "zoom": 14.2,
+      "files": {
+        "shorelines": [
+          "/ext/poc2/maengbang/shorelines.geojson"
+        ],
+        "transects": [
+          "/ext/poc2/maengbang/transects.geojson"
+        ],
+        "before": [
+          "/ext/poc2/maengbang/before.png"
+        ],
+        "after": [
+          "/ext/poc2/maengbang/after.png"
+        ]
+      },
+      "source": [
+        "분석 자료 준비 중"
+      ],
+      "labelOffset": [
+        12,
+        10
+      ]
+    },
+    {
+      "id": "aneho",
+      "name": "토고 아네호 해안",
+      "region": "토고 해안주",
+      "country": "토고",
+      "lat": 6.229,
+      "lon": 1.596,
+      "zoom": 13.6,
+      "files": {
+        "shorelines": [
+          "/ext/poc2/aneho/shorelines.geojson"
+        ],
+        "transects": [
+          "/ext/poc2/aneho/transects.geojson"
+        ],
+        "before": [
+          "/ext/poc2/aneho/before.png"
+        ],
+        "after": [
+          "/ext/poc2/aneho/after.png"
+        ]
+      },
+      "source": [
+        "분석 자료 준비 중"
+      ],
+      "labelOffset": [
+        12,
+        -12
+      ]
+    }
+  ]
+}
