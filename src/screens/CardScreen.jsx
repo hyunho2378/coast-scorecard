@@ -64,7 +64,7 @@ export default function CardScreen({ site, data, rules }) {
 
           {holdCheck && !holdCheck.same && (
             <StateBlock kind="hold" title="판정 보류 기준 갱신 대기">
-              <p>가로선 파일 기준 {holdCheck.fileM.join(', ')} m로 판정한 화면입니다. 새 규칙 파일의 이 사업지 기준은 {holdCheck.ruleM} m(판정 가능 {holdCheck.ruleJudgeable}개)이며, 가로선 파일을 다시 만들면 이 화면 값이 바뀝니다.</p>
+              <p>가로선 파일 기준 {holdCheck.fileM.join(', ')}{'\u00a0'}m로 판정한 화면입니다. 새 규칙 파일의 이 사업지 기준은 {holdCheck.ruleM}{'\u00a0'}m(판정 가능 {holdCheck.ruleJudgeable}개)이며, 가로선 파일을 다시 만들면 이 화면 값이 바뀝니다.</p>
             </StateBlock>
           )}
 
@@ -99,7 +99,7 @@ export default function CardScreen({ site, data, rules }) {
                   <>
                     <p className="type-h2 text-text-pri tabular-nums">해빈폭 변화 ±{sens.bandM} m</p>
                     <p className="type-meta text-text-meta">
-                      위성 오차 {sens.errorM} m({sens.errorKind}) 기준입니다. 사업 전 해빈폭 {sens.w0} m 가정에서 해빈폭 점수 등급이 바뀔 확률 {Math.round(sens.pGradeChange * 100)}%입니다.
+                      위성 오차 {sens.errorM}{'\u00a0'}m({sens.errorKind}) 기준입니다. 사업 전 해빈폭 {sens.w0}{'\u00a0'}m 가정에서 해빈폭 점수 등급이 바뀔 확률 {Math.round(sens.pGradeChange * 100)}%입니다.
                       {sens.targetFit && ` 목표해안선 적합도 점수는 오차 범위 안에서 ${sens.targetFit.p05}점부터 ${sens.targetFit.p95}점까지 움직입니다(모의 계산).`}
                     </p>
                   </>
