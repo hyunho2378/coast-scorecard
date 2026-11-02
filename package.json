@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build --minify false",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test tests/*.test.js"
   },
   "dependencies": {
     "animejs": "^4.5.0",

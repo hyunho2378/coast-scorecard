@@ -1,17 +1,16 @@
-// 화면 그래픽 색. 값은 미리 디자인 토큰(miri/tokens.js, kitTokens.js)에서만 가져온다
-import { colors } from '../miri/tokens.js'
-import { ios, m3 } from '../miri/kitTokens.js'
+// 지도와 지구본 그래픽 색. 값은 src/tokens.js 에서만 가져온다
+import { colors, globe } from '../tokens.js'
 
 export const PAL = {
-  ocean: m3.onPrimaryContainer,
-  land: ios.gray4,
-  graticule: m3.secondary,
-  pin: colors.danger.DEFAULT,
-  base: colors.warning.DEFAULT,
+  ocean: globe.ocean,
+  land: globe.land,
+  graticule: globe.graticule,
+  pin: colors.sand.DEFAULT,
+  base: colors.sand.DEFAULT,
   current: colors.primary.DEFAULT,
-  advance: colors.success.DEFAULT,
-  retreat: colors.danger.DEFAULT,
-  hold: colors.text.sec,
+  advance: colors.advance.DEFAULT,
+  retreat: colors.retreat.DEFAULT,
+  hold: colors.hold.DEFAULT,
   halo: colors.page,
-  sats: [ios.orange, ios.green, ios.blue, ios.purple, ios.red]
+  sats: globe.sats
 }

@@ -1,49 +1,51 @@
-// 사이트 설정(public/config/sites.json)에 선언한 파일 후보를 앞에서부터 읽는다.
-// 처음 열리는 파일을 쓰고, 어떤 후보에서 왔는지(origin)를 함께 돌려준다
-// 외부 분석 폴더(/ext/poc2/)에 실제로 있는 파일 목록. 개발 서버가 아니면 빈 목록
-let extList = null
-async function externalFiles() {
-  if (extList) return extList
-  try {
-    const res = await fetch('/ext/poc2/__list', { cache: 'no-store' })
-    const type = res.headers.get('content-type') || ''
-    extList = res.ok && type.includes('json') ? new Set(await res.json()) : new Set()
-  } catch {
-    extList = new Set()
+// 사업지 설정과 자료 파일 읽기. 파일 후보를 앞에서부터 읽고 처음 열리는 파일을 쓴다
+import { fetchJsonOptional, normalizeShorelines, normalizeTransects, periodOf, tideLabel } from './loader-core.js'
+import { summarize } from './judge.js'
+
+export const RULES_URL = '/ext/poc2/sensitivity_and_rules.json'
+
+async function firstJson(urls) {
+  let last = { status: 'missing' }
+  for (const url of urls || []) {
+    const r = await fetchJsonOptional(url)
+    if (r.status === 'ok') return r
+    if (r.status === 'error') last = r
   }
-  return extList
+  return last
 }
 
-async function firstOk(urls, kind) {
-  const ext = await externalFiles()
+async function firstImage(urls) {
   for (const url of urls || []) {
-    if (url.startsWith('/ext/') && !ext.has(url)) continue
     try {
-      const res = await fetch(url, { method: kind === 'image' ? 'HEAD' : 'GET', cache: 'no-store' })
+      const res = await fetch(url, { method: 'HEAD', cache: 'no-store' })
       const type = res.headers.get('content-type') || ''
-      if (!res.ok || type.includes('text/html')) continue
-      if (kind === 'image') return { url, origin: url.startsWith('/ext/') ? 'poc2' : 'local' }
-      return { data: await res.json(), url, origin: url.startsWith('/ext/') ? 'poc2' : 'local' }
-    } catch {
-      // 다음 후보로 넘어간다
-    }
+      if (res.ok && type.startsWith('image/')) return url
+    } catch { /* 다음 후보 */ }
   }
   return null
 }
 
 export async function loadConfig() {
-  const [sites, judge, schedule, omm] = await Promise.all(
-    ['/config/sites.json', '/config/judgement.json', '/data/acquisition_sample.json', '/data/omm_sample.json'].map((u) => fetch(u).then((r) => r.json()))
+  const [sites, schedule, omm, storms] = await Promise.all(
+    ['/config/sites.json', '/data/acquisition_sample.json', '/data/omm_sample.json', '/data/storm_sample.json'].map((u) => fetch(u).then((r) => {
+      if (!r.ok) throw new Error(`${u} 응답 ${r.status}`)
+      return r.json()
+    }))
   )
-  return { sites: sites.sites, judge, schedule, omm }
+  return { sites: sites.sites, schedule, omm, storms }
 }
 
+export async function loadRules() {
+  return fetchJsonOptional(RULES_URL)
+}
+
+// 돌려주는 status: ready(판정 가능), empty(파일 없음), error(읽기 실패)
 export async function loadSite(site) {
-  extList = null // 사업지를 열 때마다 폴더를 다시 확인한다
   const f = site.files || {}
-  const [shorelines, transects, before, after, overlay] = await Promise.all([
-    firstOk(f.shorelines, 'json'), firstOk(f.transects, 'json'),
-    firstOk(f.before, 'image'), firstOk(f.after, 'image'), firstOk(f.overlay, 'image')
-  ])
-  return { shorelines, transects, before, after, overlay, ready: Boolean(shorelines && transects) }
+  const [sh, tr, before, after] = await Promise.all([firstJson(f.shorelines), firstJson(f.transects), firstImage(f.before), firstImage(f.after)])
+  if (sh.status === 'error' || tr.status === 'error') return { status: 'error', message: sh.message || tr.message }
+  if (sh.status !== 'ok' || tr.status !== 'ok') return { status: 'empty', before, after }
+  const scenes = normalizeShorelines(sh.data)
+  const rows = normalizeTransects(tr.data)
+  return { status: 'ready', scenes, rows, summary: summarize(rows), tide: tideLabel(rows), period: periodOf(scenes), before, after, sources: { shorelines: sh.url, transects: tr.url } }
 }

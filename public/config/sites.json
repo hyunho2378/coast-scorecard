@@ -1,82 +1,95 @@
 {
-  "note": "사업지 목록과 자료 파일 선언. files의 각 항목은 앞에서부터 차례로 읽고, 처음 열리는 파일을 씀. /ext/poc2/ 주소는 vite.config.js가 erosion_poc2 폴더에 연결함",
+  "note": "사업지 목록과 자료 파일. files 항목은 앞에서부터 읽고 처음 열리는 파일을 씀. /ext/poc2/ 주소는 vite.config.js가 erosion_poc2 폴더에 연결함. 판정 보류 기준은 각 가로선의 hold, hold_threshold_m 속성을 씀. completion은 확인된 준공일만 적고, 없으면 null",
   "sites": [
     {
       "id": "hwajinpo",
-      "name": "고성 화진포 해수욕장",
+      "name": "고성 화진포",
       "region": "강원 고성군",
       "country": "대한민국",
-      "lat": 38.4745,
-      "lon": 128.442,
+      "lat": 38.4789,
+      "lon": 128.4397,
       "zoom": 14.6,
+      "kind": "연안침식 모니터링 지점",
+      "completion": null,
+      "completionNote": "정비사업 지구가 아닌 침식 관찰 지점이라 준공일이 없습니다.",
       "files": {
         "shorelines": [
-          "/ext/poc2/hwajinpo/shorelines.geojson",
-          "/data/sites/hwajinpo/shorelines.geojson"
+          "/ext/poc2/hwajinpo/shorelines.geojson"
         ],
         "transects": [
-          "/ext/poc2/hwajinpo/transects.geojson",
-          "/data/sites/hwajinpo/transects.geojson"
+          "/ext/poc2/hwajinpo/transects.geojson"
         ],
         "before": [
-          "/ext/poc2/hwajinpo/before.png",
-          "/data/sites/hwajinpo/before_20170413.png"
+          "/ext/poc2/hwajinpo/before.png"
         ],
         "after": [
-          "/ext/poc2/hwajinpo/after.png",
-          "/data/sites/hwajinpo/after_20250426.png"
-        ],
-        "overlay": [
-          "/data/sites/hwajinpo/shoreline_overlay_2017_2025.png"
+          "/ext/poc2/hwajinpo/after.png"
         ]
-      },
-      "source": [
-        "Sentinel-2 L2A NDWI 경계 개념 증명값",
-        "2017년 봄 2장면, 2025년 봄 2장면"
-      ],
-      "labelOffset": [
-        12,
-        -34
-      ]
+      }
     },
     {
-      "id": "maengbang",
-      "name": "삼척 맹방 해수욕장",
-      "region": "강원 삼척시",
+      "id": "banam",
+      "name": "고성 반암",
+      "region": "강원 고성군",
       "country": "대한민국",
-      "lat": 37.3925,
-      "lon": 129.247,
-      "zoom": 14.2,
+      "lat": 38.4236,
+      "lon": 128.4637,
+      "zoom": 14.8,
+      "kind": "잠제, 돌제, 해빈복원",
+      "completion": null,
+      "completionNote": "공공데이터포털 연안정비 사업정보 이력의 완료일이 2019. 5. 6.과 2023. 12. 2.로 서로 다릅니다.",
       "files": {
         "shorelines": [
-          "/ext/poc2/maengbang/shorelines.geojson"
+          "/ext/poc2/banam/shorelines.geojson"
         ],
         "transects": [
-          "/ext/poc2/maengbang/transects.geojson"
+          "/ext/poc2/banam/transects.geojson"
         ],
         "before": [
-          "/ext/poc2/maengbang/before.png"
+          "/ext/poc2/banam/before.png"
         ],
         "after": [
-          "/ext/poc2/maengbang/after.png"
+          "/ext/poc2/banam/after.png"
         ]
-      },
-      "source": [
-        "분석 자료 준비 중"
-      ],
-      "labelOffset": [
-        12,
-        10
-      ]
+      }
+    },
+    {
+      "id": "jinjin",
+      "name": "고성 가진",
+      "region": "강원 고성군",
+      "country": "대한민국",
+      "lat": 38.38,
+      "lon": 128.5026,
+      "zoom": 14.8,
+      "kind": "잠제, 해빈복원",
+      "completion": null,
+      "completionNote": "공공데이터포털 연안정비 사업정보 이력의 완료일이 2019. 7. 24.과 2023. 12. 4.로 서로 다릅니다.",
+      "files": {
+        "shorelines": [
+          "/ext/poc2/jinjin/shorelines.geojson"
+        ],
+        "transects": [
+          "/ext/poc2/jinjin/transects.geojson"
+        ],
+        "before": [
+          "/ext/poc2/jinjin/before.png"
+        ],
+        "after": [
+          "/ext/poc2/jinjin/after.png"
+        ]
+      }
     },
     {
       "id": "aneho",
-      "name": "토고 아네호 해안",
+      "name": "토고 Agbodrafo",
       "region": "토고 해안주",
       "country": "토고",
-      "lat": 6.229,
-      "lon": 1.596,
-      "zoom": 13.6,
+      "lat": 6.2041,
+      "lon": 1.4901,
+      "zoom": 13.2,
+      "kind": "해안 보호 사업 지역",
+      "completion": null,
+      "completionNote": "사업 준공 자료를 아직 열어 확인하지 못했습니다.",
       "files": {
         "shorelines": [
           "/ext/poc2/aneho/shorelines.geojson"
@@ -90,14 +103,33 @@
         "after": [
           "/ext/poc2/aneho/after.png"
         ]
-      },
-      "source": [
-        "분석 자료 준비 중"
-      ],
-      "labelOffset": [
-        12,
-        -12
-      ]
+      }
+    },
+    {
+      "id": "sandmotor",
+      "name": "네덜란드 Sand Motor",
+      "region": "남홀란트주",
+      "country": "네덜란드",
+      "lat": 52.045,
+      "lon": 4.1829,
+      "zoom": 13.0,
+      "kind": "대규모 양빈",
+      "completion": null,
+      "completionNote": "사업 준공 자료를 아직 열어 확인하지 못했습니다.",
+      "files": {
+        "shorelines": [
+          "/ext/poc2/sandmotor/shorelines.geojson"
+        ],
+        "transects": [
+          "/ext/poc2/sandmotor/transects.geojson"
+        ],
+        "before": [
+          "/ext/poc2/sandmotor/before.png"
+        ],
+        "after": [
+          "/ext/poc2/sandmotor/after.png"
+        ]
+      }
     }
   ]
 }
