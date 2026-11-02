@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+    --dur-press: 120ms; --dur-fast: 160ms; --dur-pop: 180ms; --dur: 280ms; --dur-sheet: 360ms;
+    color-scheme: dark;
+  }
+  html { font-family: 'Pretendard GOV Variable', 'Pretendard GOV', 'Pretendard Variable', 'Pretendard', sans-serif; -webkit-font-smoothing: antialiased; }
+  body { @apply bg-page text-text-pri; word-break: keep-all; overflow-wrap: break-word; }
+  h1, h2, h3, h4 { text-wrap: balance; }
+  p, li, dd, figcaption { text-wrap: pretty; }
+  *:focus { outline: none; }
+  *:focus-visible { outline: 3px solid theme('colors.primary.DEFAULT'); outline-offset: 2px; border-radius: 8px; }
+  html, body { overflow-x: clip; }
+
+  /* 운영체제 기본 모양 대신 디자인 시스템 모양 */
+  input[type='checkbox'] {
+    appearance: none; -webkit-appearance: none; margin: 0; flex-shrink: 0; cursor: pointer;
+    width: 24px; height: 24px; border-radius: 8px; background: theme('colors.mute');
+    box-shadow: inset 0 0 0 2px theme('colors.line.strong');
+    display: inline-grid; place-content: center; transition: background-color var(--dur-fast);
+  }
+  input[type='checkbox']:checked { background: theme('colors.primary.DEFAULT') url("/icons/check.svg") center/16px no-repeat; box-shadow: none; }
+  input[type='range'] { appearance: none; -webkit-appearance: none; background: transparent; height: 24px; cursor: pointer; }
+  input[type='range']::-webkit-slider-runnable-track { height: 4px; border-radius: 9999px; background: theme('colors.line.strong'); }
+  input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -7px; border-radius: 9999px; background: theme('colors.primary.DEFAULT'); }
+  input[type='range']::-moz-range-track { height: 4px; border-radius: 9999px; background: theme('colors.line.strong'); }
+  input[type='range']::-moz-range-thumb { width: 18px; height: 18px; border: 0; border-radius: 9999px; background: theme('colors.primary.DEFAULT'); }
+  input:-webkit-autofill { -webkit-box-shadow: 0 0 0 40px theme('colors.mute') inset; -webkit-text-fill-color: theme('colors.text.pri'); }
+  ::selection { background: theme('colors.primary.line'); color: theme('colors.text.pri'); }
+  * { scrollbar-width: thin; scrollbar-color: theme('colors.line.strong') transparent; }
+  .no-scrollbar { scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+}
+
+@layer components {
+  .pressable { transition-property: transform, background-color, color, box-shadow; transition-duration: var(--dur-press); transition-timing-function: var(--ease-out); }
+  .pressable:active { transform: scale(0.97); }
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+@keyframes pageEnter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes skeleton { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+.page-enter { animation: pageEnter var(--dur) var(--ease-out); }
+.animate-fade-in { animation: fadeIn var(--dur-fast) var(--ease-out); }
+.animate-slide-in-left { animation: slideInLeft var(--dur-sheet) var(--ease-drawer); }
+.skeleton-bar { animation: skeleton 1.4s ease-in-out infinite; }
+
+.maplibregl-ctrl-group { background: theme('colors.canvas') !important; box-shadow: none !important; border-radius: 8px !important; }
+.maplibregl-ctrl-group button + button { border-top: 0 !important; }
+.maplibregl-ctrl-group button .maplibregl-ctrl-icon { filter: invert(1); }
+.maplibregl-ctrl-attrib { background: theme('colors.canvas') !important; color: theme('colors.text.sec'); }
+.maplibregl-ctrl-attrib a { color: theme('colors.text.sec') !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  .pressable:active { transform: none; }
+}

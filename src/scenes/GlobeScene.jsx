@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { json2satrec, propagate, gstime, eciToGeodetic, degreesLat, degreesLong } from 'satellite.js'
 import { PAL } from '../lib/palette.js'
+import { PageHeader, Chip } from '../ui/index.jsx'
 import { prefersReducedMotion } from '../miri/motion/useReducedMotion.js'
 
 const R_KM = 6371
@@ -181,8 +182,10 @@ export default function GlobeScene({ sites, omm, schedule, onPick }) {
   const fmt = (d) => `${d.getUTCFullYear()}. ${d.getUTCMonth() + 1}. ${d.getUTCDate()}. ${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')} UTC`
 
   return (
-    <div className="grid h-full min-h-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div className="relative min-h-[420px] overflow-hidden rounded-md bg-text-pri" data-figma="globe-stage">
+    <>
+    <PageHeader title="사업지 지구본" desc="위성 궤도와 연결한 사업지를 한 화면에 봅니다. 핀을 누르면 그 사업지의 판정 카드로 갑니다." badges={<Chip tone="sand">촬영 일정 샘플</Chip>} />
+    <div className="grid min-h-0 flex-1 grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="relative min-h-[420px] overflow-hidden rounded-md bg-subtle" data-figma="globe-stage">
         <div ref={host} className="absolute inset-0" />
         <div className="pointer-events-none absolute inset-0">
           {sites.map((s) => (
@@ -191,14 +194,14 @@ export default function GlobeScene({ sites, omm, schedule, onPick }) {
               ref={(n) => { pinRefs.current[s.id] = n }}
               type="button"
               onClick={() => pick(s)}
-              className="pressable pointer-events-auto absolute left-0 top-0 flex items-center gap-2 rounded-md bg-page px-3 py-2 shadow-md"
+              className="pressable pointer-events-auto absolute left-0 top-0 flex items-center gap-2 rounded-sm bg-canvas px-3 py-2 shadow-md"
               style={{ visibility: 'hidden' }}
             >
               <span className="type-strong text-text-pri whitespace-nowrap">{s.name}</span>
             </button>
           ))}
         </div>
-        <p className="absolute bottom-3 left-3 rounded-md bg-text-pri px-3 py-1 type-meta text-text-inverse tabular-nums">
+        <p className="absolute bottom-3 left-3 rounded-sm bg-canvas px-3 py-1 type-meta text-text-sec tabular-nums">
           모의 시계 {SPEED}배속 {fmt(simTime)}
         </p>
         {flying && (
@@ -207,25 +210,25 @@ export default function GlobeScene({ sites, omm, schedule, onPick }) {
       </div>
 
       <aside className="flex min-h-0 flex-col gap-4 overflow-auto">
-        <section className="rounded-md bg-canvas p-4">
-          <h2 className="type-h3 text-text-pri">사업지 3곳</h2>
-          <p className="mt-1 type-body-sm text-text-sec">핀을 누르면 사업지로 확대한 뒤<br />해안선 지도로 넘어갑니다.</p>
+        <section className="rounded-md bg-canvas p-5">
+          <h2 className="type-h3 text-text-pri">사업지 {sites.length}곳</h2>
+          <p className="mt-1 type-body-sm text-text-sec">핀을 누르면 사업지로 확대한 뒤 판정 카드로 넘어갑니다.</p>
           <ul className="mt-3 flex flex-col gap-2">
             {sites.map((s) => (
               <li key={s.id}>
-                <button type="button" onClick={() => pick(s)} className="pressable flex w-full items-center justify-between gap-3 rounded-md bg-page px-3 py-3 text-left">
+                <button type="button" onClick={() => pick(s)} className="pressable flex w-full items-center justify-between gap-3 rounded-sm bg-mute px-3 py-3 text-left hover:bg-line-def">
                   <span>
                     <span className="block type-strong text-text-pri">{s.name}</span>
                     <span className="block type-meta text-text-meta">{s.region}, {s.country}</span>
                   </span>
-                  <span className="type-caption text-primary">지도 보기</span>
+                  <span className="type-caption text-primary-text">판정 카드</span>
                 </button>
               </li>
             ))}
           </ul>
         </section>
 
-        <section className="rounded-md bg-canvas p-4">
+        <section className="rounded-md bg-canvas p-5">
           <h2 className="type-h3 text-text-pri">위성 궤도</h2>
           <ul className="mt-2 flex flex-col gap-1">
             {omm.omm.map((o, i) => (
@@ -236,13 +239,13 @@ export default function GlobeScene({ sites, omm, schedule, onPick }) {
               </li>
             ))}
           </ul>
-          <p className="mt-2 type-meta text-text-meta">궤도 요소: CelesTrak GP 자료를 2026. 11. 3.<br />한 번 받아 둔 정적 파일입니다.<br />화면은 외부 호출 없이<br />이 파일로 궤도를 계산합니다.</p>
+          <p className="mt-2 type-meta text-text-meta">궤도 요소는 CelesTrak GP 자료를 2026. 11. 3. 한 번 받아 둔 정적 파일입니다. 화면은 외부 호출 없이 이 파일로 궤도를 계산합니다.</p>
         </section>
 
-        <section className="rounded-md bg-canvas p-4">
+        <section className="rounded-md bg-canvas p-5">
           <div className="flex items-center justify-between gap-2">
             <h2 className="type-h3 text-text-pri">다음 촬영 일정</h2>
-            <span className="rounded-md bg-warning px-2 py-1 type-caption text-text-inverse">{schedule.label}</span>
+            <span className="rounded-sm bg-sand px-2 py-1 type-caption text-text-inverse">{schedule.label}</span>
           </div>
           <ul className="mt-2 flex flex-col gap-1">
             {schedule.items.map((it) => (
@@ -251,9 +254,10 @@ export default function GlobeScene({ sites, omm, schedule, onPick }) {
               </li>
             ))}
           </ul>
-          <p className="mt-2 type-meta text-text-meta">공개 재방문 주기로 만든 예시 일정입니다.<br />실제 촬영 계획 조회 결과와 다릅니다.</p>
+          <p className="mt-2 type-meta text-text-meta">공개 재방문 주기로 만든 예시 일정입니다. 실제 촬영 계획 조회 결과와 다릅니다.</p>
         </section>
       </aside>
     </div>
+    </>
   )
 }
