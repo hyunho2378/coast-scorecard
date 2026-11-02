@@ -150,8 +150,8 @@
   --layout-drawer-radius: var(--krds-number-8);
   /* 서랍이 되는 폭(단위 없음, 자바스크립트가 읽는다): 공공 깃랩 1200 미만이면 사이드바가 서랍(audit_v3 05-1) */
   --rb-bp-drawer: 1200;
-  /* 서랍과 검색 대화창 뒤 덮개(공공 깃랩 rgba(0, 0, 0, 0.64)) */
-  --layout-dim: rgb(0 0 0 / 0.64);
+  /* 서랍과 검색 대화창 뒤 덮개(공공 깃랩 덮개) */
+  --layout-dim: var(--krds-color-background-dim);
   /* D-16 4의 배수: KRDS 모서리 medium1, medium2(6)를 8로 올린다(버튼, 입력, 경로 링크 등 KRDS 부품 전체). 2026. 10. 31. 감사 v3 */
   --krds-radius-medium1: var(--krds-number-5);
   --krds-radius-medium2: var(--krds-number-5);
@@ -168,7 +168,7 @@
   --layout-gsdlg-radius: var(--krds-number-8);
   /* 상단 바 단추 높이 32(공공 깃랩), 모서리 8 */
   --layout-topbar-btn-h: var(--krds-number-12);
-  /* 필터 막대 안 단추·입력 높이 32(공공 깃랩 필터 줄 65 = 16 + 32 + 16 + 선 1, Figma 같음). C2 요청 2026. 10. 31. */
+  /* 필터 막대 안 단추, 입력 높이 32(공공 깃랩 필터 줄 65 = 16 + 32 + 16 + 선 1, Figma 같음). C2 요청 2026. 10. 31. */
   --layout-filter-control-h: var(--krds-number-12);
   /* 로그인(공공 깃랩 1440): 두 열 각 420 → 416(96x4 + 32), 열 사이 60 → 64, 위 146 → 144(시스템 띠 아래) */
   --layout-login-col: calc(var(--krds-number-21) * 4 + var(--krds-number-12));
@@ -189,7 +189,7 @@
   --layout-title-project-lh: var(--rb-lh-32);
   --layout-title-section: var(--krds-pc-font-size-heading-small);
   --layout-title-section-lh: var(--rb-lh-19);
-  /* 768 미만 화면·프로젝트 제목: KRDS mobile heading-large 24 / 32(공공 깃랩 360에서 약 24) */
+  /* 768 미만 화면, 프로젝트 제목: KRDS mobile heading-large 24 / 32(공공 깃랩 360에서 약 24) */
   --layout-title-page-sm: var(--krds-mobile-font-size-heading-large);
   --layout-title-page-sm-lh: var(--rb-lh-24);
   /* 옛 이름(같은 값을 가리킨다) */

@@ -1,6 +1,6 @@
-# 해안선 성적표 담당자 콘솔(시연본)
+# 해안선 성적표
 
-2026 스페이스 해커톤 부문 2 시연용. 연안정비사업 사후관리 담당자 콘솔 구조로, 화면 7개(지구본, 사업지 목록, 판정 카드, 해안선 지도와 시간 축, 전후 영상 비교, 폭풍 뒤 점검 목록, 근거와 출처)
+연안정비사업 사후관리 담당자 콘솔. 화면 7개(지구본, 사업지 목록, 판정 카드, 해안선 지도와 시간 축, 전후 영상 비교, 폭풍 뒤 점검 목록, 근거와 출처)
 
 ## 실행
 
@@ -9,33 +9,34 @@ npm install
 NAPI_RS_FORCE_WASI=1 npm run dev
 ```
 
-주소: http://127.0.0.1:5288/ (화면 바로 열기: `#/card?site=banam`, `#/map?site=aneho`, `#/storm`)
-이 컴퓨터에서 rolldown 네이티브 바인딩이 없으면 `npm i @rolldown/binding-wasm32-wasi --no-save --ignore-scripts`를 먼저 실행
-시험: `npm test`(node --test), 대비 계산: `node scripts/contrast.mjs`
-반응형 확인: `http://127.0.0.1:5288/rwd.html?w=390&h=844&hash=/card?site=banam`(같은 출처 고정 폭 iframe)
+- 주소: http://127.0.0.1:5288/ (예: `#/card?site=banam`, `#/map?site=aneho`, `#/storm`)
+- 화면 모드: 기본 어두운 화면. 주소에 `?mode=light`, `?mode=high-contrast`, `?mode=theme`를 붙이거나 상단 바 화면 설정에서 고름. 저장소에 남기지 않음
+- rolldown 네이티브 바인딩이 없으면 `npm i @rolldown/binding-wasm32-wasi --no-save --ignore-scripts`를 먼저 실행
+- 시험: `npm test`(node --test, 판정 규칙, 로더, 대장 문구)
+- 반응형 확인: `http://127.0.0.1:5288/rwd.html?w=390&h=844&hash=/card?site=banam`(같은 출처 고정 폭 iframe)
 
-## 문서
+## 디자인 기초
 
-- `docs/DESIGN.md` 색 역할, 글자 단계, 간격, 반경, 그림자, 모션, 대비 계산 결과
-- `docs/IA.md` 화면 구조와 이동
-- `docs/UI.md` 부품 목록과 상태
-- 토큰 단일 출처: `src/tokens.js`
+공공 깃랩 2차 리빌딩(`07. 청년 공공 AX 서포터즈/2차_리빌딩/app`)의 KRDS 기초를 그대로 가져옴. 색과 글자, 간격, 반경은 KRDS CSS 변수에서만 옴
+
+- `public/krds/resources/css`, `fonts`, `img`, `public/krds/bridge`: KRDS 공식 CSS와 글꼴, 아이콘
+- `src/krds/dark.generated.css`, `syntax.generated.css`: KRDS 어두운 화면 변수(바탕 #131416 규칙)
+- `src/krds/layout.tokens.css`, `status.tokens.css`: 공공 깃랩 화면 뼈대 값과 상태 색 계단
+- `src/krds/base.css`: 공공 깃랩 `styles.css`
+- `src/krds/shell.css`: 공공 깃랩 `components/Layout/shell.css`(상단 바, 왼쪽 세로 바, 둥근 판)
+- `tailwind.config.cjs`: 공공 깃랩 설정 그대로(기본 팔레트와 크기 스케일 비움)
+- `src/tokens.js`: 의미 연결만. 지도와 지구본은 `src/lib/palette.js`가 실행 중 KRDS 변수 값을 읽어 씀
+- `src/styles.css`: 앱 전용 규칙(표, 상자, 판정 글자, 지도 무대). KRDS 변수만
 
 ## 자료 연결
 
-- 사업지와 파일 후보: `public/config/sites.json`(사업지 5곳: 고성 화진포, 고성 반암, 고성 가진, 토고 Agbodrafo, 네덜란드 Sand Motor)
-- `/ext/poc2/` 주소는 개발 서버가 erosion_poc2 폴더(환경 변수 `COAST_POC2_DIR`로 변경 가능)에 연결함. 빌드 결과(dist)만 열면 사업지 자료가 "분석 자료 없음" 상태로 보임
-- 해안선: `<사업지>/shorelines.geojson`(LineString 또는 구름으로 끊긴 MultiLineString, properties.scene, date, tide_corrected)
-- 가로선: `<사업지>/transects.geojson`(properties.id, change_m, hold, hold_threshold_m, tide_corrected, dist_m). 판정과 보류 기준은 이 값을 그대로 씀. 앱 고정 기준값 없음
-- 민감도와 규칙(선택): `sensitivity_and_rules.json`. 없으면 판정 카드의 등급 변동 폭 칸이 "계산 중"
-- 위성 궤도 요소: `public/data/omm_sample.json`(CelesTrak GP 자료를 2026. 11. 3. 한 번 받은 정적 파일)
-- 촬영 일정: `public/data/acquisition_sample.json`(샘플 데이터), 기상특보 이력: `public/data/storm_sample.json`(샘플 데이터)
-- 점검 완료 표시와 메모: 브라우저 저장소(localStorage)에만 저장
+- 사업지와 파일 후보: `public/config/sites.json`(고성 화진포, 고성 반암, 고성 가진, 토고 Agbodrafo, 네덜란드 Sand Motor)
+- `/ext/poc2/` 주소는 개발 서버가 erosion_poc2 폴더(환경 변수 `COAST_POC2_DIR`)에 연결함
+- 판정 보류 기준: `sensitivity_and_rules.json`의 `site_rules`. 기준 = max(사업지 같은 계절 장면쌍 차이 90퍼센타일, 공개 측량 대조 오차, 10 m). 변화가 기준 이하이거나 그 가로선의 같은 계절 장면쌍 차이가 기준을 넘으면 보류. Sand Motor는 `sites/sandmotor_spring_vs_jarkus_rows.json`의 조위 환산 위치로 장면쌍 차이를 만듦
+- 별표 10 점수 식과 판정 정밀도: 같은 파일의 `annex10`, `sensitivity`
+- 위성 궤도 요소: `public/data/omm.json`(CelesTrak GP, 2026. 11. 3. 받음)
+- 점검 완료 표시와 메모: 화면 안 상태로만 둠
 
-## 미리에서 가져온 부품
+## 미리에서 가져온 동작
 
-미리(github.com/hyunho2378/miri, 커밋 800f6aa, MIT, LICENSE.miri)의 `git archive HEAD client tools` 사본에서 가져옴
-
-- `src/miri/kitTokens.js`, `tokens.js`, `index.css`(문서함과 인계 인쇄 서식 제외), `mobile/tokens.css`, `tailwind.config.js`
-- `src/miri/ui/IconButton.jsx`, `Disclosure.jsx`, `motion/useReducedMotion.js`, `hooks/useMediaQuery.js`
-- `src/miri/map/TimeAxis.jsx`(시간 단위 축을 촬영 장면 단위 축으로 바꿈), `mapTheme.js`(바탕 지도 주소만)
+미리(github.com/hyunho2378/miri, 커밋 800f6aa, MIT, LICENSE.miri)의 `TimeAxis.jsx` 재생 동작을 `src/parts/TimeAxis.jsx`로 옮김. 미리의 색과 토큰은 쓰지 않음

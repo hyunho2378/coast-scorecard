@@ -7,11 +7,13 @@ import { precisionFor, typeRulesFor } from '../lib/loader-core.js'
 import { beachWidthScore, isJudgeable } from '../lib/judge.js'
 
 const ANNEX = '해양수산부 고시 제2025-181호 별표 10'
+// 구절 단위 줄바꿈(K1): 구절 안에서는 끊지 않는다
+const Ph = ({ t }) => t.map((x, i) => <span key={x}>{i > 0 && ' '}<span className="rb-phrase">{x}</span></span>)
 
 export default function CardScreen({ site, data, rules, onRetry }) {
   const [copied, setCopied] = useState(false)
   const areaRef = useRef(null)
-  const today = useMemo(() => new Date().toISOString().slice(0, 10), [])
+  const today = useMemo(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }, [])
   const head = (meta) => <PageHead title={`${site.name} 판정 카드`} meta={meta || <span>{site.region}, {site.country}</span>} />
   if (data?.status !== 'ready') return <>{head()}<SiteState data={data} onRetry={onRetry} /></>
 
@@ -55,9 +57,9 @@ export default function CardScreen({ site, data, rules, onRetry }) {
               <table className="cs-table">
                 <thead><tr><th>항목</th><th>배점 식</th><th className="is-num">위성 해안선 값</th></tr></thead>
                 <tbody>
-                  <tr><td>평균 해빈폭</td><td className="is-wrap">10 + 10 x 변화율, 최대 20점, 최소 10점</td><td className="is-num">{s.judgeable ? `평균 ${signed(s.meanChange)}` : ''}</td></tr>
-                  <tr><td>목표해안선 적합도</td><td className="is-wrap">20 + 20 x (B - A), 최대 40점, 최소 20점</td><td className="is-num">{prec?.targetFit[0] ? `${prec.targetFit[0].score}점` : ''}</td></tr>
-                  <tr><td>등급 구간</td><td className="is-wrap" colSpan={2}>A 85점 이상, B 75점 이상, C 65점 이상, D 55점 이상, E 55점 미만</td></tr>
+                  <tr><td>평균 해빈폭</td><td className="is-wrap"><Ph t={['10 + 10 x 변화율,', '최대 20점, 최소 10점']} /></td><td className="is-num">{s.judgeable ? `평균 ${signed(s.meanChange)}` : ''}</td></tr>
+                  <tr><td>목표해안선 적합도</td><td className="is-wrap"><Ph t={['20 + 20 x (B - A),', '최대 40점, 최소 20점']} /></td><td className="is-num">{prec?.targetFit[0] ? `${prec.targetFit[0].score}점` : ''}</td></tr>
+                  <tr><td>등급 구간</td><td className="is-wrap" colSpan={2}><Ph t={['A 85점 이상,', 'B 75점 이상,', 'C 65점 이상,', 'D 55점 이상,', 'E 55점 미만']} /></td></tr>
                 </tbody>
               </table>
             </div>

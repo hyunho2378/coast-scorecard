@@ -16,7 +16,7 @@ function usePopover() {
   const btn = useRef(null)
   useEffect(() => {
     if (!open) return undefined
-    const first = ref.current?.querySelector('[aria-checked="true"], [aria-current="true"], button')
+    const first = ref.current?.querySelector('[aria-checked="true"]') || ref.current?.querySelector('button')
     first?.focus()
     const onDown = (e) => { if (!ref.current?.contains(e.target) && !btn.current?.contains(e.target)) setOpen(false) }
     const onKey = (e) => {

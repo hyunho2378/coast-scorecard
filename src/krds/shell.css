@@ -354,7 +354,7 @@
 .rb-side-link { position: relative; }
 .rb-side-link.active { color: var(--krds-color-text-basic); background: var(--krds-color-action-secondary-selected); font-weight: var(--krds-font-weight-bold); }
 .rb-side-link.active::before { content: ""; position: absolute; left: calc(var(--rb-side-pad-x) * -1); top: var(--krds-number-3); bottom: var(--krds-number-3); width: var(--krds-number-2); border-radius: var(--krds-radius-max); background: var(--krds-color-text-basic); }
-/* 탭 줄(KRDS tab line): 활성 탭 글자와 밑줄이 secondary(청록)로 풀리던 것. 글자는 본문색 굵게, 밑줄은 primary 50(공공 깃랩 01 파란 밑줄) */
+/* 탭 줄(KRDS tab line): 활성 탭 글자와 밑줄이 secondary(청록)로 풀리던 문제. 글자는 본문색 굵게, 밑줄은 primary 50(공공 깃랩 01 파란 밑줄) */
 #root .krds-tab-area .tab ul li.active .btn-tab, #root .krds-tab-area .tab ul li .btn-tab[aria-selected="true"] { color: var(--krds-color-text-basic); font-weight: var(--krds-font-weight-bold); }
 #root .krds-tab-area .tab ul li.active .btn-tab::before, #root .krds-tab-area .tab ul li .btn-tab[aria-selected="true"]::before { background-color: var(--rb-status-primary); }
 /* KRDS tab line 변수의 청록(secondary)을 primary 50과 본문색으로 */

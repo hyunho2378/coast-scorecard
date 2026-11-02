@@ -1,7 +1,7 @@
 /* D-15 5장: 상태 색은 KRDS 원시 색 단계 중 채도가 살아 있는 계단만 쓴다.
-   subtler, lighter, -light(옅은 단계)와 semantic warning 계열(갈색 #9E6A00)은 금지.
-   primary 50 / success 50(어두운 40) / warning 30(#FFB114, 밝고 어두운 화면 모두) / danger 50(어두운 40) / information 50(어두운 40).
-   글자는 KRDS 글자 변수(text/basic 등)를 그대로 쓰고, 이 파일은 상태 아이콘·강조 점·채운 배지의 바탕색만 담당한다. */
+   subtler, lighter, -light(옅은 단계)와 semantic warning 계열(갈색)은 금지.
+   primary 50 / success 50(어두운 40) / warning 30(밝고 어두운 화면 모두) / danger 50(어두운 40) / information 50(어두운 40).
+   글자는 KRDS 글자 변수(text/basic 등)를 그대로 쓰고, 이 파일은 상태 아이콘, 강조 점, 채운 배지의 바탕색만 담당한다. */
 :root,
 html[data-krds-mode="light"] {
   --rb-status-primary: var(--krds-color-light-primary-50);

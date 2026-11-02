@@ -258,7 +258,7 @@ a.krds-link:hover, .krds-link:hover { text-decoration: underline; }
 .rb-dock-more { margin: 0; }
 
 
-/* D-07, D-15: 어두운 화면의 마우스 올림, 선택, 누름 면이 청록(#0E3139, #113B45)이던 문제. 위 규칙은 light 변수만 덮어 실제 색에 닿지 않았다.
+/* D-07, D-15: 어두운 화면의 마우스 올림, 선택, 누름 면이 청록이던 문제. 위 규칙은 light 변수만 덮어 실제 색에 닿지 않았다.
    실제로 쓰이는 dark 변수와 최종 변수를 함께 회색 단계(80, 70)로 바꾼다 */
 html[data-krds-mode="dark"] {
   --krds-dark-color-action-secondary-hover: var(--krds-color-high-contrast-gray-80);

@@ -2,6 +2,9 @@
    배치와 밀도는 공공 깃랩 목록 기준(행 40, 글자 15와 13) */
 
 body { font-family: 'Pretendard GOV', sans-serif; }
+/* 기준 장면 해안선과 사업지 핀: 어두운 화면과 선명한 화면 모드는 warning 30, 밝은 화면은 흰 바탕 3 대 1을 넘는 success 50 */
+:root, html[data-krds-mode] { --cs-line-base: var(--rb-status-warning); }
+html[data-krds-mode="light"] { --cs-line-base: var(--krds-color-light-success-50); }
 .cs-num { font-variant-numeric: tabular-nums; }
 .cs-nowrap { white-space: nowrap; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
@@ -28,8 +31,8 @@ body { font-family: 'Pretendard GOV', sans-serif; }
 .cs-box-foot { padding: var(--krds-padding-4) var(--krds-padding-7); border-top: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); font-size: var(--rb-step-13); line-height: var(--rb-lh-13); color: var(--krds-color-text-subtle); }
 
 /* 표: 공공 깃랩 rb-reftable(행 40) */
-.cs-table-wrap { overflow-x: auto; }
-.cs-table { width: 100%; border-collapse: collapse; }
+.cs-table-wrap { position: relative; overflow-x: auto; }
+.cs-table { width: 100%; border-collapse: collapse; table-layout: auto; }
 .cs-table th, .cs-table td { height: var(--rb-row-h); padding: 0 var(--krds-padding-7); text-align: left; border-bottom: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); font-size: var(--rb-step-15); line-height: var(--rb-lh-15); color: var(--krds-color-text-basic); white-space: nowrap; }
 .cs-table thead th { background: var(--krds-color-surface-gray-subtler); color: var(--krds-color-text-subtle); font-weight: var(--rb-fw-current); font-size: var(--rb-step-13); line-height: var(--rb-lh-13); }
 .cs-table tbody tr:last-child td { border-bottom: 0; }
@@ -88,7 +91,7 @@ body { font-family: 'Pretendard GOV', sans-serif; }
 .cs-legend { position: absolute; left: var(--krds-gap-4); top: var(--krds-gap-4); display: grid; gap: var(--krds-gap-1); padding: var(--krds-padding-3) var(--krds-padding-4); border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); border-radius: var(--krds-radius-medium2); background: var(--krds-color-surface-white); font-size: var(--rb-step-13); line-height: var(--rb-lh-13); color: var(--krds-color-text-basic); }
 .cs-legend span { display: inline-flex; align-items: center; gap: var(--krds-gap-3); }
 .cs-swatch { display: inline-block; width: var(--krds-number-9); height: var(--krds-number-2); border-radius: var(--krds-radius-max); }
-.cs-swatch.is-base { background: var(--rb-status-warning); }
+.cs-swatch.is-base { background: var(--cs-line-base); }
 .cs-swatch.is-current { background: var(--rb-status-primary); }
 .cs-swatch.is-advance { background: var(--rb-status-information); }
 .cs-swatch.is-retreat { background: var(--rb-status-danger); }
@@ -96,7 +99,7 @@ body { font-family: 'Pretendard GOV', sans-serif; }
 .cs-swatch.is-sat0 { background: var(--rb-status-primary); }
 .cs-swatch.is-sat1 { background: var(--rb-status-success); }
 .cs-swatch.is-sat2 { background: var(--rb-status-warning); }
-.cs-pinlabel { position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; gap: var(--krds-gap-2); height: var(--krds-number-12); padding: 0 var(--krds-padding-4); border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray); border-radius: var(--krds-radius-medium2); background: var(--krds-color-surface-white); color: var(--krds-color-text-basic); font: inherit; font-size: var(--rb-step-13); line-height: var(--rb-lh-13); white-space: nowrap; cursor: pointer; pointer-events: auto; }
+.cs-pinlabel { position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; gap: var(--krds-gap-2); height: var(--krds-number-12); padding: 0 var(--krds-padding-4); border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-dark); border-radius: var(--krds-radius-medium2); background: var(--krds-color-surface-white); color: var(--krds-color-text-basic); font: inherit; font-size: var(--rb-step-13); line-height: var(--rb-lh-13); white-space: nowrap; cursor: pointer; pointer-events: auto; }
 .cs-pinlabel:hover { border-color: var(--krds-color-border-primary); }
 .cs-stage-caption { position: absolute; left: var(--krds-gap-4); bottom: var(--krds-gap-4); padding: var(--krds-padding-2) var(--krds-padding-4); border-radius: var(--krds-radius-medium2); background: var(--krds-color-surface-white); font-size: var(--rb-step-13); line-height: var(--rb-lh-13); color: var(--krds-color-text-subtle); }
 
@@ -107,11 +110,11 @@ body { font-family: 'Pretendard GOV', sans-serif; }
 .cs-axis-ticks { position: absolute; inset-inline: 0; top: var(--krds-number-10); font-size: var(--rb-step-13); line-height: var(--rb-lh-13); color: var(--krds-color-text-subtle); }
 .cs-axis-ticks span { position: absolute; top: 0; white-space: nowrap; }
 .cs-range { appearance: none; -webkit-appearance: none; display: block; width: 100%; height: var(--krds-number-10); margin: 0; background: transparent; cursor: pointer; }
-.cs-range::-webkit-slider-runnable-track { height: var(--krds-number-2); border-radius: var(--krds-radius-max); background: var(--krds-color-border-gray); }
+.cs-range::-webkit-slider-runnable-track { height: var(--krds-number-2); border-radius: var(--krds-radius-max); background: var(--krds-color-border-gray-dark); }
 .cs-range::-webkit-slider-thumb { -webkit-appearance: none; width: var(--krds-number-8); height: var(--krds-number-8); margin-top: calc((var(--krds-number-8) - var(--krds-number-2)) / -2); border-radius: var(--krds-radius-max); background: var(--krds-color-element-primary); }
-.cs-range::-moz-range-track { height: var(--krds-number-2); border-radius: var(--krds-radius-max); background: var(--krds-color-border-gray); }
+.cs-range::-moz-range-track { height: var(--krds-number-2); border-radius: var(--krds-radius-max); background: var(--krds-color-border-gray-dark); }
 .cs-range::-moz-range-thumb { width: var(--krds-number-8); height: var(--krds-number-8); border: 0; border-radius: var(--krds-radius-max); background: var(--krds-color-element-primary); }
-.cs-iconbtn { display: inline-grid; place-items: center; flex: none; width: var(--krds-size-height-5); height: var(--krds-size-height-5); padding: 0; border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray); border-radius: var(--krds-radius-medium2); background: var(--krds-color-surface-white); color: var(--krds-color-text-basic); cursor: pointer; }
+.cs-iconbtn { display: inline-grid; place-items: center; flex: none; width: var(--krds-size-height-5); height: var(--krds-size-height-5); padding: 0; border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-dark); border-radius: var(--krds-radius-medium2); background: var(--krds-color-surface-white); color: var(--krds-color-text-basic); cursor: pointer; }
 .cs-iconbtn:hover { background: var(--krds-color-action-secondary-hover); }
 .cs-iconbtn:active { background: var(--krds-color-action-secondary-pressed); }
 
@@ -139,12 +142,18 @@ body { font-family: 'Pretendard GOV', sans-serif; }
 .cs-side-icon { flex: none; color: var(--krds-color-text-subtle); }
 
 /* 판정 카드의 메모 입력 */
-.cs-input { box-sizing: border-box; width: 100%; height: var(--krds-number-12); padding: 0 var(--krds-padding-4); border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray); border-radius: var(--krds-radius-medium2); background: var(--krds-color-surface-white); color: var(--krds-color-text-basic); font: inherit; font-size: var(--rb-step-13); }
+.cs-input { box-sizing: border-box; width: 100%; height: var(--krds-number-12); padding: 0 var(--krds-padding-4); border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-dark); border-radius: var(--krds-radius-medium2); background: var(--krds-color-surface-white); color: var(--krds-color-text-basic); font: inherit; font-size: var(--rb-step-13); }
 .cs-input:focus { outline: var(--krds-border-width-variable-medium) solid var(--krds-color-border-primary); outline-offset: 0; }
 .cs-ledger { box-sizing: border-box; width: 100%; padding: var(--krds-padding-4) var(--krds-padding-5); border: 0; background: var(--krds-color-surface-gray-subtler); color: var(--krds-color-text-basic); font-family: 'D2Coding', monospace; font-size: var(--rb-step-13); line-height: var(--rb-lh-13); resize: none; }
 .cs-check { width: var(--krds-number-8); height: var(--krds-number-8); accent-color: var(--krds-color-element-primary); cursor: pointer; }
 
 /* 화면 너비별 */
+#root .rb-gbar-navtoggle { order: -1; }
+@media (max-width: 767px) {
+  #root .rb-gbar-in { display: flex; }
+  #root .rb-gbar-right { margin-left: auto; min-width: 0; }
+  .cs-table { width: max-content; min-width: 100%; }
+}
 @media (max-width: 767px) {
   .cs-stage { height: calc(var(--krds-number-21) * 4); }
   .cs-table th, .cs-table td { padding: 0 var(--krds-padding-4); }
