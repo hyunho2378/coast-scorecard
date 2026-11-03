@@ -19,12 +19,12 @@ export default function SourcesScreen({ sites, siteData, rules }) {
           <Box title="판정 보류 기준" flush>
             <div className="cs-table-wrap">
               <table className="cs-table">
-                <thead><tr><th>사업지</th><th className="is-num">보류 기준</th><th className="is-num">같은 계절 장면쌍 90퍼센타일</th><th className="is-num">변화량 오차</th><th className="is-num">판정 가능</th></tr></thead>
+                <thead><tr><th>사업지</th><th className="is-num">보류 기준</th><th className="is-num is-wrap"><span className="rb-phrase">같은 계절 장면쌍</span> <span className="rb-phrase">90퍼센타일</span></th><th className="is-num is-wrap">변화량 오차</th><th className="is-num">판정 가능</th></tr></thead>
                 <tbody>
                   {sites.map((s) => {
                     const x = r?.site_rules?.[s.id]
                     return x ? (
-                      <tr key={s.id}><td>{s.name}</td><td className="is-num">{x.holdThresholdM}{'\u00a0'}m</td><td className="is-num">{x.samepairP90M}{'\u00a0'}m</td><td className="is-num">{errText(x)}</td><td className="is-num">{judgeable(s.id, x)} / {x.nTransects}</td></tr>
+                      <tr key={s.id}><td className="is-wrap">{s.name}</td><td className="is-num">{x.holdThresholdM}{'\u00a0'}m</td><td className="is-num">{x.samepairP90M}{'\u00a0'}m</td><td className="is-num">{errText(x)}</td><td className="is-num">{judgeable(s.id, x)} / {x.nTransects}</td></tr>
                     ) : null
                   })}
                 </tbody>

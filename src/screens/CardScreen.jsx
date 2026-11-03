@@ -28,7 +28,7 @@ export default function CardScreen({ site, data, rules, onRetry }) {
   const typeRules = typeRulesFor(rules?.data, site.typeRules)
   const thr = s.thresholds[0]
   const max = Math.max(thr * 2, ...rows.map((r) => Math.abs(r.change ?? 0)), 1)
-  const meanDef = `가로선 수준 값은 가로선 하나의 전후 이동 거리이고 구간 평균은 값이 있는 가로선 ${s.sectionN}개(판정 보류 포함)의 평균입니다.`
+  const meanDef = <><span className="rb-phrase">가로선 수준 값은 가로선 하나의 전후 이동 거리이고</span> <span className="rb-phrase">구간 평균은 값이 있는 가로선 {s.sectionN}개</span> <span className="rb-phrase">(판정 보류 포함)의 평균입니다.</span></>
 
   const copy = async () => {
     try { await navigator.clipboard.writeText(text) } catch { areaRef.current?.select(); document.execCommand?.('copy') }
@@ -75,8 +75,8 @@ export default function CardScreen({ site, data, rules, onRetry }) {
                 <table className="cs-table">
                   <thead><tr><th>항목</th><th>배점 식</th><th className="is-num">위성 해안선 값</th></tr></thead>
                   <tbody>
-                    <tr><td>평균 해빈폭</td><td className="is-wrap"><Ph t={['10 + 10 x 변화율,', '최대 20점, 최소 10점']} /></td><td className="is-num">구간 평균 {signed(s.sectionMean)}</td></tr>
-                    <tr><td>목표해안선 적합도</td><td className="is-wrap"><Ph t={['20 + 20 x (B - A),', '최대 40점, 최소 20점']} /></td><td className="is-num">{inputs?.targetFit[0] ? `${inputs.targetFit[0].score}점` : ''}</td></tr>
+                    <tr><td>평균 해빈폭</td><td className="is-wrap"><Ph t={['10 + 10 x 변화율,', '최대 20점,', '최소 10점']} /></td><td className="is-num is-wrap"><span className="rb-phrase">구간 평균</span> <span className="rb-phrase">{signed(s.sectionMean)}</span></td></tr>
+                    <tr><td>목표해안선 적합도</td><td className="is-wrap"><Ph t={['20 + 20 x (B - A),', '최대 40점,', '최소 20점']} /></td><td className="is-num">{inputs?.targetFit[0] ? `${inputs.targetFit[0].score}점` : ''}</td></tr>
                     <tr><td>등급 구간</td><td className="is-wrap" colSpan={2}><Ph t={['A 85점 이상,', 'B 75점 이상,', 'C 65점 이상,', 'D 55점 이상,', 'E 55점 미만']} /></td></tr>
                   </tbody>
                 </table>
@@ -85,10 +85,10 @@ export default function CardScreen({ site, data, rules, onRetry }) {
           )}
 
           {!isControl && inputs && s.judgeable > 0 && (
-            <Box title="해빈폭 점수" sub="사업 전 평균 해빈폭별" flush foot={`위성 오차 점수 변동은 위치 오차 ${inputs.errorM}\u00a0m 치우침 기준 1표준편차입니다.`}>
+            <Box title="해빈폭 점수" sub="사업 전 평균 해빈폭별" flush foot={<><span className="rb-phrase">오차 변동은 위성 위치 오차 {inputs.errorM}{'\u00a0'}m</span> <span className="rb-phrase">치우침 기준 1표준편차입니다.</span></>}>
               <div className="cs-table-wrap">
                 <table className="cs-table">
-                  <thead><tr><th>사업 전 평균 해빈폭</th><th className="is-num">구간 평균</th><th className="is-num">점수</th><th className="is-num">위성 오차 점수 변동</th></tr></thead>
+                  <thead><tr><th className="is-wrap">사업 전 평균 해빈폭</th><th className="is-num">구간 평균</th><th className="is-num">점수</th><th className="is-num">오차 변동</th></tr></thead>
                   <tbody>
                     {inputs.beachWidth.map((b) => (
                       <tr key={b.w0}><td className="cs-num">{b.w0}{'\u00a0'}m</td><td className="is-num">{signed(s.sectionMean)}</td><td className="is-num">{beachWidthScore(b.w0, s.sectionMean)}점</td><td className="is-num">약 {b.sd.toFixed(1)}점</td></tr>
@@ -100,13 +100,13 @@ export default function CardScreen({ site, data, rules, onRetry }) {
           )}
 
           {!isControl && inputs?.targetFit.length > 0 && s.judgeable > 0 && (
-            <Box title="목표해안선 적합도" sub="목표해안선 위치별" flush>
+            <Box title="목표해안선 적합도" sub="목표해안선 위치별" flush foot={<><span className="rb-phrase">사업 전 해빈폭 50{'\u00a0'}m 조건이고</span> <span className="rb-phrase">오차 변동 기준은 해빈폭 점수와 같습니다.</span></>}>
               <div className="cs-table-wrap">
                 <table className="cs-table">
-                  <thead><tr><th>목표해안선 위치</th><th className="is-num">점수</th><th className="is-num">위성 오차 점수 변동</th></tr></thead>
+                  <thead><tr><th>목표해안선 위치</th><th className="is-num">점수</th><th className="is-num">오차 변동</th></tr></thead>
                   <tbody>
                     {inputs.targetFit.map((t) => (
-                      <tr key={t.offset}><td>사업 전 해안선에서 바다 쪽 {t.offset}{'\u00a0'}m</td><td className="is-num">{t.score}점</td><td className="is-num">약 {t.sd.toFixed(1)}점</td></tr>
+                      <tr key={t.offset}><td className="is-wrap"><span className="rb-phrase">사업 전 해안선에서</span> <span className="rb-phrase">바다 쪽 {t.offset}{'\u00a0'}m</span></td><td className="is-num">{t.score}점</td><td className="is-num">약 {t.sd.toFixed(1)}점</td></tr>
                     ))}
                   </tbody>
                 </table>
@@ -118,14 +118,15 @@ export default function CardScreen({ site, data, rules, onRetry }) {
             <Box title="오차 유형별 점수 변동" sub={`위성 위치 오차 ${sens.errorM}\u00a0m`} flush foot={<>
               <span className="rb-phrase">사업 전 해빈폭 {sens.w0}{'\u00a0'}m와 목표해안선 바다 쪽 {sens.offset}{'\u00a0'}m 조건의</span> <span className="rb-phrase">1표준편차 점수입니다.</span>{' '}
               <span className="rb-phrase">치우침은 모든 가로선에 같은 방향으로,</span> <span className="rb-phrase">흩어짐은 가로선마다 따로 걸리는 오차입니다.</span>{' '}
-              <span className="rb-phrase">혼합은 Sand Motor 측량 대조 비율대로</span> <span className="rb-phrase">치우침 37.5%를 섞었습니다.</span>
+              <span className="rb-phrase">혼합은 Sand Motor 측량 대조 비율대로</span> <span className="rb-phrase">치우침 37.5%를 섞었습니다.</span>{' '}
+              <span className="rb-phrase">상관은 해빈폭 점수와 적합도 점수가</span> <span className="rb-phrase">함께 움직이는 정도입니다.</span>
             </>}>
               <div className="cs-table-wrap">
                 <table className="cs-table">
-                  <thead><tr><th>오차 유형</th><th className="is-num">해빈폭 점수</th><th className="is-num">적합도 점수</th><th className="is-num">두 점수 상관</th><th className="is-num">합계</th><th className="is-num">등급 변경</th></tr></thead>
+                  <thead><tr><th>오차 유형</th><th className="is-num">해빈폭</th><th className="is-num">적합도</th><th className="is-num">상관</th><th className="is-num">합계</th><th className="is-num">등급 변경</th></tr></thead>
                   <tbody>
                     {sens.rows.map((r) => (
-                      <tr key={r.mode}><td>{r.label}</td><td className="is-num">{r.beachWidth.toFixed(2)}점</td><td className="is-num">{r.fit.toFixed(2)}점</td><td className="is-num">{typeof r.corr === 'number' ? r.corr.toFixed(2) : '없음'}</td><td className="is-num">{r.total.toFixed(2)}점</td><td className="is-num">{pct(r.pGrade)}</td></tr>
+                      <tr key={r.mode}><td>{r.label}</td><td className="is-num">{r.beachWidth.toFixed(1)}점</td><td className="is-num">{r.fit.toFixed(1)}점</td><td className="is-num">{typeof r.corr === 'number' ? r.corr.toFixed(2) : '없음'}</td><td className="is-num">{r.total.toFixed(1)}점</td><td className="is-num">{pct(r.pGrade)}</td></tr>
                     ))}
                   </tbody>
                 </table>

@@ -14,7 +14,7 @@ function Cells({ d }) {
       <td className="is-num">{s.judgeable}<span className="is-sub"> {pct(s.judgeableRatio)}</span></td>
       <td className="is-num">{s.held}</td>
       <td className="is-num">{s.thresholds[0]}{'\u00a0'}m</td>
-      <td className="is-num">{fmtDate(d.period.from)}부터 {fmtDate(d.period.to)}까지</td>
+      <td className="is-num is-wrap"><span className="rb-phrase">{fmtDate(d.period.from)}부터</span> <span className="rb-phrase">{fmtDate(d.period.to)}까지</span></td>
     </>
   )
 }
@@ -37,10 +37,10 @@ export default function SitesScreen({ sites, siteData, rules, onOpen }) {
                   <tr key={s.id}>
                     <td>
                       <button type="button" className="cs-rowlink" onClick={() => onOpen(s.id)}>{s.name}</button>
-                      <span className="is-sub"> {s.region}, {s.country}</span>
+                      <span className="is-sub cs-block">{s.region}, {s.country}</span>
                     </td>
                     <td><span className={`cs-role is-${roleFor(s.id)}`}>{ROLE[roleFor(s.id)]}</span></td>
-                    <td className="is-sub">{s.kind}</td>
+                    <td className="is-sub is-wrap is-kind">{s.kind}</td>
                     <Cells d={siteData[s.id]} />
                   </tr>
                 ))}

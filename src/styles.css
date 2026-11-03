@@ -17,9 +17,9 @@ html[data-krds-mode="light"] { --cs-line-base: var(--krds-color-light-success-50
 
 /* 두 칸: 본문과 오른쪽 정보 열(GitHub About 296) */
 .cs-two { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--rb-col-gap); align-items: start; }
-@media (min-width: 1024px) { .cs-two { grid-template-columns: minmax(0, 1fr) var(--rb-info-w); } }
+@media (min-width: 1280px) { .cs-two { grid-template-columns: minmax(0, 1fr) var(--rb-info-w); } }
 .cs-two.is-wide-side { }
-@media (min-width: 1024px) { .cs-two.is-wide-side { grid-template-columns: minmax(0, 1fr) calc(var(--rb-info-w) + var(--krds-number-16) * 2); } }
+@media (min-width: 1280px) { .cs-two.is-wide-side { grid-template-columns: minmax(0, 1fr) calc(var(--rb-info-w) + var(--krds-number-16) * 2); } }
 .cs-col { display: flex; flex-direction: column; gap: var(--krds-gap-6); min-width: 0; }
 
 /* 상자: 공공 깃랩 rb-listbox(테두리 상자 + 회색 머리 줄) */
@@ -38,7 +38,7 @@ html[data-krds-mode="light"] { --cs-line-base: var(--krds-color-light-success-50
 .cs-table tbody tr:last-child td { border-bottom: 0; }
 .cs-table tbody tr:hover td { background: var(--krds-color-action-secondary-hover); }
 .cs-table .is-num { text-align: end; font-variant-numeric: tabular-nums; }
-.cs-table .is-wrap { white-space: normal; }
+.cs-table .is-wrap { white-space: normal; word-break: keep-all; }
 .cs-table .is-sub { color: var(--krds-color-text-subtle); font-size: var(--rb-step-13); line-height: var(--rb-lh-13); }
 .cs-table tr.is-done td { color: var(--krds-color-text-subtle); }
 .cs-rowlink { display: inline-flex; align-items: center; gap: var(--krds-gap-2); padding: 0; border: 0; background: none; color: var(--krds-color-text-basic); font: inherit; font-weight: var(--rb-fw-current); cursor: pointer; text-align: left; }
@@ -152,7 +152,6 @@ html[data-krds-mode="light"] { --cs-line-base: var(--krds-color-light-success-50
 @media (max-width: 767px) {
   #root .rb-gbar-in { display: flex; }
   #root .rb-gbar-right { margin-left: auto; min-width: 0; }
-  .cs-table { width: max-content; min-width: 100%; }
 }
 @media (max-width: 767px) {
   .cs-stage { height: calc(var(--krds-number-21) * 4); }
@@ -170,3 +169,18 @@ html[data-krds-mode="light"] { --cs-line-base: var(--krds-color-light-success-50
 /* 옆 칸 좁은 표(해안선 지도 장면별 이동 거리): 칸 여백과 막대 최소 폭을 줄여 판정 열까지 옆 칸 폭 안에 넣는다 */
 .cs-table.is-compact th, .cs-table.is-compact td { padding-inline: var(--krds-padding-4); }
 .cs-table.is-compact .cs-bar { min-width: var(--krds-number-16); }
+/* 1279 px 이하: 표 칸 여백을 줄여 열을 상자 폭 안에 넣는다. 두 단 배치는 1280 px부터 */
+@media (max-width: 1279px) { .cs-table th, .cs-table td { padding-inline: var(--krds-padding-4); } }
+.cs-table th.is-wrap { white-space: normal; }
+.cs-block { display: block; }
+/* 359 px 이하: 표 칸 여백과 막대 최소 폭을 한 단계 더 줄인다 */
+@media (max-width: 359px) {
+  .cs-table th, .cs-table td, .cs-table.is-compact th, .cs-table.is-compact td { padding-inline: var(--krds-padding-2); }
+  .cs-bar, .cs-table.is-compact .cs-bar { min-width: var(--krds-number-14); }
+}
+/* 한국어 줄바꿈: 어절 단위로 끊고 줄 길이를 고르게 맞춰 마지막 줄에 한두 글자만 남지 않게 한다 */
+.cs-box-foot, .cs-text, .cs-note span, .cs-kv dd, .cs-table .is-wrap, .cs-state { word-break: keep-all; text-wrap: balance; }
+/* 밝은 화면: 노랑 견본이 흰 바탕에서 3:1에 못 미쳐 같은 계열의 KRDS 경고 아이콘 색으로 바꾼다 */
+[data-krds-mode="light"] .cs-swatch.is-sat2 { background: var(--krds-color-icon-warning); }
+/* 1023 px 이하에서는 사업지 표가 옆으로 밀리므로 사업 내용을 한 줄로 둔다(두 어절이 한 단어씩 갈라지지 않게) */
+@media (max-width: 1023px) { .cs-table td.is-kind { white-space: nowrap; } }

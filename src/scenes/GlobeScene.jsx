@@ -153,7 +153,13 @@ export default function GlobeScene({ sites, omm, onPick }) {
         const facing = p.mesh.position.clone().normalize().dot(camera.position.clone().normalize()) > 0.15
         v.copy(p.mesh.position).project(camera)
         const [ox, oy] = p.site.labelOffset || [12, -12]
-        node.style.transform = `translate(${(v.x * 0.5 + 0.5) * w + ox}px, ${(-v.y * 0.5 + 0.5) * h + oy}px)`
+        // 이름표가 화면 오른쪽 끝을 넘으면 핀 왼쪽으로 옮기고, 그래도 넘치면 화면 안으로 붙인다
+        const px = (v.x * 0.5 + 0.5) * w
+        const nw = node.offsetWidth
+        let x = px + ox
+        if (x + nw > w - 4) x = px - ox - nw
+        x = Math.min(Math.max(x, 4), Math.max(4, w - nw - 4))
+        node.style.transform = `translate(${x}px, ${(-v.y * 0.5 + 0.5) * h + oy}px)`
         node.style.visibility = facing ? 'visible' : 'hidden'
       }
     })
