@@ -1,8 +1,8 @@
 // 사업지 설정과 자료 파일 읽기. 파일 후보를 앞에서부터 읽고 처음 열리는 파일을 쓴다
 import { fetchJsonOptional, normalizeShorelines, normalizeTransects, periodOf, samepairFromCorrected } from './loader-core.js'
-import { summarize, applySiteRule, applySceneRule } from './judge.js'
+import { summarize, judgeRows } from './judge.js'
 
-export const RULES_URL = '/ext/poc2/sensitivity_and_rules_v2.json'
+export const RULES_URL = '/ext/poc2/sensitivity_and_rules_v3.json'
 
 async function firstJson(urls) {
   let last = { status: 'missing' }
@@ -51,6 +51,13 @@ export async function loadSite(site, rules) {
   const scenes = normalizeShorelines(sh.data)
   let base = normalizeTransects(tr.data)
   if (cor.status === 'ok') base = samepairFromCorrected(base, cor.data)
-  const rows = applySceneRule(applySiteRule(base, rule), periods)
-  return { status: 'ready', scenes, rows, summary: summarize(rows), period: periodOf(scenes), before, after, sources: { shorelines: sh.url, transects: tr.url } }
+  const rows = judgeRows(base, rule, periods)
+  return { status: 'ready', scenes, base, rows, summary: summarize(rows), period: periodOf(scenes), before, after, sources: { shorelines: sh.url, transects: tr.url } }
+}
+
+// 보류 기준을 바꾸면 읽어 둔 가로선(base)에 판정을 다시 적용한다
+export function withBasis(d, site, rules, basis) {
+  if (d?.status !== 'ready' || !d.base) return d
+  const rows = judgeRows(d.base, rules?.site_rules?.[site.id], rules?.scene_rule?.sites?.[site.id]?.periods, basis)
+  return { ...d, rows, summary: summarize(rows), basis }
 }

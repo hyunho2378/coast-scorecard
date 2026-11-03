@@ -86,5 +86,5 @@ test('보류 기준 대조: 규칙 파일과 가로선 파일 값이 다르면 s
 })
 test('사업 유형 해석 규칙', async () => {
   const { typeRulesFor } = await import('../src/lib/loader-core.js')
-  assert.deepEqual(typeRulesFor(RULES, ['structures', 'none']).map((x) => x.label), ['돌제, 잠제, 이안제'])
+  assert.deepEqual(typeRulesFor(RULES, ['structures', 'none']).map((x) => x.label), ['돌제와 잠제, 이안제'])
 })

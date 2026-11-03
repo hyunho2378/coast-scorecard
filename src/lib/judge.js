@@ -7,7 +7,8 @@ export const VERDICT = {
   retreat: { label: '후퇴', note: '육지 쪽 이동' },
   hold: { label: '판정 보류', note: '위성 오차 이하' },
   nodata: { label: '판정 보류', note: '구름으로 해안선 미검출' },
-  few: { label: '판정 보류', note: '한 시점 장면 1장' }
+  few: { label: '판정 보류', note: '한 시점 장면 1장' },
+  struct: { label: '구조물 의심, 제외', note: '물가선이 구조물이나 암초 위에서 잡힘' }
 }
 
 export function round1(v) { return Math.round(v * 10) / 10 }
@@ -34,17 +35,20 @@ export function median(xs) {
 // 가로선 판정 요약. 판정 보류 비율은 전체 가로선 수를 분모로 쓴다.
 // 가로선 수준 값은 가로선 하나의 전후 이동 거리(change). 구간 평균(sectionMean)은 값이 있는 가로선 전체(판정 보류 포함)의 평균이고
 // 별표 10 평균 해빈폭 점수와 대장 문구가 함께 쓴다. meanChange 는 판정 가능 가로선만의 평균이라 점수에 쓰지 않는다
+// 구조물 의심 가로선(struct)은 판정 보류와 따로 세고 구간 평균에서도 뺀다
 export function summarize(rows) {
   const judge = rows.filter((r) => isJudgeable(r.verdict))
-  const held = rows.length - judge.length
+  const excluded = rows.filter((r) => r.verdict === 'struct').length
+  const held = rows.length - judge.length - excluded
   const ch = judge.map((r) => r.change)
-  const all = rows.map((r) => r.change).filter((v) => typeof v === 'number' && !Number.isNaN(v))
+  const all = rows.filter((r) => r.verdict !== 'struct').map((r) => r.change).filter((v) => typeof v === 'number' && !Number.isNaN(v))
   return {
     sectionMean: all.length ? round1(all.reduce((a, b) => a + b, 0) / all.length) : null,
     sectionN: all.length,
     total: rows.length,
     judgeable: judge.length,
     held,
+    excluded,
     nodata: rows.filter((r) => r.verdict === 'nodata').length,
     advance: rows.filter((r) => r.verdict === 'advance').length,
     retreat: rows.filter((r) => r.verdict === 'retreat').length,
@@ -59,12 +63,13 @@ export function summarize(rows) {
 }
 
 // 시간 축용 장면별 비교. 기준 장면 거리에서 선택 장면 거리를 뺀다. 보류 기준은 가로선마다 파일 값
+// 구조물 의심 가로선은 장면별 비교에서도 구조물 의심으로 표시한다
 export function sceneChanges(transectRows, baseScene, scene) {
   return transectRows.map((r) => {
     const a = r.dist?.[baseScene]
     const b = r.dist?.[scene]
     const change = typeof a === 'number' && typeof b === 'number' ? round1(a - b) : null
-    return { id: r.id, change, threshold: r.threshold, verdict: verdictOf(change, r.threshold, undefined) }
+    return { id: r.id, change, threshold: r.threshold, verdict: r.verdict === 'struct' ? 'struct' : verdictOf(change, r.threshold, undefined) }
   })
 }
 
@@ -117,10 +122,29 @@ export const ROLE = {
 export const roleOf = (rule) => ROLE[rule?.role] ? rule.role : 'project'
 export const scoresSite = (rule) => roleOf(rule) !== 'control'
 
-export function applySiteRule(rows, rule) {
-  if (!rule || typeof rule.holdThresholdM !== 'number') return rows
-  const t = rule.holdThresholdM
+// 보류 기준 선택: sd1(1표준편차, 기본)과 p95(95%). 95% 값이 없는 사이트는 1표준편차 기준을 그대로 쓴다
+export const BASES = [['sd1', '1표준편차'], ['p95', '95%']]
+export function thresholdOf(rule, basis = 'sd1') {
+  if (!rule || typeof rule.holdThresholdM !== 'number') return null
+  if (basis === 'p95' && typeof rule.p95?.threshold_m === 'number') return rule.p95.threshold_m
+  return rule.holdThresholdM
+}
+export function applySiteRule(rows, rule, basis = 'sd1') {
+  const t = thresholdOf(rule, basis)
+  if (t === null) return rows
   return rows.map((r) => ({ ...r, threshold: t, verdict: ruleVerdict(r.change, t, r.samepair) }))
+}
+
+// 구조물 의심 제외: 규칙 파일 site_rules[id].structureExcluded 의 가로선 번호는 판정에서 뺀다(struct)
+export function applyStructureRule(rows, ids) {
+  if (!Array.isArray(ids) || !ids.length) return rows
+  const set = new Set(ids.map(Number))
+  return rows.map((r) => (set.has(Number(r.id)) ? { ...r, verdict: 'struct' } : r))
+}
+
+// 사이트 판정 순서: 보류 기준, 구조물 의심 제외, 장면 규칙
+export function judgeRows(base, rule, periods, basis = 'sd1') {
+  return applySceneRule(applyStructureRule(applySiteRule(base, rule, basis), rule?.structureExcluded), periods)
 }
 
 // 별표 10(해양수산부 고시 제2025-181호) 점수 식

@@ -119,10 +119,82 @@ export function holdRuleCheck(rules, siteId, summary) {
   return { ruleM: r.holdThresholdM, fileM: fileT, same, ruleJudgeable: r.judgeableCount, basis: r.basis || '' }
 }
 
+// 사업 유형별 해석. 규칙 파일 문구(개조식 "~함.")는 그대로 두고 화면에는 앱 문장을 쓴다
+export const TYPE_RULE_TEXT = {
+  structures: { label: '돌제와 잠제, 이안제', text: '구조물 배후 구간과 표사 하류 인접 구간을 한 단위로 묶어 배후 전진과 하류 후퇴를 나란히 봅니다.' },
+  nourishment: { label: '양빈', text: '준공 전 해빈폭 대신 설계 감쇠 예측 대비 남은 비율로 보고 양옆 인접 구간까지 함께 집계합니다.' },
+  seasonal: { label: '계절 비교', text: '같은 계절 장면끼리 비교하고 한 해 장면 2장 이상의 중앙값을 씁니다. 여러 해 장면이 있으면 같은 계절 평균으로 사업 전후를 비교합니다.' }
+}
 export function typeRulesFor(rules, keys) {
   const t = rules?.type_rules
   if (!t) return []
-  return (keys || []).map((k) => t[k]).filter(Boolean).map((x) => ({ label: x.label, text: x.app_wording || x.text }))
+  return (keys || []).filter((k) => t[k]).map((k) => TYPE_RULE_TEXT[k] || { label: t[k].label, text: t[k].app_wording || t[k].text })
+}
+
+// 오차 유형별 민감도 한 표(sensitivity_unified). 상하한 적용 전과 후 값을 같은 열 기준으로 함께 돌려준다.
+// 반암은 구조물 의심을 뺀 가로선 20개 행, 가진은 전체 행을 쓴다
+export const UNIFIED_MODES = [
+  ['bias_independent', '치우침, 두 시점 독립'],
+  ['mixed_sandmotor', '혼합'],
+  ['scatter', '흩어짐'],
+  ['bias_same', '치우침, 두 시점 같음']
+]
+const UNIFIED_SITE = { banam: ['반암 구조물 의심 제외', '반암 전체'], jinjin: ['가진 구조물 의심 제외', '가진 전체'] }
+export function unifiedFor(rules, siteId) {
+  const u = rules?.sensitivity_unified
+  const names = UNIFIED_SITE[siteId]
+  if (!u || !Array.isArray(u.rows) || !names) return null
+  const excl = (rules.site_rules?.[siteId]?.structureExcluded || []).length > 0
+  const name = names.find((n) => (excl || !n.includes('제외')) && u.rows.some((r) => r.site === n))
+  if (!name) return null
+  const rows = UNIFIED_MODES.map(([mode, label]) => {
+    const r = u.rows.find((x) => x.site === name && x.mode === mode)
+    if (!r) return null
+    const pair = (k) => [r[`${k}_unclipped`], r[`${k}_clipped`]]
+    return { mode, label, beachWidth: pair('bw_sd'), fit: pair('fit_sd'), corr: pair('corr'), total: pair('total_sd'), pGrade: pair('p_grade'), noTarget: pair('no_target_sd'), pNoTarget: pair('p_grade_no_target') }
+  }).filter(Boolean)
+  if (!rows.length) return null
+  const first = u.rows.find((x) => x.site === name)
+  return {
+    site: name, errorM: u.error_m, w0: u.W0_m, offset: u.target_offset_m, runs: u.M,
+    nTransects: first.n_transects, meanChange: first.mean_change_m,
+    beachWidthTrue: first.bw_true_clipped, fitTrue: first.fit_true_clipped, rows
+  }
+}
+
+// 사업비와 효과평가 대상 여부(project_facts). 단위 백만 원
+export function projectFactsFor(rules, siteId) {
+  const f = rules?.project_facts
+  if (!f) return null
+  const amount = siteId === 'banam' ? f.banam_rows?.[0]?.amount_million : siteId === 'jinjin' ? f.gajin_amount_million : null
+  if (typeof amount !== 'number') return null
+  return { amountMillion: amount, eok: Math.round(amount / 100), legal: amount >= 20000 }
+}
+export function nextCandidates(rules) {
+  return (rules?.project_facts?.candidates_200 || []).map((c) => ({ no: c.no, name: c.name, eok: Math.round(c.amount_million / 100), construct: c.construct, done: c.done, content: c.content, status: c.status }))
+}
+
+// 연도별 장면쌍 90퍼센타일(year_threshold_rule). 반암은 구조물 의심 포함 행과 제외 행을 함께 돌려준다
+export function yearThresholdRows(rules) {
+  const y = rules?.year_threshold_rule?.sites
+  if (!y) return []
+  const out = []
+  for (const [id, x] of Object.entries(y)) {
+    out.push({ id, part: 'all', p2017: x.p90_2017, p2025: x.p90_2025, pooled: x.p90_pooled, maxYear: x.p90_max_year, sd1: x.sd1_maxyear, n: x.n_transects })
+    if (x.excl_struct) out.push({ id, part: 'excl', p2017: x.excl_struct.p90_2017, p2025: x.excl_struct.p90_2025, pooled: x.excl_struct.p90_pooled, maxYear: x.excl_struct.p90_max_year, sd1: x.excl_struct.sd1_maxyear, p95: x.excl_struct.p95_maxyear, n: x.n_transects, excluded: x.excl_struct.excluded.length })
+  }
+  return out
+}
+
+// 변화 없는 가로선의 거짓 판정 비율(false_positive). 정규 가정, 반암 판정 대상 가로선 수와 기대 거짓 판정 수
+export function falsePositiveRows(rules) {
+  const f = rules?.false_positive
+  const b = rules?.site_rules?.banam
+  if (!f || !b) return []
+  return [
+    { basis: 'sd1', label: '1표준편차', thresholdM: b.holdThresholdM, rate: f.analytic_sd1, n: f.banam_pass_sd1, expected: f.banam_expected_false_sd1, judgeable: b.judgeableCount },
+    { basis: 'p95', label: '95%', thresholdM: b.p95?.threshold_m, rate: f.analytic_p95, n: f.banam_pass_p95, expected: f.banam_expected_false_p95, judgeable: b.p95?.judgeable }
+  ]
 }
 
 // 조위 환산 위치 표(Sand Motor)로 가로선별 같은 계절 장면쌍 차이를 만든다.
@@ -150,7 +222,7 @@ export function samepairFromCorrected(rows, corrected) {
   })
 }
 
-// 오차 유형별 민감도(sensitivity_and_rules_v2.json). 사이트마다 쓸 오차 크기를 고른다.
+// 오차 유형별 민감도(sensitivity, poc5 형식). 해외 사이트 별표 10 입력에만 쓴다. 사이트마다 쓸 오차 크기를 고른다.
 // 동해안 사전 오차가 있는 한국 사이트는 16.21 m, 측량 대조가 있는 사이트는 변화량 RMSE, 나머지는 첫 항목의 오차.
 // 표 값은 사업 전 해빈폭 50 m, 목표해안선 바다 쪽 10 m 조건의 1표준편차 점수
 export const SENS_MODES = [
