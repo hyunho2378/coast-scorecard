@@ -31,7 +31,7 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
   const fp = falsePositiveRows(r)
   const def = r?.shoreline_definition
   const scene = r?.scene_rule
-  const m = (v) => (typeof v === 'number' ? `${v}\u00a0m` : '없음')
+  const m = (v) => (typeof v === 'number' ? `${v.toFixed(1)}\u00a0m` : '없음')
   return (
     <>
       <PageHead title="근거와 출처" meta={<><span>사업지 {sites.length}곳</span><span>판정 기준 {basisLabel}</span></>} />

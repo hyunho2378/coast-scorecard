@@ -41,7 +41,7 @@ html[data-krds-mode="light"] { --cs-line-base: var(--krds-color-light-success-50
 .cs-table tbody tr:hover td { background: var(--krds-color-action-secondary-hover); }
 .cs-table .is-num { text-align: end; font-variant-numeric: tabular-nums; }
 .cs-table thead th.is-group { text-align: center; border-bottom: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); }
-.cs-table.is-grouped th, .cs-table.is-grouped td { padding-inline: var(--krds-padding-4); }
+.cs-table.is-grouped th, .cs-table.is-grouped td { padding-inline: var(--krds-padding-3); }
 .cs-table.is-grouped th:first-child, .cs-table.is-grouped td:first-child { padding-inline-start: var(--krds-padding-7); }
 .cs-table tr.is-current td { background: var(--krds-color-action-secondary-selected); }
 .cs-table .is-wrap { white-space: normal; word-break: keep-all; }

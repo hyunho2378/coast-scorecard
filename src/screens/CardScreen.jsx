@@ -93,7 +93,7 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
 
           {!isControl && s.judgeable === 0 && (
             <Box title="별표 10 점수" sub={ANNEX}>
-              <p className="cs-text"><strong>판정 가능 가로선 0개, 현장 측량 대상</strong></p>
+              <p className="cs-text"><strong>판정 가능 {s.judgeable}/{s.total}, 현장 측량 대상</strong></p>
               <p className="cs-text">값이 있는 가로선 {s.sectionN}개 가운데 판정 보류 기준 {thr}{'\u00a0'}m({basisLabel})를 넘는 가로선이 없어 위성 해안선으로 점수를 내지 않습니다. 해빈 측량으로 해빈폭과 단면을 확인합니다.</p>
             </Box>
           )}
@@ -105,7 +105,7 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
                   <thead><tr><th>항목</th><th>배점 식</th><th className="is-num">위성 해안선 값</th></tr></thead>
                   <tbody>
                     <tr><td>평균 해빈폭</td><td className="is-wrap"><Ph t={['10 + 10 x 변화율,', '최대 20점,', '최소 10점']} /></td><td className="is-num is-wrap"><span className="rb-phrase">구간 평균</span> <span className="rb-phrase">{signed(s.sectionMean)}</span></td></tr>
-                    <tr><td>목표해안선 적합도</td><td className="is-wrap"><Ph t={['20 + 20 x (B - A),', '최대 40점,', '최소 20점']} /></td><td className="is-num is-wrap">{typeof fitScore === 'number' && <><span className="rb-phrase">{fitScore}점</span> <span className="rb-phrase is-sub">목표선 바다 쪽 10{'\u00a0'}m</span></>}</td></tr>
+                    <tr><td>목표해안선 적합도</td><td className="is-wrap"><Ph t={['20 + 20 x (B - A),', '최대 40점,', '최소 20점']} /></td><td className="is-num is-wrap">{typeof fitScore === 'number' && <><span className="rb-phrase">{fitScore.toFixed(1)}점</span> <span className="rb-phrase is-sub">목표선 바다 쪽 10{'\u00a0'}m</span></>}</td></tr>
                     <tr><td>등급 구간</td><td className="is-wrap" colSpan={2}><Ph t={['A 85점 이상,', 'B 75점 이상,', 'C 65점 이상,', 'D 55점 이상,', 'E 55점 미만']} /></td></tr>
                   </tbody>
                 </table>
