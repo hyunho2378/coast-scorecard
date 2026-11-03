@@ -19,8 +19,9 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
   const r = rules?.data
   const name = (id) => sites.find((s) => s.id === id)?.name || id
   const basisLabel = (BASES.find(([k]) => k === basis) || BASES[0])[1]
-  // 판정 가능 개수는 앱이 구조물 제외와 장면 규칙까지 적용해 센 값. 읽기 전이면 규칙 파일 값
-  const judgeable = (id, x) => siteData[id]?.status === 'ready' ? siteData[id].summary.judgeable : x.judgeableCount
+  // 판정 가능 개수는 앱이 구조물 제외와 장면 규칙까지 적용해 센 값만 쓴다. 규칙 파일 judgeableCount(아네호 17)는 화면에 쓰지 않는다
+  const judgeable = (id) => siteData[id]?.status === 'ready' ? siteData[id].summary.judgeable : '읽는 중'
+  const anehoN = siteData.aneho?.status === 'ready' ? siteData.aneho.summary.judgeable : null
   const errText = (x) => x.surveyAvailable && x.surveyChangeRmseM ? `측량 대조 ${x.surveyChangeRmseM}\u00a0m` : typeof x.priorChangeErrorM === 'number' ? `동해안 ${x.priorChangeErrorM}\u00a0m` : '없음'
   // 장면쌍 90퍼센타일: 연도별 큰 값(구조물 의심 제외). 연도별 값이 없는 해외 사이트는 사이트 값
   const yearRows = yearThresholdRows(r)
@@ -45,7 +46,7 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
                   {sites.map((s) => {
                     const x = r?.site_rules?.[s.id]
                     return x ? (
-                      <tr key={s.id}><td className="is-wrap">{s.name}</td><td className="is-num">{thresholdOf(x, basis)}{'\u00a0'}m</td><td className="is-num">{p90(s.id, x)}{'\u00a0'}m</td><td className="is-num">{errText(x)}</td><td className="is-num">{judgeable(s.id, x)} / {x.nTransects}</td></tr>
+                      <tr key={s.id}><td className="is-wrap">{s.name}</td><td className="is-num">{thresholdOf(x, basis)}{'\u00a0'}m</td><td className="is-num">{p90(s.id, x)}{'\u00a0'}m</td><td className="is-num">{errText(x)}</td><td className="is-num">{judgeable(s.id)} / {x.nTransects}</td></tr>
                     ) : null
                   })}
                 </tbody>
@@ -117,7 +118,7 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
                 def && ['해빈 경사', '0.17(허주영 외 2026, 강원 실태조사 현장 대표값). 사업지 실태조사 단면이 있으면 그 경사를 씁니다.'],
                 def && ['파랑 보정', '파랑 처오름과 셋업은 보정하지 않습니다.'],
                 scene && ['장면 규칙', '같은 해 같은 계절 장면 2장 이상의 중앙값을 씁니다. 두 시점 모두 장면이 2장 이상인 가로선만 판정합니다.'],
-                scene && ['규칙 적용 결과', '장면이 1장뿐인 시점이 있는 가로선은 판정 보류로 둡니다. 아네호는 이 규칙으로 판정 가능 가로선이 17개에서 16개가 됩니다.']
+                scene && ['규칙 적용 결과', `장면이 1장뿐인 시점이 있는 가로선은 판정 보류로 둡니다.${anehoN !== null ? ` 이 규칙을 적용한 ${name('aneho')} 판정 가능 가로선은 ${anehoN}개입니다.` : ''}`]
               ]} />
             </Box>
           )}

@@ -147,6 +147,24 @@ export function judgeRows(base, rule, periods, basis = 'sd1') {
   return applySceneRule(applyStructureRule(applySiteRule(base, rule, basis), rule?.structureExcluded), periods)
 }
 
+// 시간 축 장면별 판정. 기준 장면 거리에서 선택 장면 거리를 뺀 값에 카드와 같은 judgeRows(보류 기준 선택,
+// 구조물 의심 제외, 두 시점 모두 장면 2장 이상 규칙)를 적용한다. 마지막 장면은 최종 판정(rows)을 그대로 쓴다
+export function sceneJudge(base, baseScene, scene, rule, periods, basis = 'sd1') {
+  const rows = (base || []).map((r) => {
+    const a = r.dist?.[baseScene]
+    const b = r.dist?.[scene]
+    const change = typeof a === 'number' && typeof b === 'number' ? round1(a - b) : null
+    return { ...r, change, hold: undefined, verdict: verdictOf(change, r.threshold, undefined) }
+  })
+  return judgeRows(rows, rule, periods, basis)
+}
+export function axisRows(data, index, rule, periods, basis = 'sd1') {
+  if (data?.status !== 'ready' || !data.scenes?.length) return { mode: 'final', rows: [] }
+  const last = data.scenes.length - 1
+  if (index >= last) return { mode: 'final', rows: data.rows }
+  return { mode: 'scene', rows: sceneJudge(data.base || data.rows, data.scenes[0].id, data.scenes[index].id, rule, periods, basis) }
+}
+
 // 별표 10(해양수산부 고시 제2025-181호) 점수 식
 export const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v))
 // 평균 해빈폭: 10 + 10 x (사업후 - 사업전) / 사업전, 최대 20, 최소 10

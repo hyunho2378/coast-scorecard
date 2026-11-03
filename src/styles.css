@@ -193,3 +193,5 @@ html[data-krds-mode="light"] { --cs-line-base: var(--krds-color-light-success-50
 [data-krds-mode="light"] .cs-swatch.is-sat2 { background: var(--krds-color-icon-warning); }
 /* 1023 px 이하에서는 사업지 표가 옆으로 밀리므로 사업 내용을 한 줄로 둔다(두 어절이 한 단어씩 갈라지지 않게) */
 @media (max-width: 1023px) { .cs-table td.is-kind { white-space: nowrap; } }
+.cs-axis-basis { margin: 0; }
+.cs-axis-counts { display: grid; gap: var(--krds-gap-3); }

@@ -1,5 +1,6 @@
 // 해안선 지도와 시간 축. 구름으로 끊긴 해안선(MultiLineString)도 조각을 모두 그린다.
-// 시간 축은 장면별 거리 비교, 가로선 색은 분석 파일의 최종 판정(hold 속성)을 쓴다
+// 시간 축 개수와 표는 판정 카드와 같은 judgeRows 로 센다. 마지막 장면은 최종 판정 기준(카드와 같은 값),
+// 중간 장면은 기준 장면과 그 장면의 거리 차이로 센 비교 장면 기준. 가로선 색은 최종 판정을 쓴다
 import { useEffect, useMemo, useRef, useState } from 'react'
 import * as maplibregl from 'maplibre-gl'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
@@ -7,7 +8,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import TimeAxis from '../parts/TimeAxis.jsx'
 import { readPalette } from '../lib/palette.js'
 import { useModeTick } from '../shell/screenMode.js'
-import { sceneChanges } from '../lib/judge.js'
+import { axisRows, summarize, thresholdOf, BASES } from '../lib/judge.js'
 import { fmtDate } from '../lib/ledger.js'
 import { Bar, Box, PageHead, SiteState, TableWrap, Verdict, HOLD_ACTION, signed } from '../ui/index.jsx'
 
@@ -18,7 +19,7 @@ maplibregl.setWorkerUrl(workerUrl)
 const EMPTY = { type: 'FeatureCollection', features: [] }
 const fc = (feats) => ({ type: 'FeatureCollection', features: feats.filter((f) => f && f.geometry) })
 
-export default function MapScene({ site, data, onRetry }) {
+export default function MapScene({ site, data, rules, basis = 'sd1', onRetry }) {
   const tick = useModeTick()
   const host = useRef(null)
   const map = useRef(null)
@@ -31,8 +32,14 @@ export default function MapScene({ site, data, onRetry }) {
   const [playing, setPlaying] = useState(false)
 
   const steps = scenes.map((s, i) => ({ key: s.id, label: i === 0 ? '기준 장면' : `비교 장면 ${i}`, sub: fmtDate(s.date), tick: i === 0 || i === scenes.length - 1 ? fmtDate(s.date) : '' }))
-  const sceneRows = useMemo(() => (ready && scenes.length ? sceneChanges(data.rows, scenes[0].id, scenes[index]?.id) : []), [ready, data, scenes, index])
-  const cnt = (k) => sceneRows.filter((r) => r.verdict === k).length
+  const rule = rules?.data?.site_rules?.[site.id]
+  const periods = rules?.data?.scene_rule?.sites?.[site.id]?.periods
+  const axis = useMemo(() => axisRows(data, index, rule, periods, basis), [data, index, rule, periods, basis])
+  const sceneRows = axis.rows
+  const sc = summarize(sceneRows)
+  const isFinal = axis.mode === 'final'
+  const basisLabel = (BASES.find(([k]) => k === basis) || BASES[0])[1]
+  const thr = thresholdOf(rule, basis) ?? data?.summary?.thresholds?.[0]
 
   useEffect(() => { setIndex(Math.max(0, scenes.length - 1)); setPlaying(false) }, [scenes.length])
 
@@ -80,9 +87,9 @@ export default function MapScene({ site, data, onRetry }) {
     m.getSource('transects').setData(fc(data.rows.map((r) => ({ type: 'Feature', geometry: r.geometry, properties: { id: r.id, verdict: r.verdict } }))))
   }, [loaded, ready, data, scenes, index])
 
-  const header = <PageHead title={`${site.name} 해안선 지도`} meta={ready ? <><span>장면 {scenes.length}장</span><span>가로선 {data.rows.length}개</span><span>보류 기준 {data.summary.thresholds[0]}{'\u00a0'}m</span></> : null} />
+  const header = <PageHead title={`${site.name} 해안선 지도`} meta={ready ? <><span>장면 {scenes.length}장</span><span>가로선 {data.rows.length}개</span><span>보류 기준 {thr}{'\u00a0'}m({basisLabel})</span></> : null} />
   if (!ready) return <>{header}<SiteState data={data} onRetry={onRetry} /></>
-  const max = Math.max(data.summary.thresholds[0] * 2, ...sceneRows.map((r) => Math.abs(r.change ?? 0)), 1)
+  const max = Math.max((thr || 0) * 2, ...sceneRows.map((r) => Math.abs(r.change ?? 0)), 1)
 
   return (
     <>
@@ -101,13 +108,19 @@ export default function MapScene({ site, data, onRetry }) {
           <Box title="시간 축">
             <TimeAxis index={index} onIndex={setIndex} steps={steps} playing={playing} onPlaying={setPlaying} />
           </Box>
-          <ul className="cs-counts" aria-label="선택 장면 비교">
-            <li><strong>{cnt('advance')}</strong>전진</li>
-            <li><strong>{cnt('retreat')}</strong>후퇴</li>
-            <li><strong>{cnt('hold') + cnt('nodata')}</strong>판정 보류</li>
-            {cnt('struct') > 0 && <li><strong>{cnt('struct')}</strong>구조물 의심 제외</li>}
-          </ul>
-          <Box title="장면별 이동 거리" sub="기준 장면 대비" flush foot={HOLD_ACTION}>
+          <p className="cs-axis-basis"><strong>{isFinal ? '최종 판정 기준' : '비교 장면 기준'}</strong> <span className="cs-head-meta" style={{ display: 'inline' }}>{isFinal ? '두 시점 장면 중앙값 비교, 판정 카드와 같은 개수' : `기준 장면과 ${steps[index]?.label} 한 장씩 비교`}</span></p>
+          <div className="cs-axis-counts">
+            <ul className="cs-counts" aria-label={`${isFinal ? '최종 판정 기준' : '비교 장면 기준'} 판정 개수`}>
+              <li><strong>{sc.judgeable}</strong>판정 가능</li>
+              <li><strong>{sc.held}</strong>판정 보류</li>
+              {sc.excluded > 0 && <li><strong>{sc.excluded}</strong>구조물 의심 제외</li>}
+            </ul>
+            <ul className="cs-counts" aria-label={`${isFinal ? '최종 판정 기준' : '비교 장면 기준'} 방향 개수`}>
+              <li><strong>{sc.advance}</strong>전진</li>
+              <li><strong>{sc.retreat}</strong>후퇴</li>
+            </ul>
+          </div>
+          <Box title="장면별 이동 거리" sub={isFinal ? '최종 판정 기준' : '비교 장면 기준'} flush foot={HOLD_ACTION}>
             <TableWrap label="장면별 이동 거리 표">
               <table className="cs-table is-compact">
                 <thead><tr><th>가로선</th><th className="is-num">이동</th><th><span className="sr-only">막대</span></th><th>판정</th></tr></thead>
