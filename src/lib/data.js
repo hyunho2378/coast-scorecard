@@ -1,8 +1,8 @@
 // 사업지 설정과 자료 파일 읽기. 파일 후보를 앞에서부터 읽고 처음 열리는 파일을 쓴다
 import { fetchJsonOptional, normalizeShorelines, normalizeTransects, periodOf, samepairFromCorrected } from './loader-core.js'
-import { summarize, applySiteRule } from './judge.js'
+import { summarize, applySiteRule, applySceneRule } from './judge.js'
 
-export const RULES_URL = '/ext/poc2/sensitivity_and_rules.json'
+export const RULES_URL = '/ext/poc2/sensitivity_and_rules_v2.json'
 
 async function firstJson(urls) {
   let last = { status: 'missing' }
@@ -40,7 +40,10 @@ export async function loadRules() {
 }
 
 // 돌려주는 status: ready(판정 가능), empty(파일 없음), error(읽기 실패)
-export async function loadSite(site, rule) {
+// rules 는 규칙 파일 전체. 사업지 보류 기준(site_rules)과 장면 규칙(scene_rule)을 차례로 적용한다
+export async function loadSite(site, rules) {
+  const rule = rules?.site_rules?.[site.id]
+  const periods = rules?.scene_rule?.sites?.[site.id]?.periods
   const f = site.files || {}
   const [sh, tr, before, after, cor] = await Promise.all([firstJson(f.shorelines), firstJson(f.transects), firstImage(f.before), firstImage(f.after), firstJson(f.corrected)])
   if (sh.status === 'error' || tr.status === 'error') return { status: 'error', message: sh.message || tr.message }
@@ -48,6 +51,6 @@ export async function loadSite(site, rule) {
   const scenes = normalizeShorelines(sh.data)
   let base = normalizeTransects(tr.data)
   if (cor.status === 'ok') base = samepairFromCorrected(base, cor.data)
-  const rows = applySiteRule(base, rule)
+  const rows = applySceneRule(applySiteRule(base, rule), periods)
   return { status: 'ready', scenes, rows, summary: summarize(rows), period: periodOf(scenes), before, after, sources: { shorelines: sh.url, transects: tr.url } }
 }

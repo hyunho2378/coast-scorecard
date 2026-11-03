@@ -1,38 +1,6 @@
 {
-  "note": "사업지 목록과 자료 파일. files 항목은 앞에서부터 읽고 처음 열리는 파일을 씀. /ext/poc2/ 주소는 vite.config.js가 erosion_poc2 폴더에 연결함. 판정 보류 기준은 sensitivity_and_rules.json의 site_rules 값을 씀",
+  "note": "사업지 목록과 자료 파일. files 항목은 앞에서부터 읽고 처음 열리는 파일을 씀. /ext/poc2/ 주소는 vite.config.js가 erosion_poc2 폴더에 연결함. 판정 보류 기준은 sensitivity_and_rules_v2.json의 site_rules 값을 씀",
   "sites": [
-    {
-      "id": "hwajinpo",
-      "name": "고성 화진포",
-      "region": "강원 고성군",
-      "country": "대한민국",
-      "lat": 38.4789,
-      "lon": 128.4397,
-      "zoom": 14.6,
-      "kind": "연안침식 모니터링 지점",
-      "completion": null,
-      "files": {
-        "shorelines": [
-          "/ext/poc2/hwajinpo/shorelines.geojson"
-        ],
-        "transects": [
-          "/ext/poc2/hwajinpo/transects.geojson"
-        ],
-        "before": [
-          "/ext/poc2/hwajinpo/before.png"
-        ],
-        "after": [
-          "/ext/poc2/hwajinpo/after.png"
-        ]
-      },
-      "labelOffset": [
-        14,
-        -62
-      ],
-      "typeRules": [
-        "seasonal"
-      ]
-    },
     {
       "id": "banam",
       "name": "고성 반암",
@@ -98,6 +66,38 @@
       "typeRules": [
         "structures",
         "nourishment",
+        "seasonal"
+      ]
+    },
+    {
+      "id": "hwajinpo",
+      "name": "고성 화진포",
+      "region": "강원 고성군",
+      "country": "대한민국",
+      "lat": 38.4789,
+      "lon": 128.4397,
+      "zoom": 14.6,
+      "kind": "연안침식 모니터링 지점",
+      "completion": null,
+      "files": {
+        "shorelines": [
+          "/ext/poc2/hwajinpo/shorelines.geojson"
+        ],
+        "transects": [
+          "/ext/poc2/hwajinpo/transects.geojson"
+        ],
+        "before": [
+          "/ext/poc2/hwajinpo/before.png"
+        ],
+        "after": [
+          "/ext/poc2/hwajinpo/after.png"
+        ]
+      },
+      "labelOffset": [
+        14,
+        -62
+      ],
+      "typeRules": [
         "seasonal"
       ]
     },

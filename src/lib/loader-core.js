@@ -150,6 +150,57 @@ export function samepairFromCorrected(rows, corrected) {
   })
 }
 
+// 오차 유형별 민감도(sensitivity_and_rules_v2.json). 사이트마다 쓸 오차 크기를 고른다.
+// 동해안 사전 오차가 있는 한국 사이트는 16.21 m, 측량 대조가 있는 사이트는 변화량 RMSE, 나머지는 첫 항목의 오차.
+// 표 값은 사업 전 해빈폭 50 m, 목표해안선 바다 쪽 10 m 조건의 1표준편차 점수
+export const SENS_MODES = [
+  ['bias_independent', '치우침'],
+  ['mixed_sandmotor', '혼합'],
+  ['scatter', '흩어짐']
+]
+export function errorSizeFor(rules, siteId) {
+  const list = Array.isArray(rules?.sensitivity) ? rules.sensitivity : []
+  const site = rules?.site_rules?.[siteId] || null
+  if (!list.length) return null
+  if (site?.surveyAvailable && typeof site.surveyChangeRmseM === 'number') return list.find((e) => e.errorM === site.surveyChangeRmseM) ? site.surveyChangeRmseM : list[0].errorM
+  if (typeof site?.priorChangeErrorM === 'number') {
+    const pos = Math.round((site.priorChangeErrorM / Math.SQRT2) * 100) / 100
+    if (list.some((e) => e.errorM === pos)) return pos
+  }
+  return list[0].errorM
+}
+export function sensitivityFor(rules, siteId, w0 = 50, offset = 10) {
+  const list = Array.isArray(rules?.sensitivity) ? rules.sensitivity : []
+  const errorM = errorSizeFor(rules, siteId)
+  if (errorM === null) return null
+  const rowsOut = []
+  for (const [mode, label] of SENS_MODES) {
+    const e = list.find((x) => x.errorM === errorM && x.errorMode === mode)
+    const w = e?.bySite?.[siteId]?.W0?.find((x) => x.W0_m === w0)
+    const t = w?.withTarget?.find((x) => x.target_offset_m === offset)
+    if (!w || !t) continue
+    rowsOut.push({ mode, label, beachWidth: w.beachWidth_sd_linear, fit: t.fit_sd, corr: t.corr_beachWidth_fit, total: t.total_sd_joint, pGrade: t.p_grade_change })
+  }
+  if (!rowsOut.length) return null
+  const kind = list.find((x) => x.errorM === errorM)?.errorKind || ''
+  return { errorM, errorKind: kind, w0, offset, rows: rowsOut }
+}
+
+// 별표 10 점수 표에 쓰는 값. 사이트 오차 크기, 치우침(두 시점 독립) 항목에서 해빈폭별 점수 변동과 목표해안선 위치별 적합도
+export function scoreInputsFor(rules, siteId) {
+  const list = Array.isArray(rules?.sensitivity) ? rules.sensitivity : []
+  const errorM = errorSizeFor(rules, siteId)
+  const e = list.find((x) => x.errorM === errorM && x.errorMode === 'bias_independent')
+  const by = e?.bySite?.[siteId]
+  if (!by) return null
+  const w50 = by.W0.find((x) => x.W0_m === 50)
+  return {
+    errorM, errorKind: e.errorKind,
+    beachWidth: by.W0.map((x) => ({ w0: x.W0_m, sd: x.beachWidth_sd_linear })),
+    targetFit: (w50?.withTarget || []).map((t) => ({ offset: t.target_offset_m, score: t.fit_true, sd: t.fit_sd }))
+  }
+}
+
 // 판정 정밀도: 측량 대조가 있는 사업지는 두 시점 변화량 오차, 없는 곳은 단일 시점 위치 오차 첫 항목
 export function precisionFor(rules, siteId) {
   const list = Array.isArray(rules?.sensitivity) ? rules.sensitivity : null

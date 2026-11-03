@@ -161,3 +161,9 @@ html[data-krds-mode="light"] { --cs-line-base: var(--krds-color-light-success-50
 }
 @media (prefers-reduced-transparency: reduce) { .cs-legend, .cs-stage-caption, .cs-pinlabel { background: var(--krds-color-surface-white); } }
 @media (prefers-contrast: more) { .cs-box, .cs-table th, .cs-table td { border-color: var(--krds-color-border-gray); } }
+
+/* 본문 문단과 사이트 구분 표시 */
+.cs-text { margin: 0; font-size: var(--rb-step-15); line-height: var(--rb-lh-15); color: var(--krds-color-text-basic); word-break: keep-all; }
+.cs-text + .cs-text { margin-top: var(--krds-gap-3); }
+.cs-role { display: inline-flex; align-items: center; height: var(--krds-number-9); padding: 0 var(--krds-padding-3); border-radius: var(--krds-radius-medium2); background: var(--krds-color-surface-gray-subtle); color: var(--krds-color-text-basic); font-size: var(--rb-step-13); line-height: var(--rb-lh-13); white-space: nowrap; }
+.cs-role.is-project { background: var(--krds-color-surface-primary-subtler); color: var(--krds-color-text-primary); }

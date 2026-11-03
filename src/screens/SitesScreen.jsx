@@ -1,6 +1,7 @@
 // 사업지 목록. GitHub 저장소 목록처럼 한 줄에 한 사업지
 import { Box, Empty, ErrorLine, PageHead, pct } from '../ui/index.jsx'
 import { fmtDate } from '../lib/ledger.js'
+import { ROLE, roleOf } from '../lib/judge.js'
 
 function Cells({ d }) {
   if (!d || d.status === 'loading') return <td colSpan={5}><span className="cs-skel" style={{ width: 'calc(var(--krds-number-21) * 2)' }} aria-label="불러오는 중" /></td>
@@ -18,17 +19,19 @@ function Cells({ d }) {
   )
 }
 
-export default function SitesScreen({ sites, siteData, onOpen }) {
+export default function SitesScreen({ sites, siteData, rules, onOpen }) {
+  const roleFor = (id) => roleOf(rules?.data?.site_rules?.[id])
+  const byRole = Object.keys(ROLE).map((k) => [k, sites.filter((x) => roleFor(x.id) === k).length]).filter(([, n]) => n > 0)
   const ready = sites.filter((s) => siteData[s.id]?.status === 'ready')
   const total = ready.reduce((a, s) => a + siteData[s.id].summary.total, 0)
   return (
     <>
-      <PageHead title="사업지 목록" meta={<><span>사업지 {sites.length}곳</span>{ready.length > 0 && <span>가로선 {total}개</span>}</>} />
+      <PageHead title="사업지 목록" meta={<>{byRole.map(([k, n]) => <span key={k}>{ROLE[k]} {n}곳</span>)}{ready.length > 0 && <span>가로선 {total}개</span>}</>} />
       <Box flush>
         {sites.length ? (
           <div className="cs-table-wrap">
             <table className="cs-table">
-              <thead><tr><th>사업지</th><th>사업 내용</th><th className="is-num">가로선</th><th className="is-num">판정 가능</th><th className="is-num">판정 보류</th><th className="is-num">보류 기준</th><th className="is-num">비교 기간</th></tr></thead>
+              <thead><tr><th>사업지</th><th>구분</th><th>사업 내용</th><th className="is-num">가로선</th><th className="is-num">판정 가능</th><th className="is-num">판정 보류</th><th className="is-num">보류 기준</th><th className="is-num">비교 기간</th></tr></thead>
               <tbody>
                 {sites.map((s) => (
                   <tr key={s.id}>
@@ -36,6 +39,7 @@ export default function SitesScreen({ sites, siteData, onOpen }) {
                       <button type="button" className="cs-rowlink" onClick={() => onOpen(s.id)}>{s.name}</button>
                       <span className="is-sub"> {s.region}, {s.country}</span>
                     </td>
+                    <td><span className={`cs-role is-${roleFor(s.id)}`}>{ROLE[roleFor(s.id)]}</span></td>
                     <td className="is-sub">{s.kind}</td>
                     <Cells d={siteData[s.id]} />
                   </tr>

@@ -21,7 +21,7 @@ export default function App() {
 
   const readSite = (s, r) => {
     setSiteData((m) => ({ ...m, [s.id]: { status: 'loading' } }))
-    loadSite(s, r?.data?.site_rules?.[s.id]).then((d) => setSiteData((m) => ({ ...m, [s.id]: d })))
+    loadSite(s, r?.data).then((d) => setSiteData((m) => ({ ...m, [s.id]: d })))
       .catch((e) => setSiteData((m) => ({ ...m, [s.id]: { status: 'error', message: String(e) } })))
   }
   const boot = () => {
@@ -44,7 +44,7 @@ export default function App() {
   return (
     <AppShell screen={route.screen} onGo={(id) => go(id)} sites={cfg.sites} siteId={site.id} onSite={(id) => go(route.screen, id)}>
       {route.screen === 'globe' && <GlobeScene sites={cfg.sites} omm={cfg.omm} onPick={(s) => go('card', s.id)} />}
-      {route.screen === 'sites' && <SitesScreen sites={cfg.sites} siteData={siteData} onOpen={(id) => go('card', id)} />}
+      {route.screen === 'sites' && <SitesScreen sites={cfg.sites} siteData={siteData} rules={rules} onOpen={(id) => go('card', id)} />}
       {route.screen === 'card' && <CardScreen key={site.id} {...common} />}
       {route.screen === 'map' && <MapScene key={site.id} {...common} />}
       {route.screen === 'compare' && <CompareScene key={site.id} {...common} />}

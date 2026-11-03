@@ -3,8 +3,8 @@ import { useMemo, useRef, useState } from 'react'
 import { Check, Copy, ShieldCheck } from 'lucide-react'
 import { Bar, Box, Button, KV, Note, PageHead, SiteState, Verdict, HOLD_ACTION, RESPONSIBILITY, pct, signed } from '../ui/index.jsx'
 import { ledgerText, fmtDate } from '../lib/ledger.js'
-import { precisionFor, typeRulesFor } from '../lib/loader-core.js'
-import { beachWidthScore, isJudgeable } from '../lib/judge.js'
+import { scoreInputsFor, sensitivityFor, typeRulesFor } from '../lib/loader-core.js'
+import { beachWidthScore, isJudgeable, roleOf, ROLE } from '../lib/judge.js'
 
 const ANNEX = '해양수산부 고시 제2025-181호 별표 10'
 // 구절 단위 줄바꿈(K1): 구절 안에서는 끊지 않는다
@@ -21,11 +21,14 @@ export default function CardScreen({ site, data, rules, onRetry }) {
   const rows = data.rows
   const held = rows.filter((r) => !isJudgeable(r.verdict))
   const text = ledgerText({ site, rows, period: data.period, today })
-  const prec = precisionFor(rules?.data, site.id)
+  const role = roleOf(rules?.data?.site_rules?.[site.id])
+  const isControl = role === 'control'
+  const inputs = scoreInputsFor(rules?.data, site.id)
+  const sens = isControl ? null : sensitivityFor(rules?.data, site.id)
   const typeRules = typeRulesFor(rules?.data, site.typeRules)
   const thr = s.thresholds[0]
   const max = Math.max(thr * 2, ...rows.map((r) => Math.abs(r.change ?? 0)), 1)
-  const bw50 = prec?.beachWidth.find((b) => b.w0 === 50)
+  const meanDef = `가로선 수준 값은 가로선 하나의 전후 이동 거리이고 구간 평균은 값이 있는 가로선 ${s.sectionN}개(판정 보류 포함)의 평균입니다.`
 
   const copy = async () => {
     try { await navigator.clipboard.writeText(text) } catch { areaRef.current?.select(); document.execCommand?.('copy') }
@@ -35,6 +38,7 @@ export default function CardScreen({ site, data, rules, onRetry }) {
   return (
     <>
       {head(<>
+        <span>{ROLE[role]}</span>
         <span>{site.region}, {site.country}</span>
         <span>{site.kind}</span>
         <span>{fmtDate(data.period.from)}부터 {fmtDate(data.period.to)}까지</span>
@@ -47,32 +51,47 @@ export default function CardScreen({ site, data, rules, onRetry }) {
         <li><strong>{s.advance}</strong>전진</li>
         <li><strong>{s.retreat}</strong>후퇴</li>
         <li><strong>{thr}{'\u00a0'}m</strong>보류 기준</li>
-        {s.judgeable > 0 && <li><strong>{signed(s.medianChange)}</strong>변화 중앙값</li>}
+        {s.sectionN > 0 && <li><strong>{signed(s.sectionMean)}</strong>구간 평균</li>}
       </ul>
 
       <div className="cs-two is-wide-side">
         <div className="cs-col">
-          <Box title="별표 10 점수" sub={ANNEX} flush foot={bw50 && `판정 정밀도: 위성 위치 오차 ${prec.errorM}\u00a0m(${prec.errorKind}) 기준, 해빈폭 50\u00a0m 구간 점수 변동 약 ${Math.round(bw50.sd)}점.`}>
-            <div className="cs-table-wrap">
-              <table className="cs-table">
-                <thead><tr><th>항목</th><th>배점 식</th><th className="is-num">위성 해안선 값</th></tr></thead>
-                <tbody>
-                  <tr><td>평균 해빈폭</td><td className="is-wrap"><Ph t={['10 + 10 x 변화율,', '최대 20점, 최소 10점']} /></td><td className="is-num">{s.judgeable ? `평균 ${signed(s.meanChange)}` : ''}</td></tr>
-                  <tr><td>목표해안선 적합도</td><td className="is-wrap"><Ph t={['20 + 20 x (B - A),', '최대 40점, 최소 20점']} /></td><td className="is-num">{prec?.targetFit[0] ? `${prec.targetFit[0].score}점` : ''}</td></tr>
-                  <tr><td>등급 구간</td><td className="is-wrap" colSpan={2}><Ph t={['A 85점 이상,', 'B 75점 이상,', 'C 65점 이상,', 'D 55점 이상,', 'E 55점 미만']} /></td></tr>
-                </tbody>
-              </table>
-            </div>
-          </Box>
+          {isControl && (
+            <Box title="대조 해변" sub="사업지 점수 계산 없음">
+              <p className="cs-text">해양수산부 연안정비 사업정보에 화진포 이름의 사업이 없어 별표 10 점수를 계산하지 않습니다. 사업지 해안선 변화와 견주는 대조 해변으로 씁니다.</p>
+            </Box>
+          )}
 
-          {prec && s.judgeable > 0 && (
-            <Box title="해빈폭 점수" sub="사업 전 평균 해빈폭별" flush>
+          {!isControl && s.judgeable === 0 && (
+            <Box title="별표 10 점수" sub={ANNEX}>
+              <p className="cs-text"><strong>판정 가능 가로선 0개, 현장 측량 대상</strong></p>
+              <p className="cs-text">값이 있는 가로선 {s.sectionN}개의 전후 변화가 모두 판정 보류 기준 {thr}{'\u00a0'}m 이하라서 위성 해안선으로 점수를 내지 않습니다. 해빈 측량으로 해빈폭과 단면을 확인합니다.</p>
+            </Box>
+          )}
+
+          {!isControl && s.judgeable > 0 && (
+            <Box title="별표 10 점수" sub={ANNEX} flush foot={meanDef}>
               <div className="cs-table-wrap">
                 <table className="cs-table">
-                  <thead><tr><th>사업 전 평균 해빈폭</th><th className="is-num">평균 변화</th><th className="is-num">점수</th><th className="is-num">위성 오차 점수 변동</th></tr></thead>
+                  <thead><tr><th>항목</th><th>배점 식</th><th className="is-num">위성 해안선 값</th></tr></thead>
                   <tbody>
-                    {prec.beachWidth.map((b) => (
-                      <tr key={b.w0}><td className="cs-num">{b.w0}{'\u00a0'}m</td><td className="is-num">{signed(s.meanChange)}</td><td className="is-num">{beachWidthScore(b.w0, s.meanChange)}점</td><td className="is-num">약 {b.sd.toFixed(1)}점</td></tr>
+                    <tr><td>평균 해빈폭</td><td className="is-wrap"><Ph t={['10 + 10 x 변화율,', '최대 20점, 최소 10점']} /></td><td className="is-num">구간 평균 {signed(s.sectionMean)}</td></tr>
+                    <tr><td>목표해안선 적합도</td><td className="is-wrap"><Ph t={['20 + 20 x (B - A),', '최대 40점, 최소 20점']} /></td><td className="is-num">{inputs?.targetFit[0] ? `${inputs.targetFit[0].score}점` : ''}</td></tr>
+                    <tr><td>등급 구간</td><td className="is-wrap" colSpan={2}><Ph t={['A 85점 이상,', 'B 75점 이상,', 'C 65점 이상,', 'D 55점 이상,', 'E 55점 미만']} /></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </Box>
+          )}
+
+          {!isControl && inputs && s.judgeable > 0 && (
+            <Box title="해빈폭 점수" sub="사업 전 평균 해빈폭별" flush foot={`위성 오차 점수 변동은 위치 오차 ${inputs.errorM}\u00a0m 치우침 기준 1표준편차입니다.`}>
+              <div className="cs-table-wrap">
+                <table className="cs-table">
+                  <thead><tr><th>사업 전 평균 해빈폭</th><th className="is-num">구간 평균</th><th className="is-num">점수</th><th className="is-num">위성 오차 점수 변동</th></tr></thead>
+                  <tbody>
+                    {inputs.beachWidth.map((b) => (
+                      <tr key={b.w0}><td className="cs-num">{b.w0}{'\u00a0'}m</td><td className="is-num">{signed(s.sectionMean)}</td><td className="is-num">{beachWidthScore(b.w0, s.sectionMean)}점</td><td className="is-num">약 {b.sd.toFixed(1)}점</td></tr>
                     ))}
                   </tbody>
                 </table>
@@ -80,14 +99,33 @@ export default function CardScreen({ site, data, rules, onRetry }) {
             </Box>
           )}
 
-          {prec?.targetFit.length > 0 && (
+          {!isControl && inputs?.targetFit.length > 0 && s.judgeable > 0 && (
             <Box title="목표해안선 적합도" sub="목표해안선 위치별" flush>
               <div className="cs-table-wrap">
                 <table className="cs-table">
-                  <thead><tr><th>목표해안선 위치</th><th className="is-num">점수</th><th className="is-num">위성 오차 범위</th></tr></thead>
+                  <thead><tr><th>목표해안선 위치</th><th className="is-num">점수</th><th className="is-num">위성 오차 점수 변동</th></tr></thead>
                   <tbody>
-                    {prec.targetFit.map((t) => (
-                      <tr key={t.offset}><td>사업 전 해안선에서 바다 쪽 {t.offset}{'\u00a0'}m</td><td className="is-num">{t.score}점</td><td className="is-num">{t.p05}점부터 {t.p95}점</td></tr>
+                    {inputs.targetFit.map((t) => (
+                      <tr key={t.offset}><td>사업 전 해안선에서 바다 쪽 {t.offset}{'\u00a0'}m</td><td className="is-num">{t.score}점</td><td className="is-num">약 {t.sd.toFixed(1)}점</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Box>
+          )}
+
+          {sens && (
+            <Box title="오차 유형별 점수 변동" sub={`위성 위치 오차 ${sens.errorM}\u00a0m`} flush foot={<>
+              <span className="rb-phrase">사업 전 해빈폭 {sens.w0}{'\u00a0'}m와 목표해안선 바다 쪽 {sens.offset}{'\u00a0'}m 조건의</span> <span className="rb-phrase">1표준편차 점수입니다.</span>{' '}
+              <span className="rb-phrase">치우침은 모든 가로선에 같은 방향으로,</span> <span className="rb-phrase">흩어짐은 가로선마다 따로 걸리는 오차입니다.</span>{' '}
+              <span className="rb-phrase">혼합은 Sand Motor 측량 대조 비율대로</span> <span className="rb-phrase">치우침 37.5%를 섞었습니다.</span>
+            </>}>
+              <div className="cs-table-wrap">
+                <table className="cs-table">
+                  <thead><tr><th>오차 유형</th><th className="is-num">해빈폭 점수</th><th className="is-num">적합도 점수</th><th className="is-num">두 점수 상관</th><th className="is-num">합계</th><th className="is-num">등급 변경</th></tr></thead>
+                  <tbody>
+                    {sens.rows.map((r) => (
+                      <tr key={r.mode}><td>{r.label}</td><td className="is-num">{r.beachWidth.toFixed(2)}점</td><td className="is-num">{r.fit.toFixed(2)}점</td><td className="is-num">{typeof r.corr === 'number' ? r.corr.toFixed(2) : '없음'}</td><td className="is-num">{r.total.toFixed(2)}점</td><td className="is-num">{pct(r.pGrade)}</td></tr>
                     ))}
                   </tbody>
                 </table>

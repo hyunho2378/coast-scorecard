@@ -6,7 +6,8 @@ export const VERDICT = {
   advance: { label: '전진', note: '바다 쪽 이동' },
   retreat: { label: '후퇴', note: '육지 쪽 이동' },
   hold: { label: '판정 보류', note: '위성 오차 이하' },
-  nodata: { label: '판정 보류', note: '구름으로 해안선 미검출' }
+  nodata: { label: '판정 보류', note: '구름으로 해안선 미검출' },
+  few: { label: '판정 보류', note: '한 시점 장면 1장' }
 }
 
 export function round1(v) { return Math.round(v * 10) / 10 }
@@ -30,12 +31,17 @@ export function median(xs) {
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2
 }
 
-// 가로선 판정 요약. 판정 보류 비율은 전체 가로선 수를 분모로 쓴다
+// 가로선 판정 요약. 판정 보류 비율은 전체 가로선 수를 분모로 쓴다.
+// 가로선 수준 값은 가로선 하나의 전후 이동 거리(change). 구간 평균(sectionMean)은 값이 있는 가로선 전체(판정 보류 포함)의 평균이고
+// 별표 10 평균 해빈폭 점수와 대장 문구가 함께 쓴다. meanChange 는 판정 가능 가로선만의 평균이라 점수에 쓰지 않는다
 export function summarize(rows) {
   const judge = rows.filter((r) => isJudgeable(r.verdict))
   const held = rows.length - judge.length
   const ch = judge.map((r) => r.change)
+  const all = rows.map((r) => r.change).filter((v) => typeof v === 'number' && !Number.isNaN(v))
   return {
+    sectionMean: all.length ? round1(all.reduce((a, b) => a + b, 0) / all.length) : null,
+    sectionN: all.length,
     total: rows.length,
     judgeable: judge.length,
     held,
@@ -84,6 +90,32 @@ export function ruleVerdict(change, threshold, samepair) {
   if (!pairs.length || pairs.some((v) => v > threshold)) return 'hold'
   return change > 0 ? 'advance' : 'retreat'
 }
+
+// 장면 규칙: 같은 해 같은 계절 장면 2장 이상의 중앙값. 두 시점 모두 2장 이상인 가로선만 판정한다.
+// periods 는 규칙 파일 scene_rule.sites[id].periods({ 시점: [장면 id] }). 장면이 1장뿐인 시점이 있으면 few(판정 보류)
+export function sceneCount(dist, periods) {
+  const out = {}
+  for (const [p, ids] of Object.entries(periods || {})) out[p] = ids.filter((id) => typeof dist?.[id] === 'number').length
+  return out
+}
+export function applySceneRule(rows, periods) {
+  if (!periods || Object.keys(periods).length < 2) return rows
+  return rows.map((r) => {
+    if (!isJudgeable(r.verdict)) return r
+    const n = Object.values(sceneCount(r.dist, periods))
+    return n.some((k) => k < 2) ? { ...r, verdict: 'few' } : r
+  })
+}
+
+// 사이트 구분: 규칙 파일 role. 사업지만 별표 10 점수를 계산한다
+export const ROLE = {
+  project: '사업지',
+  control: '대조 해변',
+  overseas_reference: '해외 참고',
+  survey_validation: '측량 검증'
+}
+export const roleOf = (rule) => ROLE[rule?.role] ? rule.role : 'project'
+export const scoresSite = (rule) => roleOf(rule) !== 'control'
 
 export function applySiteRule(rows, rule) {
   if (!rule || typeof rule.holdThresholdM !== 'number') return rows
