@@ -106,7 +106,7 @@ export default function MapScene({ site, data, onRetry }) {
           </ul>
           <Box title="장면별 이동 거리" sub="기준 장면 대비" flush foot={HOLD_ACTION}>
             <div className="cs-table-wrap">
-              <table className="cs-table">
+              <table className="cs-table is-compact">
                 <thead><tr><th>가로선</th><th className="is-num">이동</th><th><span className="sr-only">막대</span></th><th>판정</th></tr></thead>
                 <tbody>
                   {sceneRows.map((r) => (
