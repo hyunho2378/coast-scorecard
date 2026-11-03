@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import AppShell from './shell/AppShell.jsx'
 import { useRoute } from './shell/route.js'
-import { loadConfig, loadRules, loadSite } from './lib/data.js'
+import { loadConfig, loadRules, loadSite, withBasis } from './lib/data.js'
 import { Box, ErrorLine, Loading } from './ui/index.jsx'
 import GlobeScene from './scenes/GlobeScene.jsx'
 import SitesScreen from './screens/SitesScreen.jsx'
@@ -18,6 +18,14 @@ export default function App() {
   const [siteData, setSiteData] = useState({})
   const [rules, setRules] = useState({ status: 'loading' })
   const [checks, setChecks] = useState({})
+  // 보류 기준 선택. 기본값은 1표준편차, 화면 안 상태로만 둔다
+  const [basis, setBasis] = useState('sd1')
+  const judged = useMemo(() => {
+    if (!cfg) return siteData
+    const out = {}
+    for (const s of cfg.sites) out[s.id] = withBasis(siteData[s.id], s, rules?.data, basis)
+    return out
+  }, [cfg, siteData, rules, basis])
 
   const readSite = (s, r) => {
     setSiteData((m) => ({ ...m, [s.id]: { status: 'loading' } }))
@@ -37,19 +45,19 @@ export default function App() {
   if (!cfg) return <main className="rb-panel-in"><Box flush><Loading /></Box></main>
 
   const site = cfg.sites.find((s) => s.id === route.site) || cfg.sites[0]
-  const data = siteData[site.id]
+  const data = judged[site.id]
   const retry = () => readSite(site, rules)
-  const common = { site, data, rules, onRetry: retry }
+  const common = { site, data, rules, basis, onRetry: retry }
 
   return (
-    <AppShell screen={route.screen} onGo={(id) => go(id)} sites={cfg.sites} siteId={site.id} onSite={(id) => go(route.screen, id)}>
+    <AppShell basis={basis} onBasis={setBasis} screen={route.screen} onGo={(id) => go(id)} sites={cfg.sites} siteId={site.id} onSite={(id) => go(route.screen, id)}>
       {route.screen === 'globe' && <GlobeScene sites={cfg.sites} omm={cfg.omm} onPick={(s) => go('card', s.id)} />}
-      {route.screen === 'sites' && <SitesScreen sites={cfg.sites} siteData={siteData} rules={rules} onOpen={(id) => go('card', id)} />}
+      {route.screen === 'sites' && <SitesScreen sites={cfg.sites} siteData={judged} rules={rules} onOpen={(id) => go('card', id)} />}
       {route.screen === 'card' && <CardScreen key={site.id} {...common} />}
       {route.screen === 'map' && <MapScene key={site.id} {...common} />}
       {route.screen === 'compare' && <CompareScene key={site.id} {...common} />}
-      {route.screen === 'storm' && <StormScreen sites={cfg.sites} siteData={siteData} checks={checks} setChecks={setChecks} onOpen={(id) => go('map', id)} />}
-      {route.screen === 'sources' && <SourcesScreen sites={cfg.sites} siteData={siteData} rules={rules} />}
+      {route.screen === 'storm' && <StormScreen sites={cfg.sites} siteData={judged} checks={checks} setChecks={setChecks} onOpen={(id) => go('map', id)} />}
+      {route.screen === 'sources' && <SourcesScreen sites={cfg.sites} siteData={judged} rules={rules} basis={basis} />}
     </AppShell>
   )
 }

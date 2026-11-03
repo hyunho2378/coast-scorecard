@@ -13,6 +13,7 @@ NAPI_RS_FORCE_WASI=1 npm run dev
 - 화면 모드: 기본 어두운 화면. 주소에 `?mode=light`, `?mode=high-contrast`, `?mode=theme`를 붙이거나 상단 바 화면 설정에서 고름. 저장소에 남기지 않음
 - rolldown 네이티브 바인딩이 없으면 `npm i @rolldown/binding-wasm32-wasi --no-save --ignore-scripts`를 먼저 실행
 - 시험: `npm test`(node --test, 판정 규칙, 로더, 대장 문구)
+- 다른 포트: `NAPI_RS_FORCE_WASI=1 npm run dev -- --port 5289`
 - 반응형 확인: `http://127.0.0.1:5288/rwd.html?w=390&h=844&hash=/card?site=banam`(같은 출처 고정 폭 iframe)
 
 ## 디자인 기초
@@ -32,8 +33,15 @@ NAPI_RS_FORCE_WASI=1 npm run dev
 
 - 사업지와 파일 후보: `public/config/sites.json`(고성 화진포, 고성 반암, 고성 가진, 토고 Agbodrafo, 네덜란드 Sand Motor)
 - `/ext/poc2/` 주소는 개발 서버가 erosion_poc2 폴더(환경 변수 `COAST_POC2_DIR`)에 연결함
-- 판정 보류 기준: `sensitivity_and_rules.json`의 `site_rules`. 기준 = max(사업지 같은 계절 장면쌍 차이 90퍼센타일, 공개 측량 대조 오차, 10 m). 변화가 기준 이하이거나 그 가로선의 같은 계절 장면쌍 차이가 기준을 넘으면 보류. Sand Motor는 `sites/sandmotor_spring_vs_jarkus_rows.json`의 조위 환산 위치로 장면쌍 차이를 만듦
-- 별표 10 점수 식과 판정 정밀도: 같은 파일의 `annex10`, `sensitivity`
+- 규칙 파일: `sensitivity_and_rules_v3.json`(6차 분석, 2026. 11. 3.). v2는 분석 폴더에 그대로 둠
+- 판정 보류 기준: `site_rules`. 기준 = max(연도별 같은 계절 장면쌍 90퍼센타일 중 큰 값, 지역 사전 오차의 변화량 환산값 또는 공개 측량 대조 오차, 10 m). 한국 세 곳은 1표준편차 22.9 m가 기본이고 상단 바 판정 기준 메뉴에서 95% 44.9 m를 고름. 변화가 기준 이하이거나 그 가로선의 같은 계절 장면쌍 차이가 기준을 넘으면 보류. Sand Motor는 `sites/sandmotor_spring_vs_jarkus_rows.json`의 조위 환산 위치로 장면쌍 차이를 만듦
+- 구조물 의심 제외: `site_rules.banam.structureExcluded`(가로선 15개). NDWI 변화와 MNDWI 변화의 차이가 22.9 m를 넘거나 물가선이 구조물 30 m 이내이면 판정과 구간 평균에서 뺌. 판정 열은 "구조물 의심, 제외", 지도는 점선
+- 현재 값(1표준편차): 고성 반암 판정 가능 7/36(26번에서 32번, 전진 7, 변화 +23.9 m에서 +41.2 m), 구간 평균 +16.0 m(구조물 의심 제외 20개). 95% 기준에서 0개. 고성 가진 0/37, 고성 화진포 0/16(대조 해변). 반암 장면쌍 90퍼센타일은 전체 가로선 2017년 7.0 m, 2025년 79.9 m, 구조물 의심 제외 6.3 m와 5.9 m
+- 거짓 판정 비율(정규 가정): 1표준편차 31.7%, 반암 판정 대상 20개에서 기대 6.3개. 95% 5.0%, 기대 1.0개
+- 오차 유형별 점수 변동: `sensitivity_unified` 한 표(상하한 적용 전과 후 열). 반암 치우침(두 시점 독립) 합계 9.73점과 7.42점, 가진 14.47점과 8.39점
+- 해안선 높이 환산: 한국 세 곳은 환산 없음(동해안 환산량 수평 0.25 m에서 0.34 m). Sand Motor는 평균고조위 환산 적용, 토고는 적용 대상(2024년에서 2025년 장면쌍 환산량 4.74 m)
+- 사업비와 다음 적용 후보: `project_facts`. 반암 약 105억 원, 가진 약 119억 원(효과평가 법정 대상 200억 원 이상 아님). 다음 적용 후보 봉포, 월천, 속초해수욕장은 사업지 목록에 표시하고 점수는 계산하지 않음
+- 별표 10 점수 식: 같은 파일의 `annex10`
 - 위성 궤도 요소: `public/data/omm.json`(CelesTrak GP, 2026. 11. 3. 받음)
 - 점검 완료 표시와 메모: 화면 안 상태로만 둠
 

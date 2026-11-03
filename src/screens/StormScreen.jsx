@@ -1,7 +1,7 @@
 // 폭풍 뒤 점검 목록. 판정 가능 가로선만 모아 변화가 큰 순서로. 점검 표시와 메모는 화면 안 상태로만 둔다
 import { useMemo } from 'react'
 import { ShieldCheck } from 'lucide-react'
-import { Box, Empty, Loading, Note, PageHead, Verdict, HOLD_ACTION, RESPONSIBILITY, signed } from '../ui/index.jsx'
+import { Box, Empty, Loading, Note, PageHead, TableWrap, Verdict, HOLD_ACTION, RESPONSIBILITY, signed } from '../ui/index.jsx'
 import { stormOrder } from '../lib/judge.js'
 import { checkKey } from '../lib/checks.js'
 
@@ -10,15 +10,16 @@ export default function StormScreen({ sites, siteData, checks, setChecks, onOpen
   const ready = sites.filter((s) => siteData[s.id]?.status === 'ready')
   const list = useMemo(() => stormOrder(ready.map((s) => ({ ...s, rows: siteData[s.id].rows }))), [siteData]) // eslint-disable-line react-hooks/exhaustive-deps
   const heldTotal = ready.reduce((a, s) => a + siteData[s.id].summary.held, 0)
+  const exclTotal = ready.reduce((a, s) => a + (siteData[s.id].summary.excluded || 0), 0)
   const done = list.filter((r) => checks[checkKey(r.siteId, r.id)]?.done).length
   const set = (k, patch) => setChecks((m) => ({ ...m, [k]: { ...m[k], ...patch } }))
 
   return (
     <>
-      <PageHead title="폭풍 뒤 점검 목록" meta={<><span>판정 가능 가로선 {list.length}개</span><span>점검 완료 {done}개</span><span>판정 보류 {heldTotal}개 제외</span></>} />
+      <PageHead title="폭풍 뒤 점검 목록" meta={<><span>판정 가능 가로선 {list.length}개</span><span>점검 완료 {done}개</span><span>판정 보류 {heldTotal}개 제외</span>{exclTotal > 0 && <span>구조물 의심 {exclTotal}개 제외</span>}</>} />
       <Box flush foot={HOLD_ACTION}>
         {loading ? <Loading rows={6} /> : !list.length ? <Empty>판정 가능 가로선이 없습니다.</Empty> : (
-          <div className="cs-table-wrap">
+          <TableWrap label="폭풍 뒤 점검 표">
             <table className="cs-table">
               <thead><tr><th>순서</th><th>완료</th><th>사업지</th><th className="is-num">가로선</th><th className="is-num">변화</th><th>판정</th><th>현장 메모</th></tr></thead>
               <tbody>
@@ -48,7 +49,7 @@ export default function StormScreen({ sites, siteData, checks, setChecks, onOpen
                 })}
               </tbody>
             </table>
-          </div>
+          </TableWrap>
         )}
       </Box>
       <Note icon={ShieldCheck}>{RESPONSIBILITY}</Note>

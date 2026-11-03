@@ -2,7 +2,8 @@
 // 왼쪽 세로 바 맨 위는 사업지 선택(공공 깃랩 프로젝트 이름 자리), 그 아래 묶음 두 개.
 // 768 미만은 왼쪽 세로 바를 숨기고 상단 바의 메뉴 단추로 연다
 import { useEffect, useRef, useState } from 'react'
-import { BookOpen, Check, ChevronsUpDown, Columns2, FileText, Globe2, List, ListChecks, Map, Menu, Monitor, X } from 'lucide-react'
+import { BookOpen, Check, ChevronsUpDown, Columns2, FileText, Globe2, List, ListChecks, Map, Menu, Monitor, Ruler, X } from 'lucide-react'
+import { BASES } from '../lib/judge.js'
 import { NAV } from './route.js'
 import { MODES, useScreenMode } from './screenMode.js'
 
@@ -85,6 +86,30 @@ function ModeMenu() {
   )
 }
 
+// 판정 보류 기준 선택. 화면 설정과 같은 메뉴 부품(cs-pop, menuitemradio)을 쓴다
+function BasisMenu({ basis, onBasis }) {
+  const p = usePopover()
+  const cur = BASES.find(([k]) => k === basis) || BASES[0]
+  return (
+    <div className="rb-gbar-drop">
+      <button ref={p.btn} type="button" className="rb-gbar-btn" aria-haspopup="menu" aria-expanded={p.open} aria-label={`판정 기준 ${cur[1]}`} onClick={() => p.setOpen(!p.open)}>
+        <Ruler size={20} aria-hidden="true" /><span className="rb-gbar-btn-text">판정 기준 {cur[1]}</span>
+      </button>
+      {p.open && (
+        <ul ref={p.ref} className="cs-pop is-right" role="menu" aria-label="판정 기준">
+          {BASES.map(([k, label]) => (
+            <li key={k} role="none">
+              <button type="button" role="menuitemradio" aria-checked={basis === k} onClick={() => { onBasis(k); p.setOpen(false); p.btn.current?.focus() }}>
+                <span className="cs-pop-check">{basis === k && <Check size={16} aria-hidden="true" />}</span>{label} 기준
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
 function Item({ id, screen, onGo }) {
   const n = NAV.find((x) => x.id === id)
   const Icon = ICON[id]
@@ -99,7 +124,7 @@ function Item({ id, screen, onGo }) {
   )
 }
 
-export default function AppShell({ screen, onGo, sites, siteId, onSite, children }) {
+export default function AppShell({ basis, onBasis, screen, onGo, sites, siteId, onSite, children }) {
   const [open, setOpen] = useState(false)
   const toggle = useRef(null)
   const side = useRef(null)
@@ -128,7 +153,7 @@ export default function AppShell({ screen, onGo, sites, siteId, onSite, children
               </a>
             </div>
             <span />
-            <div className="rb-gbar-right"><ModeMenu /></div>
+            <div className="rb-gbar-right">{onBasis && <BasisMenu basis={basis} onBasis={onBasis} />}<ModeMenu /></div>
           </div>
         </header>
       </div>

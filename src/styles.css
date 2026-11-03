@@ -32,12 +32,18 @@ html[data-krds-mode="light"] { --cs-line-base: var(--krds-color-light-success-50
 
 /* 표: 공공 깃랩 rb-reftable(행 40) */
 .cs-table-wrap { position: relative; overflow-x: auto; }
+.cs-table-wrap:focus { outline: none; }
+.cs-table-wrap:focus-visible { outline: var(--krds-border-width-variable-medium) solid var(--krds-color-border-primary); outline-offset: calc(var(--krds-border-width-variable-medium) * -1); }
 .cs-table { width: 100%; border-collapse: collapse; table-layout: auto; }
 .cs-table th, .cs-table td { height: var(--rb-row-h); padding: 0 var(--krds-padding-7); text-align: left; border-bottom: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); font-size: var(--rb-step-15); line-height: var(--rb-lh-15); color: var(--krds-color-text-basic); white-space: nowrap; }
 .cs-table thead th { background: var(--krds-color-surface-gray-subtler); color: var(--krds-color-text-subtle); font-weight: var(--rb-fw-current); font-size: var(--rb-step-13); line-height: var(--rb-lh-13); }
 .cs-table tbody tr:last-child td { border-bottom: 0; }
 .cs-table tbody tr:hover td { background: var(--krds-color-action-secondary-hover); }
 .cs-table .is-num { text-align: end; font-variant-numeric: tabular-nums; }
+.cs-table thead th.is-group { text-align: center; border-bottom: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); }
+.cs-table.is-grouped th, .cs-table.is-grouped td { padding-inline: var(--krds-padding-4); }
+.cs-table.is-grouped th:first-child, .cs-table.is-grouped td:first-child { padding-inline-start: var(--krds-padding-7); }
+.cs-table tr.is-current td { background: var(--krds-color-action-secondary-selected); }
 .cs-table .is-wrap { white-space: normal; word-break: keep-all; }
 .cs-table .is-sub { color: var(--krds-color-text-subtle); font-size: var(--rb-step-13); line-height: var(--rb-lh-13); }
 .cs-table tr.is-done td { color: var(--krds-color-text-subtle); }
@@ -61,7 +67,8 @@ html[data-krds-mode="light"] { --cs-line-base: var(--krds-color-light-success-50
 .cs-verdict { display: inline-flex; align-items: center; gap: var(--krds-gap-2); white-space: nowrap; }
 .cs-verdict.is-advance { color: var(--rb-status-information); }
 .cs-verdict.is-retreat { color: var(--rb-status-danger); }
-.cs-verdict.is-hold, .cs-verdict.is-nodata { color: var(--krds-color-text-subtle); }
+.cs-verdict.is-hold, .cs-verdict.is-nodata, .cs-verdict.is-few { color: var(--krds-color-text-subtle); }
+.cs-verdict.is-struct { color: var(--krds-color-text-subtle); font-style: italic; }
 
 /* 변화 막대: 가운데 0선, 오른쪽 전진 왼쪽 후퇴 */
 .cs-bar { position: relative; display: block; height: var(--krds-number-5); min-width: var(--krds-number-21); background: var(--krds-color-surface-gray-subtle); border-radius: var(--krds-radius-max); }
@@ -69,7 +76,8 @@ html[data-krds-mode="light"] { --cs-line-base: var(--krds-color-light-success-50
 .cs-bar-fill { position: absolute; inset-block: 0; border-radius: var(--krds-radius-max); }
 .cs-bar-fill.is-advance { background: var(--rb-status-information); }
 .cs-bar-fill.is-retreat { background: var(--rb-status-danger); }
-.cs-bar-fill.is-hold, .cs-bar-fill.is-nodata { background: var(--krds-color-icon-gray); }
+.cs-bar-fill.is-hold, .cs-bar-fill.is-nodata, .cs-bar-fill.is-few { background: var(--krds-color-icon-gray); }
+.cs-bar-fill.is-struct { background: repeating-linear-gradient(90deg, var(--krds-color-icon-gray) 0 var(--krds-number-2), transparent var(--krds-number-2) var(--krds-number-3)); }
 
 /* 빈 상태와 오류: GitHub처럼 상자 안 한 줄 */
 .cs-state { display: flex; align-items: center; gap: var(--krds-gap-3); min-height: var(--rb-row-h); padding: var(--krds-padding-4) var(--krds-padding-7); font-size: var(--rb-step-15); line-height: var(--rb-lh-15); color: var(--krds-color-text-subtle); }
@@ -96,6 +104,7 @@ html[data-krds-mode="light"] { --cs-line-base: var(--krds-color-light-success-50
 .cs-swatch.is-advance { background: var(--rb-status-information); }
 .cs-swatch.is-retreat { background: var(--rb-status-danger); }
 .cs-swatch.is-hold { background: var(--krds-color-icon-gray); }
+.cs-swatch.is-struct { background: repeating-linear-gradient(90deg, var(--krds-color-icon-gray) 0 var(--krds-number-3), transparent var(--krds-number-3) var(--krds-number-5)); }
 .cs-swatch.is-sat0 { background: var(--rb-status-primary); }
 .cs-swatch.is-sat1 { background: var(--rb-status-success); }
 .cs-swatch.is-sat2 { background: var(--rb-status-warning); }

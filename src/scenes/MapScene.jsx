@@ -9,7 +9,7 @@ import { readPalette } from '../lib/palette.js'
 import { useModeTick } from '../shell/screenMode.js'
 import { sceneChanges } from '../lib/judge.js'
 import { fmtDate } from '../lib/ledger.js'
-import { Bar, Box, PageHead, SiteState, Verdict, HOLD_ACTION, signed } from '../ui/index.jsx'
+import { Bar, Box, PageHead, SiteState, TableWrap, Verdict, HOLD_ACTION, signed } from '../ui/index.jsx'
 
 // 바탕 타일: OpenFreeMap(키 불필요, 저작권 OpenStreetMap 기여자). 화면 모드에 맞춰 고른다
 const STYLE_URL = { light: 'https://tiles.openfreemap.org/styles/positron', dark: 'https://tiles.openfreemap.org/styles/dark' }
@@ -58,7 +58,9 @@ export default function MapScene({ site, data, onRetry }) {
     m.on('dragstart', moved); m.on('zoomstart', moved)
     m.on('load', () => {
       ;['base', 'current', 'transects'].forEach((id) => m.addSource(id, { type: 'geojson', data: EMPTY }))
-      m.addLayer({ id: 'transects', type: 'line', source: 'transects', paint: { 'line-color': ['match', ['get', 'verdict'], 'advance', PAL.advance, 'retreat', PAL.retreat, PAL.hold], 'line-width': 2 } })
+      m.addLayer({ id: 'transects', type: 'line', source: 'transects', filter: ['!=', ['get', 'verdict'], 'struct'], paint: { 'line-color': ['match', ['get', 'verdict'], 'advance', PAL.advance, 'retreat', PAL.retreat, PAL.hold], 'line-width': 2 } })
+      // 구조물 의심 가로선: 판정에서 뺀 가로선을 점선으로 따로 그린다
+      m.addLayer({ id: 'transects-struct', type: 'line', source: 'transects', filter: ['==', ['get', 'verdict'], 'struct'], paint: { 'line-color': PAL.hold, 'line-width': 2, 'line-dasharray': [1.5, 1.5] } })
       m.addLayer({ id: 'base-halo', type: 'line', source: 'base', paint: { 'line-color': PAL.halo, 'line-width': 7 } })
       m.addLayer({ id: 'base', type: 'line', source: 'base', paint: { 'line-color': PAL.base, 'line-width': 3.5 } })
       m.addLayer({ id: 'current-halo', type: 'line', source: 'current', paint: { 'line-color': PAL.halo, 'line-width': 7 } })
@@ -89,7 +91,7 @@ export default function MapScene({ site, data, onRetry }) {
         <div className="cs-stage">
           <div ref={host} className="cs-stage-fill" role="img" aria-label={`${site.name} 해안선과 가로선 지도`} />
           <div className="cs-legend">
-            {[['is-base', '기준 장면 해안선'], ['is-current', '선택 장면 해안선'], ['is-advance', '전진 가로선'], ['is-retreat', '후퇴 가로선'], ['is-hold', '판정 보류 가로선']].map(([c, t]) => (
+            {[['is-base', '기준 장면 해안선'], ['is-current', '선택 장면 해안선'], ['is-advance', '전진 가로선'], ['is-retreat', '후퇴 가로선'], ['is-hold', '판정 보류 가로선'], data.summary.excluded > 0 && ['is-struct', '구조물 의심 가로선(제외)']].filter(Boolean).map(([c, t]) => (
               <span key={t}><span className={`cs-swatch ${c}`} aria-hidden="true" />{t}</span>
             ))}
           </div>
@@ -103,9 +105,10 @@ export default function MapScene({ site, data, onRetry }) {
             <li><strong>{cnt('advance')}</strong>전진</li>
             <li><strong>{cnt('retreat')}</strong>후퇴</li>
             <li><strong>{cnt('hold') + cnt('nodata')}</strong>판정 보류</li>
+            {cnt('struct') > 0 && <li><strong>{cnt('struct')}</strong>구조물 의심 제외</li>}
           </ul>
           <Box title="장면별 이동 거리" sub="기준 장면 대비" flush foot={HOLD_ACTION}>
-            <div className="cs-table-wrap">
+            <TableWrap label="장면별 이동 거리 표">
               <table className="cs-table is-compact">
                 <thead><tr><th>가로선</th><th className="is-num">이동</th><th><span className="sr-only">막대</span></th><th>판정</th></tr></thead>
                 <tbody>
@@ -114,7 +117,7 @@ export default function MapScene({ site, data, onRetry }) {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </TableWrap>
           </Box>
         </aside>
       </div>

@@ -1,5 +1,5 @@
 // 공유 부품. 배치는 공공 깃랩 목록 상자(rb-listbox)와 표(rb-reftable)를 따르고 값은 KRDS 변수만 쓴다
-import { ArrowDownLeft, ArrowUpRight, CircleAlert, Info, Minus } from 'lucide-react'
+import { ArrowDownLeft, ArrowUpRight, Ban, CircleAlert, Info, Minus } from 'lucide-react'
 
 export const RESPONSIBILITY = '위성 판정은 참고 자료이고 최종 판단은 관리주체의 현장 점검이 정합니다.'
 export const HOLD_ACTION = '판정 보류 가로선은 현장 측량으로 확인합니다.'
@@ -42,11 +42,13 @@ const V = {
   advance: { Icon: ArrowUpRight, label: '전진' },
   retreat: { Icon: ArrowDownLeft, label: '후퇴' },
   hold: { Icon: Minus, label: '판정 보류' },
-  nodata: { Icon: Minus, label: '판정 보류' }
+  nodata: { Icon: Minus, label: '판정 보류' },
+  few: { Icon: Minus, label: '판정 보류' },
+  struct: { Icon: Ban, label: '구조물 의심, 제외' }
 }
 export function Verdict({ v }) {
   const x = V[v] || V.hold
-  return <span className={`cs-verdict is-${v}`}><x.Icon size={16} aria-hidden="true" />{x.label}</span>
+  return <span className={`cs-verdict is-${V[v] ? v : 'hold'}`}><x.Icon size={16} aria-hidden="true" />{x.label}</span>
 }
 
 export function Bar({ value, max, verdict }) {
@@ -100,4 +102,9 @@ export function KV({ items, row = false }) {
 
 export function Note({ icon: Icon = Info, children }) {
   return <p className="cs-note"><Icon size={16} aria-hidden="true" /><span>{children}</span></p>
+}
+
+// 가로로 넘치는 표 영역. 키보드로 초점을 받아 좌우 화살표로 스크롤한다
+export function TableWrap({ label, children }) {
+  return <div className="cs-table-wrap" role="region" aria-label={label} tabIndex={0}>{children}</div>
 }
