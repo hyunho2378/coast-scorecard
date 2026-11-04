@@ -6,6 +6,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   base: '/coast-scorecard/',
   plugins: [react()],
-  server: { port: 5291, strictPort: true, host: '127.0.0.1' },
+  server: { port: 5295, strictPort: true, host: '127.0.0.1' },
   preview: { port: 5292, strictPort: true, host: '127.0.0.1' }
 })
