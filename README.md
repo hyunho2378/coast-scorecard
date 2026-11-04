@@ -1,6 +1,21 @@
 # 연안정비사업 성적표
 
-연안정비사업 사후관리 담당자 콘솔. 화면 7개(지구본, 사업지 목록, 판정 카드, 해안선 지도와 시간 축, 전후 영상 비교, 점검 순서 목록, 자료와 출처)
+연안정비사업 사후관리 담당자 콘솔
+
+- 업무: 현황판, 사업지 분석, 판정 카드, 해안선 지도, 전후 영상, 점검 순서 목록
+- 기록: 분석 기록, 운영 기준, 문서 센터
+- 외부: 자료와 출처
+- 상단 띠 주 행동: 새 사업지 분석
+
+## 새 사업지 분석
+
+- 장면 검색: Earth Search STAC(`sentinel-2-l2a`, 구름 10% 미만, 같은 타일과 같은 상대궤도 묶음 우선, 시점별 최대 3장)
+- 장면 읽기: geotiff.js(MIT)로 COG 범위 요청, 분석 범위 2 km x 2 km(B03, B08 10 m 창과 SCL 20 m 창, 창 안 구름 5% 넘는 장면 제외)
+- 물가선: NDWI 3집단 오츠 위 경계, marching squares, 300 m 미만 조각 제외
+- 가로선: 사업 전 첫 장면 물가선을 따라 100 m 간격, 길이 400 m, 육지 쪽에서 바다 쪽
+- 판정: 같은 해 장면 중앙값 차이, 보류 기준 22.9 m(1표준편차) 또는 44.9 m(95%), 같은 해 장면쌍 차이가 기준을 넘으면 보류, 구조물 다각형 30 m 이내 물가선은 구조물 의심
+- UTM 변환: `src/engine/utm.js`(Krüger 6차 급수)
+- 결과는 화면 메모리와 내려받기 파일(JSON)로만 둠
 
 ## 실행
 
@@ -9,12 +24,12 @@ npm install
 NAPI_RS_FORCE_WASI=1 npm run dev
 ```
 
-- 주소: http://127.0.0.1:5288/ (예: `#/card?site=banam`, `#/map?site=aneho`, `#/storm`)
+- 주소: http://127.0.0.1:5295/coast-scorecard/ (예: `#/card?site=banam`, `#/map?site=aneho`, `#/storm`)
 - 화면 모드: 기본 어두운 화면. 주소에 `?mode=light`, `?mode=high-contrast`, `?mode=theme`를 붙이거나 상단 바 화면 설정에서 고름. 저장소에 남기지 않음
 - rolldown 네이티브 바인딩이 없으면 `npm i @rolldown/binding-wasm32-wasi --no-save --ignore-scripts`를 먼저 실행
 - 시험: `npm test`(node --test, 판정 규칙, 로더, 대장 문구)
 - 다른 포트: `NAPI_RS_FORCE_WASI=1 npm run dev -- --port 5289`
-- 반응형 확인: `http://127.0.0.1:5288/rwd.html?w=390&h=844&hash=/card?site=banam`(같은 출처 고정 폭 iframe)
+- 반응형 확인: `http://127.0.0.1:5295/coast-scorecard/rwd.html?w=390&h=844&hash=/card?site=banam`(같은 출처 고정 폭 iframe)
 
 ## 디자인 기초
 
@@ -26,7 +41,7 @@ NAPI_RS_FORCE_WASI=1 npm run dev
 - `src/krds/base.css`: 공공 깃랩 `styles.css`
 - `src/krds/shell.css`: 공공 깃랩 `components/Layout/shell.css`(상단 바, 왼쪽 세로 바, 둥근 판)
 - `tailwind.config.cjs`: 공공 깃랩 설정 그대로(기본 팔레트와 크기 스케일 비움)
-- `src/tokens.js`: 의미 연결만. 지도와 지구본은 `src/lib/palette.js`가 실행 중 KRDS 변수 값을 읽어 씀
+- `src/tokens.js`: 의미 연결만. 지도는 `src/lib/palette.js`가 실행 중 KRDS 변수 값을 읽어 씀
 - `src/styles.css`: 앱 전용 규칙(표, 상자, 판정 글자, 지도 무대). KRDS 변수만
 
 ## 자료 연결
@@ -50,7 +65,7 @@ NAPI_RS_FORCE_WASI=1 npm run dev
 ## 배포
 
 - `vite.config.js`의 `base`는 `/coast-scorecard/`. `npm run build` 결과(dist)를 gh-pages 브랜치에 올려 GitHub Pages로 공개
-- 개발 서버 5291, 미리보기 5292
+- 개발 서버 5295, 미리보기 5292
 
 ## 미리에서 가져온 동작
 
