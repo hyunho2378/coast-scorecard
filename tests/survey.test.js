@@ -1,6 +1,10 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { surveyRows, surveyCsv, surveyFileName, groupOf, SURVEY_HEAD } from '../src/lib/survey.js'
+import fs from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { surveyRows, surveyCsv, surveyFileName, groupOf, basePoint, SURVEY_HEAD } from '../src/lib/survey.js'
+import { normalizeShorelines, normalizeTransects } from '../src/lib/loader-core.js'
+import { judgeRows } from '../src/lib/judge.js'
 
 const rows = [
   { id: 1, change: 5, threshold: 22.9, verdict: 'hold' },
@@ -30,21 +34,61 @@ test('원래 배열을 바꾸지 않는다', () => {
   assert.equal(JSON.stringify(rows), copy)
 })
 test('CSV는 UTF-8 BOM으로 시작하고 CRLF 줄 끝, 머리와 가로선 수만큼 줄', () => {
-  const t = surveyCsv({ site, rows, basisLabel: '1표준편차' })
+  const t = surveyCsv({ site, rows })
   assert.equal(t.charCodeAt(0), 0xfeff)
   const lines = t.slice(1).split('\r\n').filter(Boolean)
   assert.equal(lines.length, rows.length + 1)
   assert.equal(lines[0], SURVEY_HEAD.join(','))
-  assert.equal(lines[1], '1,고성 반암,3,구조물 의심 가로선,,41.0,22.9,1표준편차,물가선이 구조물이나 암초 위에서 잡힘')
-  assert.equal(lines[3], '3,고성 반암,2,기준 초과,후퇴,-30.2,22.9,1표준편차,육지 쪽 이동')
-  assert.equal(lines[7], '7,고성 반암,4,판정 보류,,,22.9,1표준편차,구름으로 해안선 미검출')
+  assert.equal(lines[1], '1,고성 반암,3,구조물 의심 가로선,,41.0,22.9,,,물가선이 구조물이나 암초 위에서 잡힘')
+  assert.equal(lines[3], '3,고성 반암,2,기준 초과,후퇴,-30.2,22.9,,,육지 쪽 이동')
+  assert.equal(lines[7], '7,고성 반암,4,판정 보류,,,22.9,,,구름으로 해안선 미검출')
 })
 test('쉼표와 따옴표가 든 값은 따옴표로 감싼다', () => {
-  const t = surveyCsv({ site: { id: 'x', name: '가, "나"' }, rows: [rows[0]], basisLabel: '95%' })
+  const t = surveyCsv({ site: { id: 'x', name: '가, "나"' }, rows: [rows[0]] })
   assert.match(t, /,"가, ""나""",/)
 })
 test('빈 목록은 머리 줄만', () => {
-  const t = surveyCsv({ site, rows: [], basisLabel: '95%' })
+  const t = surveyCsv({ site, rows: [] })
   assert.equal(t, '\uFEFF' + SURVEY_HEAD.join(',') + '\r\n')
 })
 test('파일 이름', () => { assert.equal(surveyFileName(site, '2026-11-04'), 'banam_현장측량구간_2026-11-04.csv') })
+test('열 10개: 우선순위, 사업지, 가로선, 판정, 방향, 이동 거리, 보류 기준, 위도, 경도, 판정 내용', () => {
+  assert.deepEqual(SURVEY_HEAD, ['우선순위', '사업지', '가로선', '판정', '방향', '이동 거리(m)', '보류 기준(m)', '위도', '경도', '판정 내용'])
+})
+test('기준 점: 기준 장면 해안선과 가로선이 만나는 점, 만나지 않으면 가로선 중간점', () => {
+  const tr = { type: 'LineString', coordinates: [[0, 0], [0.01, 0]] }
+  const sh = { type: 'LineString', coordinates: [[0.004, -1], [0.004, 1]] }
+  const p = basePoint(tr, sh, 445)
+  assert.ok(Math.abs(p.lon - 0.004) < 1e-9); assert.equal(p.lat, 0); assert.equal(p.onShore, true)
+  const m = basePoint(tr, { type: 'LineString', coordinates: [[1, 1], [2, 2]] })
+  assert.ok(Math.abs(m.lon - 0.005) < 1e-9); assert.equal(m.onShore, false)
+  assert.equal(basePoint(null, sh), null)
+})
+
+const DATA = fileURLToPath(new URL('../public/data', import.meta.url))
+const RULES = `${DATA}/sensitivity_and_rules_v3.json`
+const hasBanam = fs.existsSync(RULES) && fs.existsSync(`${DATA}/banam/transects.geojson`)
+test('실제 자료 반암 CSV: 36줄 모두 10열, 위경도는 소수 6자리이고 강원 고성 범위, 해안선과 만나는 점', { skip: !hasBanam }, () => {
+  const rules = JSON.parse(fs.readFileSync(RULES, 'utf8'))
+  const scenes = normalizeShorelines(JSON.parse(fs.readFileSync(`${DATA}/banam/shorelines.geojson`, 'utf8')))
+  const base = normalizeTransects(JSON.parse(fs.readFileSync(`${DATA}/banam/transects.geojson`, 'utf8')))
+  const rowsB = judgeRows(base, rules.site_rules.banam, rules.scene_rule?.sites?.banam?.periods)
+  const t = surveyCsv({ site, rows: rowsB, baseScene: scenes[0] })
+  const lines = t.slice(1).split('\r\n').filter(Boolean)
+  assert.equal(lines.length, 37)
+  let onShore = 0
+  for (const l of lines.slice(1)) {
+    const c = l.split(',')
+    assert.equal(c.length, 10)
+    assert.match(c[7], /^\d+\.\d{6}$/); assert.match(c[8], /^\d+\.\d{6}$/)
+    const lat = Number(c[7]), lon = Number(c[8])
+    assert.ok(lat > 38.2 && lat < 38.6, `위도 ${lat}`)
+    assert.ok(lon > 128.3 && lon < 128.7, `경도 ${lon}`)
+    assert.ok(['기준 초과', '판정 보류', '구조물 의심 가로선'].includes(c[3]))
+  }
+  for (const r of rowsB) if (basePoint(r.geometry, scenes[0].feature.geometry, r.dist?.[scenes[0].id])?.onShore) onShore += 1
+  assert.ok(onShore >= 30, `해안선과 만나는 가로선 ${onShore}개`)
+  const groups = lines.slice(1).map((l) => l.split(',')[3])
+  assert.deepEqual([...new Set(groups)], ['구조물 의심 가로선', '기준 초과', '판정 보류'])
+  assert.equal(lines.slice(1).filter((l) => l.split(',')[3] === '기준 초과').length, 7)
+})

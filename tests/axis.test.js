@@ -62,7 +62,7 @@ test('반암: 중간 장면은 비교 장면 기준으로 세고 구조물 의�
   }
   assert.equal(summarize(axisRows(d, 0, rule, periods).rows).judgeable, 0)
 })
-test('토고 Agbodrafo: 앱 판정 가능 16개, 시간 축 마지막 장면도 16개(규칙 파일 17은 쓰지 않음)', { skip: !has('aneho') }, () => {
+test('토고 Agbodrafo: 앱 기준 초과 16개, 시간 축 마지막 장면도 16개(규칙 파일 17은 쓰지 않음)', { skip: !has('aneho') }, () => {
   const { d, rule, periods } = siteData('aneho')
   assert.equal(rules.site_rules.aneho.judgeableCount, 17)
   assert.equal(d.summary.judgeable, 16)

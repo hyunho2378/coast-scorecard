@@ -23,15 +23,53 @@ const cell = (v) => {
 }
 const num = (v) => (typeof v === 'number' ? v.toFixed(1) : '')
 
-export const SURVEY_HEAD = ['우선순위', '사업지', '가로선', '판정', '방향', '이동 거리(m)', '판정 보류 기준(m)', '보류 기준', '판정 내용']
+export const SURVEY_HEAD = ['우선순위', '사업지', '가로선', '판정', '방향', '이동 거리(m)', '보류 기준(m)', '위도', '경도', '판정 내용']
+
+// 가로선의 해안 쪽 기준 점. 기준 장면 해안선(shoreline 의 선분 좌표)과 가로선 선분이 만나는 점을 쓰고
+// 만나는 점이 여럿이면 가로선 시작점에서 기준 장면 거리(dist_m)에 가장 가까운 점, 없으면 가로선 선분의 중간점
+const linesOf = (g) => (g?.type === 'LineString' ? [g.coordinates] : g?.type === 'MultiLineString' ? g.coordinates : [])
+function cross(a, b, c, d) {
+  const rx = b[0] - a[0], ry = b[1] - a[1], qx = d[0] - c[0], qy = d[1] - c[1]
+  const den = rx * qy - ry * qx
+  if (!den) return null
+  const t = ((c[0] - a[0]) * qy - (c[1] - a[1]) * qx) / den
+  const u = ((c[0] - a[0]) * ry - (c[1] - a[1]) * rx) / den
+  return t >= 0 && t <= 1 && u >= 0 && u <= 1 ? t : null
+}
+const meters = (a, b) => {
+  const k = Math.cos(((a[1] + b[1]) / 2) * Math.PI / 180)
+  return Math.hypot((b[0] - a[0]) * 111320 * k, (b[1] - a[1]) * 110950)
+}
+export function basePoint(transect, shoreline, baseDist) {
+  const line = linesOf(transect)[0]
+  if (!line || line.length < 2) return null
+  const a = line[0], b = line[line.length - 1]
+  const hits = []
+  for (const sl of linesOf(shoreline)) {
+    for (let i = 0; i < sl.length - 1; i += 1) {
+      const t = cross(a, b, sl[i], sl[i + 1])
+      if (t !== null) hits.push(t)
+    }
+  }
+  const len = meters(a, b)
+  const pick = hits.length
+    ? hits.sort((x, y) => (typeof baseDist === 'number' ? Math.abs(x * len - baseDist) - Math.abs(y * len - baseDist) : x - y))[0]
+    : 0.5
+  return { lon: a[0] + (b[0] - a[0]) * pick, lat: a[1] + (b[1] - a[1]) * pick, onShore: hits.length > 0 }
+}
+const deg = (v) => (typeof v === 'number' ? v.toFixed(6) : '')
 
 // 엑셀이 한글 열을 UTF-8로 읽도록 맨 앞에 BOM을 붙이고 줄 끝은 CRLF로 쓴다
-export function surveyCsv({ site, rows, basisLabel }) {
-  const lines = surveyRows(rows).map((r) => [
-    r.priority, site.name, r.id, SURVEY_GROUP[r.group],
-    r.verdict === 'advance' ? '전진' : r.verdict === 'retreat' ? '후퇴' : '',
-    num(r.change), num(r.threshold), basisLabel, VERDICT[r.verdict]?.note || ''
-  ].map(cell).join(','))
+// baseScene: 기준 장면({ id, feature }). 가로선 기준 점을 구할 때 쓴다
+export function surveyCsv({ site, rows, baseScene }) {
+  const lines = surveyRows(rows).map((r) => {
+    const p = basePoint(r.geometry, baseScene?.feature?.geometry, r.dist?.[baseScene?.id])
+    return [
+      r.priority, site.name, r.id, SURVEY_GROUP[r.group],
+      r.verdict === 'advance' ? '전진' : r.verdict === 'retreat' ? '후퇴' : '',
+      num(r.change), num(r.threshold), deg(p?.lat), deg(p?.lon), VERDICT[r.verdict]?.note || ''
+    ].map(cell).join(',')
+  })
   return '\uFEFF' + [SURVEY_HEAD.join(','), ...lines].join('\r\n') + '\r\n'
 }
 

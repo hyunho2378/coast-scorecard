@@ -374,6 +374,6 @@ html, html[data-krds-mode="dark"], html[data-krds-mode="light"] {
 #root .rb-side-scroll, #root .rb-side-foot { padding-inline: var(--rb-side-pad-x); }
 /* 묶음 접기 상자가 현재 항목 왼쪽 막대(상자 밖 8)를 자르지 않게 자르는 선을 바깥으로 8 넓힌다(접힌 동안은 투명이라 보이지 않는다) */
 #root .rb-side-fold > ul { overflow: clip; overflow-clip-margin: var(--rb-side-pad-x); }
-/* Figma 대조(2026. 10. 31.): 경로 줄 13 / 줄 높이 20, 경로 → 본문 간격 24(layout/crumb-title-gap) */
+/* Figma 대조(2026. 10. 31.): 경로 줄 13 / 줄 높이 20, 경로와 본문 사이 간격 24(layout/crumb-title-gap) */
 #root .krds-breadcrumb-wrap.is-path, #root .krds-breadcrumb-wrap.is-path .breadcrumb, #root .krds-breadcrumb-wrap.is-path li, #root .krds-breadcrumb-wrap.is-path li::after, #root .krds-breadcrumb-wrap.is-path .txt { font-size: var(--krds-font-size-body-xsmall); line-height: var(--rb-lh-13); min-height: 0; }
 #root .rb-page > .krds-breadcrumb-wrap.is-path { margin-bottom: calc(var(--layout-crumb-title-gap) - var(--rb-rhythm)); }

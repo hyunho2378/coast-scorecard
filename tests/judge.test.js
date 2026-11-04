@@ -19,7 +19,7 @@ test('기준도 hold 도 없으면 보류(앱 고정값 없음)', () => {
 test('값이 없으면 nodata', () => {
   assert.equal(verdictOf(null, 10, true), 'nodata')
 })
-test('요약: 판정 가능과 보류 개수, 비율, 중앙값', () => {
+test('요약: 기준 초과과 보류 개수, 비율, 중앙값', () => {
   const rows = [
     { id: 1, change: 20, verdict: 'advance', threshold: 10 },
     { id: 2, change: -40, verdict: 'retreat', threshold: 10 },
@@ -38,7 +38,7 @@ test('장면 비교: 거리 값이 없으면 nodata', () => {
   const r = sceneChanges([{ id: 1, threshold: 10, dist: { a: 100, b: 85 } }, { id: 2, threshold: 10, dist: { a: null, b: 3 } }], 'a', 'b')
   assert.equal(r[0].change, 15); assert.equal(r[0].verdict, 'advance'); assert.equal(r[1].verdict, 'nodata')
 })
-test('점검 목록: 판정 가능만, 변화 큰 순서', () => {
+test('점검 목록: 기준 초과만, 변화 큰 순서', () => {
   const list = stormOrder([
     { id: 'a', name: 'A', rows: [{ id: 1, change: 12, verdict: 'advance' }, { id: 2, change: 90, verdict: 'hold' }] },
     { id: 'b', name: 'B', rows: [{ id: 1, change: -50, verdict: 'retreat' }] }

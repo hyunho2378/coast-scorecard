@@ -34,7 +34,7 @@ export default function SitesScreen({ sites, siteData, rules, onOpen }) {
         {sites.length ? (
           <TableWrap label="사업지 표">
             <table className="cs-table">
-              <thead><tr><th>사업지</th><th>구분</th><th>사업 내용</th><th className="is-num">가로선</th><th className="is-num">판정 가능</th><th className="is-num">판정 보류</th><th className="is-num is-wrap">구조물 의심 제외</th><th className="is-num">보류 기준</th><th className="is-num">비교 기간</th></tr></thead>
+              <thead><tr><th>사업지</th><th>구분</th><th>사업 내용</th><th className="is-num">가로선</th><th className="is-num">기준 초과</th><th className="is-num">판정 보류</th><th className="is-num is-wrap">구조물 의심 제외</th><th className="is-num">보류 기준</th><th className="is-num">비교 기간</th></tr></thead>
               <tbody>
                 {sites.map((s) => (
                   <tr key={s.id}>

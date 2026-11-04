@@ -19,7 +19,7 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
   const r = rules?.data
   const name = (id) => sites.find((s) => s.id === id)?.name || id
   const basisLabel = (BASES.find(([k]) => k === basis) || BASES[0])[1]
-  // 판정 가능 개수는 앱이 구조물 제외와 장면 규칙까지 적용해 센 값만 쓴다. 규칙 파일 judgeableCount(아네호 17)는 화면에 쓰지 않는다
+  // 기준 초과 개수는 앱이 구조물 제외와 장면 규칙까지 적용해 센 값만 쓴다. 규칙 파일 judgeableCount(아네호 17)는 화면에 쓰지 않는다
   const judgeable = (id) => siteData[id]?.status === 'ready' ? siteData[id].summary.judgeable : '읽는 중'
   const errText = (x) => x.surveyAvailable && x.surveyChangeRmseM ? `측량 대조 ${x.surveyChangeRmseM}\u00a0m` : typeof x.priorChangeErrorM === 'number' ? `동해안 ${x.priorChangeErrorM}\u00a0m` : '없음'
   // 장면쌍 90퍼센타일: 연도별 큰 값(구조물 의심 제외). 연도별 값이 없는 해외 사이트는 사이트 값
@@ -40,7 +40,7 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
           <Box title="판정 보류 기준" sub={`${basisLabel} 기준`} flush>
             <TableWrap label="판정 보류 기준 표">
               <table className="cs-table">
-                <thead><tr><th>사업지</th><th className="is-num">보류 기준</th><th className="is-num is-wrap"><span className="rb-phrase">장면쌍 90퍼센타일</span> <span className="rb-phrase">연도별 큰 값</span></th><th className="is-num is-wrap">변화량 오차</th><th className="is-num">판정 가능</th></tr></thead>
+                <thead><tr><th>사업지</th><th className="is-num">보류 기준</th><th className="is-num is-wrap"><span className="rb-phrase">장면쌍 90퍼센타일</span> <span className="rb-phrase">연도별 큰 값</span></th><th className="is-num is-wrap">변화량 오차</th><th className="is-num">기준 초과</th></tr></thead>
                 <tbody>
                   {sites.map((s) => {
                     const x = r?.site_rules?.[s.id]
@@ -60,7 +60,7 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
             </>}>
               <TableWrap label="연도별 장면쌍 90퍼센타일 표">
                 <table className="cs-table">
-                  <thead><tr><th>사업지</th><th className="is-num">2017년</th><th className="is-num">2025년</th><th className="is-num is-wrap">두 해 합친 값</th><th className="is-num is-wrap">연도별 큰 값</th><th className="is-num is-wrap">1표준편차 기준</th><th className="is-num">판정 가능</th></tr></thead>
+                  <thead><tr><th>사업지</th><th className="is-num">2017년</th><th className="is-num">2025년</th><th className="is-num is-wrap">두 해 합친 값</th><th className="is-num is-wrap">연도별 큰 값</th><th className="is-num is-wrap">1표준편차 기준</th><th className="is-num">기준 초과</th></tr></thead>
                   <tbody>
                     {yearRows.map((y) => (
                       <tr key={`${y.id}-${y.part}`}>
@@ -78,12 +78,12 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
 
           {fp.length > 0 && (
             <Box title="보류 기준과 거짓 판정" sub="고성 반암, 판정 대상 20개" flush foot={<>
-              <span className="rb-phrase">거짓 판정은 실제 변화가 없는 가로선이 판정 가능으로 나오는 경우입니다.</span>{' '}
+              <span className="rb-phrase">거짓 판정은 실제 변화가 없는 가로선이 기준 초과로 나오는 경우입니다.</span>{' '}
               <span className="rb-phrase">비율은 변화량 오차를 표준편차 22.92{'\u00a0'}m 정규분포로 둔 값이고</span> <span className="rb-phrase">95% 기준은 1.96 x 22.92{'\u00a0'}m입니다.</span>
             </>}>
               <TableWrap label="보류 기준과 거짓 판정 표">
                 <table className="cs-table">
-                  <thead><tr><th>기준</th><th className="is-num">보류 기준</th><th className="is-num is-wrap">거짓 판정 비율</th><th className="is-num is-wrap">기대 거짓 판정</th><th className="is-num is-wrap">반암 판정 가능</th></tr></thead>
+                  <thead><tr><th>기준</th><th className="is-num">보류 기준</th><th className="is-num is-wrap">거짓 판정 비율</th><th className="is-num is-wrap">기대 거짓 판정</th><th className="is-num is-wrap">반암 기준 초과</th></tr></thead>
                   <tbody>
                     {fp.map((x) => (
                       <tr key={x.basis} className={x.basis === basis ? 'is-current' : undefined}><td>{x.label}{x.basis === basis && <span className="is-sub"> 선택</span>}</td><td className="is-num">{x.thresholdM}{'\u00a0'}m</td><td className="is-num">{(x.rate * 100).toFixed(1)}%</td><td className="is-num">{x.expected.toFixed(1)}개</td><td className="is-num">{x.judgeable}개</td></tr>

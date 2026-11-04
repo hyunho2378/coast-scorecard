@@ -34,7 +34,7 @@ export function median(xs) {
 
 // 가로선 판정 요약. 판정 보류 비율은 전체 가로선 수를 분모로 쓴다.
 // 가로선 수준 값은 가로선 하나의 전후 이동 거리(change). 구간 평균(sectionMean)은 값이 있는 가로선 전체(판정 보류 포함)의 평균이고
-// 별표 10 평균 해빈폭 점수와 대장 문구가 함께 쓴다. meanChange 는 판정 가능 가로선만의 평균이라 점수에 쓰지 않는다
+// 별표 10 평균 해빈폭 점수와 대장 문구가 함께 쓴다. meanChange 는 기준 초과 가로선만의 평균이라 점수에 쓰지 않는다
 // 구조물 의심 가로선(struct)은 판정 보류와 따로 세고 구간 평균에서도 뺀다
 export function summarize(rows) {
   const judge = rows.filter((r) => isJudgeable(r.verdict))
@@ -73,7 +73,7 @@ export function sceneChanges(transectRows, baseScene, scene) {
   })
 }
 
-// 폭풍 뒤 점검 목록: 판정 가능 가로선만, 변화 절댓값이 큰 순서
+// 점검 순서 목록: 기준 초과 가로선만, 변화 절댓값이 큰 순서
 export function stormOrder(sites) {
   const out = []
   for (const s of sites) {

@@ -26,3 +26,21 @@ test('소스에 개발 서버 전용 주소 /ext/ 와 앞이 / 인 자료 주소
 test('vite 기본 주소는 /coast-scorecard/', () => {
   assert.match(fs.readFileSync(`${root}vite.config.js`, 'utf8'), /base:\s*'\/coast-scorecard\/'/)
 })
+
+test('화면 이름: 점검 순서 목록(식별자 storm 그대로), 사이트 이름 연안정비사업 성적표', async () => {
+  const { NAV } = await import('../src/shell/route.js')
+  assert.deepEqual(NAV.find((n) => n.id === 'storm'), { id: 'storm', label: '점검 순서 목록' })
+  assert.equal(NAV.length, 7)
+  const storm = fs.readFileSync(`${root}src/screens/StormScreen.jsx`, 'utf8')
+  assert.match(storm, /title="점검 순서 목록"/)
+  assert.match(storm, /선택한 기준 장면과 비교 장면의 변화가 큰 가로선부터 점검 순서를 매깁니다\./)
+  assert.match(fs.readFileSync(`${root}index.html`, 'utf8'), /<title>연안정비사업 성적표<\/title>/)
+  assert.match(fs.readFileSync(`${root}src/shell/AppShell.jsx`, 'utf8'), />연안정비사업 성적표</)
+  assert.match(fs.readFileSync(`${root}README.md`, 'utf8'), /^# 연안정비사업 성적표/)
+})
+test('소스와 README에 폭풍, 파고, 판정 가능, 판정 전진, 해안선 성적표 문구가 없다', () => {
+  const files = []
+  const walk = (d) => { for (const f of fs.readdirSync(d, { withFileTypes: true })) { const p = `${d}/${f.name}`; if (f.isDirectory()) walk(p); else if (/\.(jsx?|css|html|md)$/.test(f.name)) files.push(p) } }
+  walk(`${root}src`); files.push(`${root}README.md`, `${root}index.html`)
+  for (const p of files) assert.doesNotMatch(fs.readFileSync(p, 'utf8'), /폭풍|파고|판정 가능|판정 전진|판정 후퇴|해안선 성적표/, p)
+})

@@ -149,7 +149,7 @@ export default function AppShell({ basis, onBasis, screen, onGo, sites, siteId, 
               </button>
               <a href="#/globe" className="rb-gbar-brand" onClick={(e) => { e.preventDefault(); go('globe') }}>
                 <span className="rb-gbar-mark" aria-hidden="true">해</span>
-                <span className="rb-gbar-brand-text">해안선 성적표</span>
+                <span className="rb-gbar-brand-text">연안정비사업 성적표</span>
               </a>
             </div>
             <span />

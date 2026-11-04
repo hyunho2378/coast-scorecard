@@ -1,4 +1,4 @@
-// 폭풍 뒤 점검 목록. 판정 가능 가로선만 모아 변화가 큰 순서로. 점검 표시와 메모는 화면 안 상태로만 둔다
+// 점검 순서 목록. 기준 장면과 비교 장면 사이 기준 초과 가로선만 모아 변화가 큰 순서로. 점검 표시와 메모는 화면 안 상태로만 둔다
 import { useMemo } from 'react'
 import { Box, Empty, Loading, PageHead, TableWrap, Verdict, HOLD_ACTION, signed } from '../ui/index.jsx'
 import { stormOrder } from '../lib/judge.js'
@@ -15,10 +15,11 @@ export default function StormScreen({ sites, siteData, checks, setChecks, onOpen
 
   return (
     <>
-      <PageHead title="폭풍 뒤 점검 목록" meta={<><span>판정 가능 가로선 {list.length}개</span><span>점검 완료 {done}개</span><span>판정 보류 {heldTotal}개 제외</span>{exclTotal > 0 && <span>구조물 의심 {exclTotal}개 제외</span>}</>} />
+      <PageHead title="점검 순서 목록" meta={<><span>기준 초과 가로선 {list.length}개</span><span>점검 완료 {done}개</span><span>판정 보류 {heldTotal}개 제외</span>{exclTotal > 0 && <span>구조물 의심 {exclTotal}개 제외</span>}</>} />
+      <p className="cs-text">선택한 기준 장면과 비교 장면의 변화가 큰 가로선부터 점검 순서를 매깁니다.</p>
       <Box flush foot={HOLD_ACTION}>
-        {loading ? <Loading rows={6} /> : !list.length ? <Empty>판정 가능 가로선이 없습니다.</Empty> : (
-          <TableWrap label="폭풍 뒤 점검 표">
+        {loading ? <Loading rows={6} /> : !list.length ? <Empty>기준 초과 가로선이 없습니다.</Empty> : (
+          <TableWrap label="점검 순서 표">
             <table className="cs-table">
               <thead><tr><th>순서</th><th>완료</th><th>사업지</th><th className="is-num">가로선</th><th className="is-num">변화</th><th>판정</th><th>현장 메모</th></tr></thead>
               <tbody>

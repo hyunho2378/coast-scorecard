@@ -42,7 +42,7 @@ export async function loadRules() {
   return fetchJsonOptional(RULES_URL)
 }
 
-// 돌려주는 status: ready(판정 가능), empty(파일 없음), error(읽기 실패)
+// 돌려주는 status: ready(읽기 완료), empty(파일 없음), error(읽기 실패)
 // rules 는 규칙 파일 전체. 사업지 보류 기준(site_rules)과 장면 규칙(scene_rule)을 차례로 적용한다
 export async function loadSite(site, rules) {
   const rule = rules?.site_rules?.[site.id]

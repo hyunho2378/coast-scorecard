@@ -111,7 +111,7 @@ export default function MapScene({ site, data, rules, basis = 'sd1', onRetry }) 
           <p className="cs-axis-basis"><strong>{isFinal ? '최종 판정 기준' : '비교 장면 기준'}</strong> <span className="cs-head-meta" style={{ display: 'inline' }}>{isFinal ? '두 시점 장면 중앙값 비교' : `기준 장면과 ${steps[index]?.label} 한 장씩 비교`}</span></p>
           <div className="cs-axis-counts">
             <ul className="cs-counts" aria-label={`${isFinal ? '최종 판정 기준' : '비교 장면 기준'} 판정 개수`}>
-              <li><strong>{sc.judgeable}</strong>판정 가능</li>
+              <li><strong>{sc.judgeable}</strong>기준 초과</li>
               <li><strong>{sc.held}</strong>판정 보류</li>
               {sc.excluded > 0 && <li><strong>{sc.excluded}</strong>구조물 의심 제외</li>}
             </ul>

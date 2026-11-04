@@ -33,7 +33,7 @@ function siteRows(id, basis = 'sd1') {
   if (id === 'sandmotor') base = samepairFromCorrected(base, JSON.parse(fs.readFileSync(`${POC2}/sites/sandmotor_spring_vs_jarkus_rows.json`, 'utf8')))
   return judgeRows(base, rules.site_rules[id], rules.scene_rule.sites[id].periods, basis)
 }
-// 6차 분석(poc6) 값: 한국 기준 22.9 m, 반암 구조물 의심 15개 제외, 장면 규칙 뒤 판정 가능 개수
+// 6차 분석(poc6) 값: 한국 기준 22.9 m, 반암 구조물 의심 15개 제외, 장면 규칙 뒤 기준 초과 개수
 const EXPECT = {
   banam: { total: 36, judgeable: 7, advance: 7, retreat: 0, t: 22.9 },
   jinjin: { total: 37, judgeable: 0, advance: 0, retreat: 0, t: 22.9 },
@@ -42,7 +42,7 @@ const EXPECT = {
   sandmotor: { total: 37, judgeable: 17, advance: 4, retreat: 13, t: 57.2 }
 }
 for (const [id, e] of Object.entries(EXPECT)) {
-  test(`실제 자료 ${id}: 보류 기준 ${e.t} m와 장면 규칙으로 판정 가능 ${e.judgeable}/${e.total}`, { skip: !has(id) }, () => {
+  test(`실제 자료 ${id}: 보류 기준 ${e.t} m와 장면 규칙으로 기준 초과 ${e.judgeable}/${e.total}`, { skip: !has(id) }, () => {
     const s = summarize(siteRows(id))
     assert.equal(s.total, e.total); assert.equal(s.judgeable, e.judgeable)
     assert.equal(s.advance, e.advance); assert.equal(s.retreat, e.retreat)
@@ -61,7 +61,7 @@ test('사이트 구분: 화진포는 비교 해변이라 점수 계산 없음, �
   assert.equal(roleOf(rules.site_rules.banam), 'project'); assert.equal(roleOf(rules.site_rules.jinjin), 'project')
   assert.equal(roleOf(null), 'project')
 })
-test('장면 규칙: 한 시점 장면이 1장이면 판정 가능 가로선도 보류(few)', () => {
+test('장면 규칙: 한 시점 장면이 1장이면 기준 초과 가로선도 보류(few)', () => {
   const periods = { 2017: ['a', 'b'], 2025: ['c', 'd'] }
   const rows = [
     { id: 1, change: 40, verdict: 'advance', dist: { a: 1, b: 2, c: 3, d: 4 } },
@@ -85,7 +85,7 @@ test('구간 평균: 판정 보류 가로선을 포함한 값이 있는 가로�
   const s = summarize(rows)
   assert.equal(s.sectionMean, 20); assert.equal(s.sectionN, 3); assert.equal(s.meanChange, 60)
 })
-test('반암 판정 가능 7/36: 26번에서 32번, 모두 전진, +23.9 m에서 +41.2 m', { skip: !has('banam') }, () => {
+test('반암 기준 초과 7/36: 26번에서 32번, 모두 전진, +23.9 m에서 +41.2 m', { skip: !has('banam') }, () => {
   const rows = siteRows('banam')
   const ok = rows.filter((r) => r.verdict === 'advance' || r.verdict === 'retreat')
   assert.deepEqual(ok.map((r) => r.id), [26, 27, 28, 29, 30, 31, 32])
@@ -111,6 +111,15 @@ test('반암 구간 평균: 구조물 의심을 뺀 가로선 20개 +16.0 m, 민
   const t = ledgerText({ site: { name: '고성 반암' }, rows, period: { from: '2017-04-13', to: '2025-05-30' }, today: '2026-11-03' })
   assert.match(t, /고성 반암 구간 평균 해빈폭 \+16\.0 m 변화/)
   assert.doesNotMatch(t, /가로선 (10|15|24|33)번/)
+})
+test('반암 대장 문구: 기준 초과 7개와 거짓 판정 표의 기대 수 6.3개(1표준편차, 판정 대상 20개)', { skip: !has('banam') }, () => {
+  const rows = siteRows('banam')
+  const fp = falsePositiveRows(rules).find((x) => x.basis === 'sd1')
+  assert.equal(fp.expected, 6.3); assert.equal(fp.n, 20)
+  const t = ledgerText({ site: { name: '고성 반암' }, rows, period: { from: '2017-04-13', to: '2025-05-30' }, today: '2026-11-03', expected: { value: fp.expected, label: fp.label } }).split('\n')
+  assert.equal(t[1], '기준 초과 7개, 같은 기준에서 오차만으로 나올 수 있는 기대 수 6.3개(1표준편차)')
+  assert.match(t.join('\n'), /가로선 26번 해빈폭 \+41\.2 m 변화\(판정 보류 기준 22\.9 m\), 기준 초과 전진\./)
+  assert.equal(falsePositiveRows(rules).find((x) => x.basis === 'p95').expected, 1.0)
 })
 test('기준 선택: 95% 44.9 m에서 반암 0개, 기본값은 1표준편차 22.9 m', { skip: !has('banam') }, () => {
   assert.equal(thresholdOf(rules.site_rules.banam), 22.9)

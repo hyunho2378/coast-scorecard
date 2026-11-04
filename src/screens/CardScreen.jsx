@@ -4,7 +4,7 @@ import { Check, Copy, Download } from 'lucide-react'
 import { Bar, Box, Button, KV, PageHead, SiteState, TableWrap, Verdict, HOLD_ACTION, pct, signed } from '../ui/index.jsx'
 import { ledgerText, fmtDate } from '../lib/ledger.js'
 import { downloadText, surveyCsv, surveyFileName, surveyRows } from '../lib/survey.js'
-import { projectFactsFor, scoreInputsFor, typeRulesFor, unifiedFor } from '../lib/loader-core.js'
+import { falsePositiveRows, projectFactsFor, scoreInputsFor, typeRulesFor, unifiedFor } from '../lib/loader-core.js'
 import { BASES, beachWidthScore, isJudgeable, roleOf, ROLE } from '../lib/judge.js'
 
 const ANNEX = '해양수산부 고시 제2025-181호 별표 10'
@@ -35,7 +35,8 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
   const s = data.summary
   const rows = data.rows
   const held = rows.filter((r) => !isJudgeable(r.verdict) && r.verdict !== 'struct')
-  const text = ledgerText({ site, rows, period: data.period, today })
+  const fpRow = site.id === 'banam' ? falsePositiveRows(rules?.data).find((x) => x.basis === basis) : null
+  const text = ledgerText({ site, rows, period: data.period, today, expected: fpRow && typeof fpRow.expected === 'number' ? { value: fpRow.expected, label: fpRow.label } : null })
   const rule = rules?.data?.site_rules?.[site.id]
   const role = roleOf(rule)
   const isControl = role === 'control'
@@ -56,7 +57,7 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
   const nStruct = survey.filter((r) => r.group === 'struct').length
   const nExceed = survey.filter((r) => r.group === 'exceed').length
   const nHold = survey.length - nStruct - nExceed
-  const download = () => downloadText(surveyCsv({ site, rows, basisLabel }), surveyFileName(site, today))
+  const download = () => downloadText(surveyCsv({ site, rows, baseScene: data.scenes[0] }), surveyFileName(site, today))
 
   const copy = async () => {
     try { await navigator.clipboard.writeText(text) } catch { areaRef.current?.select(); document.execCommand?.('copy') }
@@ -73,7 +74,7 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
       </>)}
       <ul className="cs-counts" aria-label="판정 개수">
         <li><strong>{s.total}</strong>가로선</li>
-        <li><strong>{s.judgeable}</strong>판정 가능({pct(s.judgeableRatio)})</li>
+        <li><strong>{s.judgeable}</strong>기준 초과({pct(s.judgeableRatio)})</li>
         <li><strong>{s.held}</strong>판정 보류</li>
         {s.excluded > 0 && <li><strong>{s.excluded}</strong>구조물 의심 제외</li>}
         <li><strong>{s.advance}</strong>전진</li>
@@ -89,7 +90,7 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
               <p className="cs-text">사업지 해안선 변화와 견주는 비교 해변입니다.</p>
               <KV items={[
                 values.length > 0 && ['위성 변화', `가로선 ${values.length}개 ${signed(Math.min(...values))}에서 ${signed(Math.max(...values))}`],
-                ['판정 기준', `변화가 판정 기준 ${thr}\u00a0m보다 작아 판정 가능 가로선이 ${s.judgeable}개입니다.`],
+                ['판정 기준', `변화가 판정 기준 ${thr}\u00a0m보다 작아 기준 초과 가로선이 ${s.judgeable}개입니다.`],
                 grades && gradeRuns(grades, 2021) && ['실태조사 침식등급', gradeRuns(grades, 2021)],
                 grades && ['출처', '해양수산부 연안포털, 연안침식실태조사 화진포 침식등급이력(열람 2026. 11. 3.)']
               ]} />
@@ -98,7 +99,7 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
 
           {!isControl && s.judgeable === 0 && (
             <Box title="별표 10 점수" sub={ANNEX}>
-              <p className="cs-text"><strong>판정 가능 {s.judgeable}/{s.total}, 현장 측량 대상</strong></p>
+              <p className="cs-text"><strong>기준 초과 {s.judgeable}/{s.total}, 현장 측량 대상</strong></p>
               <p className="cs-text">판정 보류 기준 {thr}{'\u00a0'}m({basisLabel})를 넘는 가로선이 없어 해빈 측량으로 해빈폭과 단면을 확인합니다.</p>
             </Box>
           )}
@@ -212,7 +213,7 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
           )}>
             <KV items={[
               ['순서', `구조물 의심 ${nStruct}개, 기준 초과 ${nExceed}개, 판정 보류 ${nHold}개`],
-              ['파일 내용', <><span className="rb-phrase">가로선별 판정과 이동 거리,</span> <span className="rb-phrase">보류 기준 {thr}{'\u00a0'}m({basisLabel})와 우선순위</span></>]
+              ['파일 내용', <><span className="rb-phrase">가로선별 판정과 이동 거리,</span> <span className="rb-phrase">해안 쪽 기준 점의 위도와 경도,</span> <span className="rb-phrase">보류 기준 {thr}{'\u00a0'}m({basisLabel})와 우선순위</span></>]
             ]} />
           </Box>
 
@@ -226,7 +227,7 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
                 <label htmlFor="ledger" className="sr-only">대장 옮김 문구</label>
                 <textarea id="ledger" ref={areaRef} readOnly value={text} rows={Math.min(12, text.split('\n').length + 1)} className="cs-ledger" />
               </>
-            ) : <p className="cs-state">판정 가능 가로선이 없습니다.</p>}
+            ) : <p className="cs-state">기준 초과 가로선이 없습니다.</p>}
             <p id="copy-state" role="status" className="sr-only">{copied ? '문구를 복사했습니다.' : ''}</p>
           </Box>
 
