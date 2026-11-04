@@ -27,16 +27,25 @@ test('vite 기본 주소는 /coast-scorecard/', () => {
   assert.match(fs.readFileSync(`${root}vite.config.js`, 'utf8'), /base:\s*'\/coast-scorecard\/'/)
 })
 
-test('화면 이름: 점검 순서 목록(식별자 storm 그대로), 사이트 이름 연안정비사업 성적표', async () => {
-  const { NAV } = await import('../src/shell/route.js')
-  assert.deepEqual(NAV.find((n) => n.id === 'storm'), { id: 'storm', label: '점검 순서 목록' })
-  assert.equal(NAV.length, 7)
-  const storm = fs.readFileSync(`${root}src/screens/StormScreen.jsx`, 'utf8')
-  assert.match(storm, /title="점검 순서 목록"/)
-  assert.match(storm, /선택한 기준 장면과 비교 장면의 변화가 큰 가로선부터 점검 순서를 매깁니다\./)
+test('정보 구조: 업무, 기록, 외부 묶음과 화면 10개, 사이트 이름 연안정비사업 성적표', async () => {
+  const { NAV, GROUPS } = await import('../src/shell/route.js')
+  assert.deepEqual(GROUPS.map((g) => g[1]), ['업무', '기록', '외부'])
+  assert.deepEqual(NAV.filter((n) => n.group === 'work').map((n) => n.label), ['현황판', '사업지 분석', '판정 카드', '해안선 지도', '전후 영상', '점검 순서 목록'])
+  assert.deepEqual(NAV.filter((n) => n.group === 'record').map((n) => n.label), ['분석 기록', '운영 기준', '문서 센터'])
+  assert.deepEqual(NAV.filter((n) => n.group === 'outside').map((n) => n.label), ['자료와 출처'])
+  assert.equal(NAV[0].id, 'home')
   assert.match(fs.readFileSync(`${root}index.html`, 'utf8'), /<title>연안정비사업 성적표<\/title>/)
-  assert.match(fs.readFileSync(`${root}src/shell/AppShell.jsx`, 'utf8'), />연안정비사업 성적표</)
+  const shell = fs.readFileSync(`${root}src/shell/AppShell.jsx`, 'utf8')
+  assert.match(shell, />연안정비사업 성적표</)
+  assert.match(shell, /새 사업지 분석/)
   assert.match(fs.readFileSync(`${root}README.md`, 'utf8'), /^# 연안정비사업 성적표/)
+})
+test('화면에 서비스 소개, 이용 안내 문단, 자기 제한 문구가 없다', () => {
+  const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => e.isDirectory() ? walk(`${d}/${e.name}`) : [`${d}/${e.name}`])
+  for (const f of walk(`${root}src`).filter((x) => /\.jsx$/.test(x))) {
+    const t = fs.readFileSync(f, 'utf8')
+    assert.doesNotMatch(t, /서비스 안내|이용 순서|className="cs-text"|근거|시험값|샘플/, f)
+  }
 })
 test('소스와 README에 폭풍, 파고, 판정 가능, 판정 전진, 해안선 성적표 문구가 없다', () => {
   const files = []
