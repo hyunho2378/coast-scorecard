@@ -943,7 +943,6 @@ html[data-krds-mode="high-contrast"] {
 }
 /* 공공 깃랩 app/src/styles.css 사본(2026. 11. 3.). 값은 KRDS 변수만. 앱 전용 규칙은 src/styles.css에 둔다 */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
-.block { display: block; }
 .inline { display: inline; }
 .flex { display: flex; }
 .table { display: table; }
@@ -2033,3 +2032,4 @@ html[data-krds-mode="light"] { --cs-line-base: var(--krds-color-light-success-50
 /* 1023 px 이하: 큰 숫자와 선택 상세를 지도 위로 올린다. 범례는 지도 아래 한 줄 */
 @media (max-width: 1023px) { .cs-dash > .cs-dash-side { order: -1; } }
 @media (max-width: 767px) { .cs-stage .cs-legend { left: var(--krds-gap-2); top: var(--krds-gap-2); grid-template-columns: repeat(2, auto); -moz-column-gap: var(--krds-gap-4); column-gap: var(--krds-gap-4); padding: var(--krds-padding-2) var(--krds-padding-3); } }
+@media (max-width: 479px) { .cs-table .cs-barcell { display: none; } }

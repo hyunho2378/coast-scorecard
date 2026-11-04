@@ -7857,6 +7857,26 @@ var History = createLucideIcon("history", [
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var Import = createLucideIcon("import", [
+	["path", {
+		d: "M12 3v12",
+		key: "1x0j5s"
+	}],
+	["path", {
+		d: "m8 11 4 4 4-4",
+		key: "1dohi6"
+	}],
+	["path", {
+		d: "M8 5H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-4",
+		key: "1ywtjm"
+	}]
+]);
+/**
+* @license lucide-react v0.545.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var Info = createLucideIcon("info", [
 	["circle", {
 		cx: "12",
@@ -47007,7 +47027,11 @@ function TransectList({ rows, selected, onSelect, label = "가로선 목록", li
 	const max = Math.max(...list.map((r) => Math.abs(r.change ?? 0)), (list[0]?.threshold || 10) * 2, 1);
 	const ref = (0, import_react.useRef)(null);
 	(0, import_react.useEffect)(() => {
-		ref.current?.querySelector("tr.is-current")?.scrollIntoView?.({ block: "nearest" });
+		const row = ref.current?.querySelector("tr.is-current");
+		const box = ref.current?.closest(".cs-table-wrap");
+		if (!row || !box) return;
+		const top = row.offsetTop - (ref.current.tHead?.offsetHeight || 0);
+		if (top < box.scrollTop || row.offsetTop + row.offsetHeight > box.scrollTop + box.clientHeight) box.scrollTop = Math.max(0, top);
 	}, [selected]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableWrap, {
 		label,
@@ -47021,10 +47045,13 @@ function TransectList({ rows, selected, onSelect, label = "가로선 목록", li
 					className: "is-num",
 					children: "이동 거리"
 				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-					className: "sr-only",
-					children: "막대"
-				}) })
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+					className: "cs-barcell",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "sr-only",
+						children: "막대"
+					})
+				})
 			] }) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: shown.map((r) => {
 				const cur = r.id === selected;
 				return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
@@ -47401,6 +47428,33 @@ function HomeScreen({ sites, siteData, rules, site, settings, onSelect, onOpen }
 			]
 		})
 	] });
+}
+// src/lib/structures.js
+function idRuns(ids) {
+	const xs = [...new Set((ids || []).map(Number))].filter(Number.isFinite).sort((a, b) => a - b);
+	const out = [];
+	for (const x of xs) {
+		const last = out[out.length - 1];
+		if (last && x === last[last.length - 1] + 1) last.push(x);
+		else out.push([x]);
+	}
+	return out;
+}
+function structurePolygons(rows, ids) {
+	const byId = new Map((rows || []).map((r) => [Number(r.id), r]));
+	const polys = [];
+	for (const run of idRuns(ids)) {
+		const a = byId.get(run[0])?.geometry?.coordinates;
+		const b = byId.get(run[run.length - 1])?.geometry?.coordinates;
+		if (!a || !b || a.length < 2 || b.length < 2) continue;
+		polys.push([
+			a[0],
+			a[a.length - 1],
+			b[b.length - 1],
+			b[0]
+		]);
+	}
+	return polys;
 }
 // src/engine/stac.js
 var STAC_URL = "https://earth-search.aws.element84.com/v1/search";
@@ -48282,7 +48336,7 @@ function boxRing(lon, lat) {
 		[lon - dx, lat - dy]
 	];
 }
-function AnalyzeScreen({ sites, siteData, settings, job, onRun, onStop, onOpen }) {
+function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, onOpen }) {
 	const tick = useModeTick();
 	const host = (0, import_react.useRef)(null);
 	const map = (0, import_react.useRef)(null);
@@ -48478,6 +48532,13 @@ function AnalyzeScreen({ sites, siteData, settings, job, onRun, onStop, onOpen }
 		ring,
 		drawing
 	]);
+	const presetIds = preset ? rules?.data?.site_rules?.[preset]?.structureExcluded || [] : [];
+	const presetRows = preset && siteData[preset]?.status === "ready" ? siteData[preset].base || siteData[preset].rows : null;
+	const loadStructures = () => {
+		setPolys(structurePolygons(presetRows, presetIds));
+		setRing([]);
+		setDrawing(false);
+	};
 	const closeRing = () => {
 		if (ring.length >= 3) {
 			setPolys((x) => [...x, ring]);
@@ -48574,6 +48635,16 @@ function AnalyzeScreen({ sites, siteData, settings, job, onRun, onStop, onOpen }
 							ring.length,
 							"점"
 						]
+					}),
+					presetIds.length > 0 && presetRows && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						className: "krds-btn small secondary",
+						disabled: running,
+						onClick: loadStructures,
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Import, {
+							size: 16,
+							"aria-hidden": "true"
+						}), "기존 사업지 구조물 구간 불러오기"]
 					}),
 					polys.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						type: "button",
@@ -53241,362 +53312,386 @@ function RulesScreen({ sites, siteData, rules, settings, setSettings, siteId, on
 	const sc = d ? annexScore(d.rows, settings) : null;
 	const shift = tideShift(settings.tide, settings.slope);
 	const thr = thresholdOf(rules?.data?.site_rules?.[cur?.id], settings.basis);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PageHead, {
-		title: "운영 기준",
-		meta: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["판정 기준 ", (BASES.find(([k]) => k === settings.basis) || BASES[0])[1]] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-			"시점별 장면 ",
-			settings.minScenes,
-			"장 이상"
-		] })] })
-	}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "cs-split is-even",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "cs-col",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
-					title: "판정 보류 기준",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "cs-form",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-							label: "보류 기준",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Segmented, {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PageHead, {
+			title: "운영 기준",
+			meta: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["판정 기준 ", (BASES.find(([k]) => k === settings.basis) || BASES[0])[1]] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+				"시점별 장면 ",
+				settings.minScenes,
+				"장 이상"
+			] })] })
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "cs-split is-even",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "cs-col",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
+						title: "판정 보류 기준",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "cs-form",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
 								label: "보류 기준",
-								value: settings.basis,
-								options: [["sd1", `1표준편차 ${korea?.holdThresholdM ?? 22.9} m`], ["p95", `95% ${korea?.p95?.threshold_m ?? 44.9} m`]],
-								onChange: set("basis")
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Segmented, {
+									label: "보류 기준",
+									value: settings.basis,
+									options: [["sd1", `1표준편차 ${korea?.holdThresholdM ?? 22.9} m`], ["p95", `95% ${korea?.p95?.threshold_m ?? 44.9} m`]],
+									onChange: set("basis")
+								})
 							})
 						})
-					})
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
-					title: "장면 규칙",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "cs-form",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "cs-form-row",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-								label: "시점별 최소 장면",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pick, {
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
+						title: "장면 규칙",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "cs-form",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "cs-form-row",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
 									label: "시점별 최소 장면",
-									value: settings.minScenes,
-									options: [
-										[1, "1장"],
-										[2, "2장"],
-										[3, "3장"]
-									],
-									onChange: set("minScenes")
-								})
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-								label: "시점별 최대 장면",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pick, {
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pick, {
+										label: "시점별 최소 장면",
+										value: settings.minScenes,
+										options: [
+											[1, "1장"],
+											[2, "2장"],
+											[3, "3장"]
+										],
+										onChange: set("minScenes")
+									})
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
 									label: "시점별 최대 장면",
-									value: settings.maxScenes,
-									options: [
-										[2, "2장"],
-										[3, "3장"],
-										[4, "4장"]
-									],
-									onChange: set("maxScenes")
-								})
-							})]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "cs-form-row",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-								label: "장면 구름 상한",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pick, {
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pick, {
+										label: "시점별 최대 장면",
+										value: settings.maxScenes,
+										options: [
+											[2, "2장"],
+											[3, "3장"],
+											[4, "4장"]
+										],
+										onChange: set("maxScenes")
+									})
+								})]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "cs-form-row",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
 									label: "장면 구름 상한",
-									value: settings.maxCloud,
-									options: [
-										[5, "5%"],
-										[10, "10%"],
-										[20, "20%"]
-									],
-									onChange: set("maxCloud")
-								})
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-								label: "가로선 간격",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pick, {
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pick, {
+										label: "장면 구름 상한",
+										value: settings.maxCloud,
+										options: [
+											[5, "5%"],
+											[10, "10%"],
+											[20, "20%"]
+										],
+										onChange: set("maxCloud")
+									})
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
 									label: "가로선 간격",
-									value: settings.spacing,
-									options: [
-										[50, "50 m"],
-										[100, "100 m"],
-										[200, "200 m"]
-									],
-									onChange: set("spacing")
-								})
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pick, {
+										label: "가로선 간격",
+										value: settings.spacing,
+										options: [
+											[50, "50 m"],
+											[100, "100 m"],
+											[200, "200 m"]
+										],
+										onChange: set("spacing")
+									})
+								})]
 							})]
-						})]
-					})
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
-					title: "별표 10 계산기",
-					sub: "해양수산부 고시 제2025-181호",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "cs-form",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-								label: "사업지",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pick, {
-									label: "계산기 사업지",
-									value: cur?.id,
-									options: scored.map((s) => [s.id, s.name]),
-									onChange: onSite,
-									wide: true
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "cs-form-row",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-									label: "사업 전 해빈폭",
-									htmlFor: "rs-w0",
-									unit: "m",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumInput, {
-										id: "rs-w0",
-										value: settings.w0,
-										onChange: set("w0"),
-										step: 5,
-										min: 1,
-										max: 500
+						})
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
+						title: "별표 10 계산기",
+						sub: "해양수산부 고시 제2025-181호",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "cs-form",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+									label: "사업지",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pick, {
+										label: "계산기 사업지",
+										value: cur?.id,
+										options: scored.map((s) => [s.id, s.name]),
+										onChange: onSite,
+										wide: true
 									})
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-									label: "목표 해안선 거리",
-									htmlFor: "rs-off",
-									unit: "m",
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "cs-form-row",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+										label: "사업 전 해빈폭",
+										htmlFor: "rs-w0",
+										unit: "m",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumInput, {
+											id: "rs-w0",
+											value: settings.w0,
+											onChange: set("w0"),
+											step: 5,
+											min: 1,
+											max: 500
+										})
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+										label: "목표 해안선 거리",
+										htmlFor: "rs-off",
+										unit: "m",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumInput, {
+											id: "rs-off",
+											value: settings.offset,
+											onChange: set("offset"),
+											step: 5,
+											min: -100,
+											max: 200
+										})
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "cs-form-row",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+										label: "해빈 경사",
+										htmlFor: "rs-slope",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumInput, {
+											id: "rs-slope",
+											value: settings.slope,
+											onChange: set("slope"),
+											step: .01,
+											min: .01,
+											max: 1
+										})
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+										label: "조위 차이",
+										htmlFor: "rs-tide",
+										unit: "m",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumInput, {
+											id: "rs-tide",
+											value: settings.tide,
+											onChange: set("tide"),
+											step: .1,
+											min: 0,
+											max: 10
+										})
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+									label: "나머지 항목 점수",
+									htmlFor: "rs-other",
+									unit: "점",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumInput, {
-										id: "rs-off",
-										value: settings.offset,
-										onChange: set("offset"),
-										step: 5,
-										min: -100,
-										max: 200
-									})
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "cs-form-row",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-									label: "해빈 경사",
-									htmlFor: "rs-slope",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumInput, {
-										id: "rs-slope",
-										value: settings.slope,
-										onChange: set("slope"),
-										step: .01,
-										min: .01,
-										max: 1
-									})
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-									label: "조위 차이",
-									htmlFor: "rs-tide",
-									unit: "m",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumInput, {
-										id: "rs-tide",
-										value: settings.tide,
-										onChange: set("tide"),
-										step: .1,
+										id: "rs-other",
+										value: settings.other,
+										onChange: set("other"),
+										step: 1,
 										min: 0,
-										max: 10
+										max: 40
 									})
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-								label: "나머지 항목 점수",
-								htmlFor: "rs-other",
-								unit: "점",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumInput, {
-									id: "rs-other",
-									value: settings.other,
-									onChange: set("other"),
-									step: 1,
-									min: 0,
-									max: 40
 								})
-							})
-						]
+							]
+						})
 					})
-				})
-			]
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "cs-col",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
-				title: "계산 결과",
-				sub: cur?.name || "",
-				flush: true,
-				children: sc && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableWrap, {
-					label: "별표 10 계산 결과 표",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
-						className: "cs-table",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "항목" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "is-num",
-								children: "값"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "is-num",
-								children: "점수"
-							})
-						] }) }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tbody", { children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: "평균 해빈폭" }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
+				]
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "cs-col",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
+					title: "계산 결과",
+					sub: cur?.name || "",
+					flush: true,
+					children: sc && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableWrap, {
+						label: "별표 10 계산 결과 표",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
+							className: "cs-table",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "항목" }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 									className: "is-num",
-									children: [
-										signed$1(sc.mean),
-										" / ",
-										settings.w0,
-										" m"
-									]
+									children: "값"
 								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 									className: "is-num",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: pt(sc.beach) })
+									children: "점수"
 								})
-							] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: "목표해안선 적합도" }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
-									className: "is-num",
-									children: [
-										"A ",
-										share(sc.a),
-										", B ",
-										share(sc.b)
-									]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "is-num",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: pt(sc.fit) })
-								})
-							] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: "위성 두 항목 합" }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "is-num",
-									children: "최대 60점"
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "is-num",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: pt(sc.sum) })
-								})
-							] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: "나머지 항목" }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "is-num",
-									children: "최대 40점"
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "is-num",
-									children: pt(settings.other)
-								})
-							] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-								className: "is-current",
-								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: "등급" }),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+							] }) }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tbody", { children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: "평균 해빈폭" }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
 										className: "is-num",
-										children: pt(typeof sc.sum === "number" ? sc.sum + settings.other : null)
+										children: [
+											signed$1(sc.mean),
+											" / ",
+											settings.w0,
+											" m"
+										]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 										className: "is-num",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: gradeWith(sc.sum, settings.other) || "" })
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: pt(sc.beach) })
 									})
-								]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: "조위 수평 환산" }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
-									className: "is-num",
+								] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: "목표해안선 적합도" }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
+										className: "is-num",
+										children: [
+											"A ",
+											share(sc.a),
+											", B ",
+											share(sc.b)
+										]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+										className: "is-num",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: pt(sc.fit) })
+									})
+								] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: "위성 두 항목 합" }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+										className: "is-num",
+										children: "최대 60점"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+										className: "is-num",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: pt(sc.sum) })
+									})
+								] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: "나머지 항목" }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+										className: "is-num",
+										children: "최대 40점"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+										className: "is-num",
+										children: pt(settings.other)
+									})
+								] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
+									className: "is-current",
 									children: [
-										settings.tide,
-										" m / ",
-										settings.slope
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: "등급" }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+											className: "is-num",
+											children: pt(typeof sc.sum === "number" ? sc.sum + settings.other : null)
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+											className: "is-num",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: gradeWith(sc.sum, settings.other) || "" })
+										})
 									]
 								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "is-num",
-									children: shift === null ? "" : `${shift} m`
-								})
-							] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: "보류 기준" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
-								className: "is-num",
-								colSpan: 2,
-								children: [thr ?? "", " m"]
-							})] })
-						] })]
-					})
-				})
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
-				title: "사업지별 점수",
-				flush: true,
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableWrap, {
-					label: "사업지별 별표 10 점수 표",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
-						className: "cs-table",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "사업지" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "is-num",
-								children: "기준 초과"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "is-num",
-								children: "구간 평균"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "is-num",
-								children: "해빈폭"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "is-num",
-								children: "적합도"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "is-num",
-								children: "합"
-							})
-						] }) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: scored.map((s) => {
-							const x = annexScore(siteData[s.id].rows, settings);
-							return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-								className: s.id === cur?.id ? "is-current" : void 0,
-								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-										type: "button",
-										className: "cs-rowlink",
-										onClick: () => onSite(s.id),
-										children: s.name
-									}) }),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: "조위 수평 환산" }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
 										className: "is-num",
-										children: siteData[s.id].summary.judgeable
+										children: [
+											settings.tide,
+											" m / ",
+											settings.slope
+										]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 										className: "is-num",
-										children: signed$1(x.mean)
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										className: "is-num",
-										children: pt(x.beach)
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										className: "is-num",
-										children: pt(x.fit)
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										className: "is-num",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: pt(x.sum) })
+										children: shift === null ? "" : `${shift} m`
 									})
-								]
-							}, s.id);
-						}) })]
+								] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: "보류 기준" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
+									className: "is-num",
+									colSpan: 2,
+									children: [thr ?? "", " m"]
+								})] })
+							] })]
+						})
 					})
 				})
 			})]
-		})]
-	})] });
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
+			title: "사업지별 점수",
+			flush: true,
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableWrap, {
+				label: "사업지별 별표 10 점수 표",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
+					className: "cs-table",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "사업지" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+							className: "is-num",
+							children: "기준 초과"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+							className: "is-num",
+							children: "구간 평균"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+							className: "is-num",
+							children: "해빈폭 점수"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("th", {
+							className: "is-num is-wrap",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "rb-phrase",
+									children: "목표해안선"
+								}),
+								" ",
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "rb-phrase",
+									children: "적합도"
+								})
+							]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("th", {
+							className: "is-num is-wrap",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "rb-phrase",
+									children: "위성 두 항목"
+								}),
+								" ",
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "rb-phrase",
+									children: "합"
+								})
+							]
+						})
+					] }) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: scored.map((s) => {
+						const x = annexScore(siteData[s.id].rows, settings);
+						return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
+							className: s.id === cur?.id ? "is-current" : void 0,
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "button",
+									className: "cs-rowlink",
+									onClick: () => onSite(s.id),
+									children: s.name
+								}) }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+									className: "is-num",
+									children: siteData[s.id].summary.judgeable
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+									className: "is-num",
+									children: signed$1(x.mean)
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+									className: "is-num",
+									children: pt(x.beach)
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+									className: "is-num",
+									children: pt(x.fit)
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+									className: "is-num",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: pt(x.sum) })
+								})
+							]
+						}, s.id);
+					}) })]
+				})
+			})
+		})
+	] });
 }
 // src/screens/DocsScreen.jsx
 function DocsScreen({ sites, siteData, rules, settings, site, onSite }) {
@@ -54359,7 +54454,7 @@ function App() {
 		});
 		try {
 			const { analyzeInBrowser } = await __vitePreload(async () => {
-				const { analyzeInBrowser } = await import("./browser-F6T7zuMA.js");
+				const { analyzeInBrowser } = await import("./browser-vo2GnJVO.js");
 				return { analyzeInBrowser };
 			}, []);
 			const result = await analyzeInBrowser(params, {
@@ -54469,6 +54564,7 @@ function App() {
 			route.screen === "analyze" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnalyzeScreen, {
 				sites: allSites,
 				siteData: judged,
+				rules: merged,
 				settings,
 				job,
 				onRun: startRun,
