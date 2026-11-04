@@ -1,6 +1,7 @@
 // 브라우저 전용: geotiff.js 로 COG 범위 요청 창 읽기, 참색 영상(visual) 창을 그림 주소(Blob)로 만든다
 import { fromUrl } from 'geotiff'
 import { runAnalysis } from './analyze.js'
+import { runRepro } from './repro.js'
 
 const cache = new Map()
 export function openTiff(href) {
@@ -37,22 +38,32 @@ async function makeImage(scene, box) {
 }
 
 // 분석 중 받은 바이트 수를 세려고 fetch 를 잠시 감싼다(응답 content-length 합)
-export async function analyzeInBrowser(params, { onProgress, signal } = {}) {
+async function counted(fn) {
   const orig = window.fetch
-  let bytes = 0
-  let requests = 0
+  const c = { bytes: 0, requests: 0 }
   window.fetch = async (...a) => {
     const res = await orig(...a)
-    requests += 1
-    bytes += Number(res.headers.get('content-length') || 0)
+    c.requests += 1
+    c.bytes += Number(res.headers.get('content-length') || 0)
     return res
   }
   try {
-    const out = await runAnalysis(params, { openTiff, makeImage, fetchFn: orig, onProgress, signal })
-    out.meta.bytes = bytes
-    out.meta.requests = requests
-    return out
+    const out = await fn(orig)
+    return { out, ...c }
   } finally {
     window.fetch = orig
   }
+}
+
+export async function analyzeInBrowser(params, { onProgress, signal } = {}) {
+  const { out, bytes, requests } = await counted((orig) => runAnalysis(params, { openTiff, makeImage, fetchFn: orig, onProgress, signal }))
+  out.meta.bytes = bytes
+  out.meta.requests = requests
+  return out
+}
+
+// 재현 기준. cfg: { aoi, zone, south, halfM, periods, features }
+export async function reproInBrowser(cfg, { onProgress, signal } = {}) {
+  const { out, bytes, requests } = await counted((orig) => runRepro(cfg, { openTiff, fetchFn: orig, onProgress, signal }))
+  return { ...out, bytes, requests }
 }

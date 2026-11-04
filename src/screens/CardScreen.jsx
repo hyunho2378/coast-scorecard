@@ -4,6 +4,7 @@ import { Check, Copy, Download } from 'lucide-react'
 import { PageHead, SiteState, TableWrap, signed, pct } from '../ui/index.jsx'
 import { ledgerText, fmtDate } from '../lib/ledger.js'
 import { downloadText, surveyCsv, surveyFileName } from '../lib/survey.js'
+import { conditionsCsvHead, runConditions, runLine } from '../lib/runs.js'
 import { falsePositiveRows, projectFactsFor, unifiedFor } from '../lib/loader-core.js'
 import { BASES, beachWidthScore, roleOf, ROLE } from '../lib/judge.js'
 import { annexScore, gradeWith } from '../lib/annex.js'
@@ -54,7 +55,8 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', settings,
   const score = annexScore(rows, settings)
   const row = rows.find((r) => r.id === sel)
   const thr = s.thresholds[0]
-  const download = () => downloadText(surveyCsv({ site, rows, baseScene: data.scenes[0] }), surveyFileName(site, today))
+  const runInfo = site.run && data.run ? { data, rule } : null
+  const download = () => downloadText(surveyCsv({ site, rows, baseScene: data.scenes[0], head: runInfo ? conditionsCsvHead(runConditions(runInfo)) : [] }), surveyFileName(site, today))
   const copy = async () => {
     try { await navigator.clipboard.writeText(text) } catch { areaRef.current?.select(); document.execCommand?.('copy') }
     setCopied(true); setTimeout(() => setCopied(false), 2400)
@@ -65,6 +67,7 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', settings,
       <PageHead title={`${site.name} 판정 카드`}
         meta={<><span>{site.run ? '새 분석' : ROLE[role]}</span><span>{fmtDate(data.period.from)}부터 {fmtDate(data.period.to)}까지</span><span>보류 기준 {thr}{'\u00a0'}m({basisLabel})</span>{s.sectionN > 0 && <span>구간 평균 {signed(s.sectionMean)}</span>}</>}
         actions={<button type="button" className="krds-btn small primary" onClick={download}><Download size={16} aria-hidden="true" />현장 측량 구간 CSV</button>} />
+      {runInfo && <ul className="cs-run-cond cs-card-cond" aria-label="재현 조건">{runLine(runInfo).map(([k, v]) => <li key={k}><b>{k}</b>{v}</li>)}</ul>}
       <BigNumbers summary={s} />
       <Tabs value={tab} onChange={setTab} label="판정 카드 보기" items={TABS} />
 

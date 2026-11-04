@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import AppShell from './shell/AppShell.jsx'
 import { useRoute } from './shell/route.js'
 import { loadConfig, loadRules, loadSite, withBasis } from './lib/data.js'
-import { mergeRules, runToSite } from './lib/runs.js'
+import { mergeRules, reproToSite, runToSite } from './lib/runs.js'
 import { Box, ErrorLine, Loading } from './ui/index.jsx'
 import HomeScreen from './screens/HomeScreen.jsx'
 import AnalyzeScreen from './screens/AnalyzeScreen.jsx'
@@ -61,6 +61,18 @@ export default function App() {
     abort.current = ctl
     setJob({ status: 'running', stage: 0, done: 0, total: 2, params, name })
     try {
+      if (params.mode === 'repro') {
+        const { reproInBrowser } = await import('./engine/browser.js')
+        const base = cfg.sites.find((s) => s.id === params.siteId)
+        const out = await reproInBrowser(params.cfg, { signal: ctl.signal, onProgress: (e) => setJob((j) => ({ ...j, stage: e.stage, done: e.done, total: e.total })) })
+        runCount.current += 1
+        const id = `run${runCount.current}`
+        const sd = siteData[base.id]
+        const run = reproToSite(out, { id, name: name || `${base.name} 재현 기준`, base, boardRule: rules?.data?.site_rules?.[base.id], structureIds: params.structureIds, images: { before: sd?.before, after: sd?.after } })
+        setRuns((xs) => [...xs, run])
+        setJob({ status: 'done', id, params: { mode: 'repro', siteId: base.id }, name: run.site.name, meta: run.data.run.meta })
+        return id
+      }
       const { analyzeInBrowser } = await import('./engine/browser.js')
       const result = await analyzeInBrowser(params, { signal: ctl.signal, onProgress: (e) => setJob((j) => ({ ...j, stage: e.stage, done: e.done, total: e.total })) })
       runCount.current += 1

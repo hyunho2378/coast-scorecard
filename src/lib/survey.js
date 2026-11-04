@@ -61,7 +61,8 @@ const deg = (v) => (typeof v === 'number' ? v.toFixed(6) : '')
 
 // 엑셀이 한글 열을 UTF-8로 읽도록 맨 앞에 BOM을 붙이고 줄 끝은 CRLF로 쓴다
 // baseScene: 기준 장면({ id, feature }). 가로선 기준 점을 구할 때 쓴다
-export function surveyCsv({ site, rows, baseScene }) {
+// head: 표 앞에 붙일 머리말 줄(새 분석 재현 조건, # 으로 시작)
+export function surveyCsv({ site, rows, baseScene, head = [] }) {
   const lines = surveyRows(rows).map((r) => {
     const p = basePoint(r.geometry, baseScene?.feature?.geometry, r.dist?.[baseScene?.id])
     return [
@@ -70,7 +71,7 @@ export function surveyCsv({ site, rows, baseScene }) {
       num(r.change), num(r.threshold), deg(p?.lat), deg(p?.lon), VERDICT[r.verdict]?.note || ''
     ].map(cell).join(',')
   })
-  return '\uFEFF' + [SURVEY_HEAD.join(','), ...lines].join('\r\n') + '\r\n'
+  return '\uFEFF' + [...head, SURVEY_HEAD.join(','), ...lines].join('\r\n') + '\r\n'
 }
 
 export function surveyFileName(site, today) {
