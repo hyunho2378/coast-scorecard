@@ -1,8 +1,8 @@
 /* D-13 화면 뼈대 값.
    KRDS 변수에 있는 값은 그 변수를 그대로 참조한다. KRDS에 없는 값(칸 너비, 머리 높이)만 숫자로 두고
-   아래에 근거와 KRDS 대응을 적는다. 값을 고칠 때는 Figma 상자 자료(code_plan/figma_boxes)와 함께 고친다.
+   아래에 산출 방식과 KRDS 대응을 적는다. 값을 고칠 때는 Figma 상자 자료(code_plan/figma_boxes)와 함께 고친다.
 
-   | 이름 | 값 | 근거 | KRDS 대응 |
+   | 이름 | 값 | 산출 방식 | KRDS 대응 |
    |---|---|---|---|
    | 좌우 여백 | 24px | R-01_1920_Guest.json sidebar.x | --krds-padding-8 (number-10, 2.4rem) |
    | 왼쪽 메뉴 너비(D-18, 펼침) | 264px | D-18(GitHub 266에 가장 가까운 4의 배수) | number-12(32) x 8 + number-5(8) |

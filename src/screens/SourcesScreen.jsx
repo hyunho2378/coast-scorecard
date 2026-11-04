@@ -1,4 +1,4 @@
-// 근거와 출처. 위성 자료 출처 표기, 판정 규칙, 연도별 보류 기준, 거짓 판정 비율, 해안선 높이 환산, 분석 파일
+// 자료와 출처. 위성 자료 출처 표기, 판정 규칙, 연도별 보류 기준, 거짓 판정 비율, 해안선 높이 환산, 분석 파일
 import { Box, KV, PageHead, TableWrap } from '../ui/index.jsx'
 import { fmtDate } from '../lib/ledger.js'
 import { falsePositiveRows, yearThresholdRows } from '../lib/loader-core.js'
@@ -34,7 +34,7 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
   const m = (v) => (typeof v === 'number' ? `${v.toFixed(1)}\u00a0m` : '없음')
   return (
     <>
-      <PageHead title="근거와 출처" meta={<><span>사업지 {sites.length}곳</span><span>판정 기준 {basisLabel}</span></>} />
+      <PageHead title="자료와 출처" meta={<><span>사업지 {sites.length}곳</span><span>판정 기준 {basisLabel}</span></>} />
       <div className="cs-two">
         <div className="cs-col">
           <Box title="판정 보류 기준" sub={`${basisLabel} 기준`} flush>
@@ -55,7 +55,7 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
 
           {yearRows.length > 0 && (
             <Box title="연도별 큰 값" sub="같은 계절 장면쌍 90퍼센타일" flush foot={<>
-              <span className="rb-phrase">2017년과 2025년 장면쌍 90퍼센타일 가운데</span> <span className="rb-phrase">큰 값을 사이트 장면 잡음으로 씁니다.</span>{' '}
+              <span className="rb-phrase">2017년과 2025년 장면쌍 90퍼센타일 가운데</span> <span className="rb-phrase">큰 값을 사이트 장면 오차로 씁니다.</span>{' '}
               <span className="rb-phrase">반암 전체 가로선의 2025년 값 79.9{'\u00a0'}m에는</span> <span className="rb-phrase">구조물 위 물가선이 들어 있습니다.</span>
             </>}>
               <TableWrap label="연도별 장면쌍 90퍼센타일 표">

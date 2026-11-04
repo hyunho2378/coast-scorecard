@@ -56,7 +56,7 @@ test('한국 사업지 기준: 동해안 사전 오차 16.21 m x 루트 2 = 22.9
     assert.equal(Math.round(16.21 * Math.SQRT2 * 10) / 10, rules.site_rules[id].holdThresholdM)
   }
 })
-test('사이트 구분: 화진포는 대조 해변이라 점수 계산 없음, 반암과 가진은 사업지', { skip: !rules }, () => {
+test('사이트 구분: 화진포는 비교 해변이라 점수 계산 없음, 반암과 가진은 사업지', { skip: !rules }, () => {
   assert.equal(roleOf(rules.site_rules.hwajinpo), 'control'); assert.equal(scoresSite(rules.site_rules.hwajinpo), false)
   assert.equal(roleOf(rules.site_rules.banam), 'project'); assert.equal(roleOf(rules.site_rules.jinjin), 'project')
   assert.equal(roleOf(null), 'project')
@@ -153,7 +153,7 @@ test('사업비와 다음 적용 후보', { skip: !rules }, () => {
   assert.equal(projectFactsFor(rules, 'hwajinpo'), null)
   assert.deepEqual(nextCandidates(rules).map((c) => c.name), ['고성 봉포지구', '삼척 월천지구', '속초 속초해수욕장'])
 })
-test('화진포 대조 해변: 실태조사 등급 2021년 D, 2022년에서 2025년 C', { skip: !has('hwajinpo') }, () => {
+test('화진포 비교 해변: 실태조사 등급 2021년 D, 2022년에서 2025년 C', { skip: !has('hwajinpo') }, () => {
   const g = rules.site_rules.hwajinpo.surveyGrades
   assert.deepEqual([g['2021'], g['2022'], g['2023'], g['2024'], g['2025']], ['D', 'C', 'C', 'C', 'C'])
   const ch = siteRows('hwajinpo').map((r) => r.change).filter((v) => typeof v === 'number')

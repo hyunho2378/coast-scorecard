@@ -8,7 +8,7 @@ export const NAV = [
   { id: 'map', label: '해안선 지도' },
   { id: 'compare', label: '전후 영상 비교' },
   { id: 'storm', label: '폭풍 뒤 점검 목록' },
-  { id: 'sources', label: '근거와 출처' }
+  { id: 'sources', label: '자료와 출처' }
 ]
 
 function parse() {

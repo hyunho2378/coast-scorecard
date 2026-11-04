@@ -85,8 +85,8 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
       <div className="cs-two is-wide-side">
         <div className="cs-col">
           {isControl && (
-            <Box title="대조 해변" sub="사업지 점수 계산 없음">
-              <p className="cs-text">사업지 해안선 변화와 견주는 대조 해변입니다.</p>
+            <Box title="비교 해변" sub="사업지 점수 계산 없음">
+              <p className="cs-text">사업지 해안선 변화와 견주는 비교 해변입니다.</p>
               <KV items={[
                 values.length > 0 && ['위성 변화', `가로선 ${values.length}개 ${signed(Math.min(...values))}에서 ${signed(Math.max(...values))}`],
                 ['판정 기준', `변화가 판정 기준 ${thr}\u00a0m보다 작아 판정 가능 가로선이 ${s.judgeable}개입니다.`],
@@ -178,7 +178,7 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
           )}
 
           {excludedRows.length > 0 && (
-            <Box title="구조물 의심 제외" sub={`${excludedRows.length}개`}>
+            <Box title="구조물 의심 가로선" sub={`${excludedRows.length}개`}>
               <KV items={[
                 ['가로선', excludedRows.map((r) => r.id).join(', ')],
                 ['제외 규칙', 'NDWI 변화와 MNDWI 변화의 차이가 22.9\u00a0m를 넘거나 어느 장면의 물가선이 구조물에서 30\u00a0m 이내이면 판정과 90퍼센타일 계산에서 뺍니다.'],
@@ -207,8 +207,8 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
         </div>
 
         <aside className="cs-col">
-          <Box title="측량 우선 구간" sub={`${survey.length}개`} actions={survey.length > 0 && (
-            <Button variant="primary" onClick={download}><Download size={16} aria-hidden="true" />측량 우선 구간 내려받기</Button>
+          <Box title="현장 측량 구간" sub={`${survey.length}개`} actions={survey.length > 0 && (
+            <Button variant="primary" onClick={download}><Download size={16} aria-hidden="true" />현장 측량 구간 내려받기</Button>
           )}>
             <KV items={[
               ['순서', `구조물 의심 ${nStruct}개, 기준 초과 ${nExceed}개, 판정 보류 ${nHold}개`],

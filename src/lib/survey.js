@@ -1,7 +1,7 @@
-// 측량 우선 구간 CSV. 순서는 구조물 의심, 기준 초과, 판정 보류이고 같은 묶음 안에서는 이동 거리 절댓값이 큰 가로선이 앞선다
+// 현장 측량 구간 CSV. 순서는 구조물 의심, 기준 초과, 판정 보류이고 같은 묶음 안에서는 이동 거리 절댓값이 큰 가로선이 앞선다
 import { VERDICT, isJudgeable } from './judge.js'
 
-export const SURVEY_GROUP = { struct: '구조물 의심 제외', exceed: '기준 초과', hold: '판정 보류' }
+export const SURVEY_GROUP = { struct: '구조물 의심 가로선', exceed: '기준 초과', hold: '판정 보류' }
 const RANK = { struct: 0, exceed: 1, hold: 2 }
 
 export function groupOf(verdict) {
@@ -36,7 +36,7 @@ export function surveyCsv({ site, rows, basisLabel }) {
 }
 
 export function surveyFileName(site, today) {
-  return `${site.id}_측량우선구간_${today}.csv`
+  return `${site.id}_현장측량구간_${today}.csv`
 }
 
 // 브라우저 내려받기. 파일은 Blob 주소로만 만들고 저장소에는 아무것도 남기지 않는다

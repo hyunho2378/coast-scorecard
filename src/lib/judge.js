@@ -115,7 +115,7 @@ export function applySceneRule(rows, periods) {
 // 사이트 구분: 규칙 파일 role. 사업지만 별표 10 점수를 계산한다
 export const ROLE = {
   project: '사업지',
-  control: '대조 해변',
+  control: '비교 해변',
   overseas_reference: '해외 참고',
   survey_validation: '측량 검증'
 }
