@@ -8242,7 +8242,7 @@ var NAV = [
 	},
 	{
 		id: "storm",
-		label: "폭풍 뒤 점검 목록"
+		label: "점검 순서 목록"
 	},
 	{
 		id: "sources",
@@ -8649,7 +8649,7 @@ function AppShell({ basis, onBasis, screen, onGo, sites, siteId, onSite, childre
 									children: "해"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 									className: "rb-gbar-brand-text",
-									children: "해안선 성적표"
+									children: "연안정비사업 성적표"
 								})]
 							})]
 						}),
@@ -44329,15 +44329,19 @@ function fmtDate(d) {
 	return `${y}. ${Number(m)}. ${Number(dd)}.`;
 }
 var signed = (v) => `${v > 0 ? "+" : ""}${v.toFixed(1)} m`;
-function ledgerText({ site, rows, period, today }) {
+function ledgerText({ site, rows, period, today, expected }) {
 	const ok = rows.filter((r) => isJudgeable(r.verdict));
 	if (!ok.length) return "";
 	const head = `${fmtDate(today)} 위성 해안선 비교(Sentinel-2, ${fmtDate(period.from)}부터 ${fmtDate(period.to)}까지) 결과`;
 	const s = summarize(rows);
+	const exp = expected && typeof expected.value === "number" ? [`기준 초과 ${ok.length}개, 같은 기준에서 오차만으로 나올 수 있는 기대 수 ${expected.value.toFixed(1)}개(${expected.label})`] : [];
+	const mean = `${site.name} 구간 평균 해빈폭 ${signed(s.sectionMean)} 변화(값이 있는 가로선 ${s.sectionN}개 평균, 판정 보류 포함${s.excluded ? `, 구조물 의심 ${s.excluded}개 제외` : ""}).`;
+	const lines = ok.map((r) => `${site.name} 가로선 ${r.id}번 해빈폭 ${signed(r.change)} 변화(판정 보류 기준 ${r.threshold} m), 기준 초과 ${VERDICT[r.verdict].label}.`);
 	return [
 		head,
-		`${site.name} 구간 평균 해빈폭 ${signed(s.sectionMean)} 변화(값이 있는 가로선 ${s.sectionN}개 평균, 판정 보류 포함${s.excluded ? `, 구조물 의심 ${s.excluded}개 제외` : ""}).`,
-		...ok.map((r) => `${site.name} 가로선 ${r.id}번 해빈폭 ${signed(r.change)} 변화(판정 보류 기준 ${r.threshold} m), 판정 ${VERDICT[r.verdict].label}.`)
+		...exp,
+		mean,
+		...lines
 	].join("\n");
 }
 // src/screens/SitesScreen.jsx
@@ -44449,7 +44453,7 @@ function SitesScreen({ sites, siteData, rules, onOpen }) {
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 							className: "is-num",
-							children: "판정 가능"
+							children: "기준 초과"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 							className: "is-num",
@@ -44583,22 +44587,58 @@ var SURVEY_HEAD = [
 	"판정",
 	"방향",
 	"이동 거리(m)",
-	"판정 보류 기준(m)",
-	"보류 기준",
+	"보류 기준(m)",
+	"위도",
+	"경도",
 	"판정 내용"
 ];
-function surveyCsv({ site, rows, basisLabel }) {
-	const lines = surveyRows(rows).map((r) => [
-		r.priority,
-		site.name,
-		r.id,
-		SURVEY_GROUP[r.group],
-		r.verdict === "advance" ? "전진" : r.verdict === "retreat" ? "후퇴" : "",
-		num(r.change),
-		num(r.threshold),
-		basisLabel,
-		VERDICT[r.verdict]?.note || ""
-	].map(cell).join(","));
+var linesOf = (g) => g?.type === "LineString" ? [g.coordinates] : g?.type === "MultiLineString" ? g.coordinates : [];
+function cross(a, b, c, d) {
+	const rx = b[0] - a[0], ry = b[1] - a[1], qx = d[0] - c[0], qy = d[1] - c[1];
+	const den = rx * qy - ry * qx;
+	if (!den) return null;
+	const t = ((c[0] - a[0]) * qy - (c[1] - a[1]) * qx) / den;
+	const u = ((c[0] - a[0]) * ry - (c[1] - a[1]) * rx) / den;
+	return t >= 0 && t <= 1 && u >= 0 && u <= 1 ? t : null;
+}
+var meters = (a, b) => {
+	const k = Math.cos((a[1] + b[1]) / 2 * Math.PI / 180);
+	return Math.hypot((b[0] - a[0]) * 111320 * k, (b[1] - a[1]) * 110950);
+};
+function basePoint(transect, shoreline, baseDist) {
+	const line = linesOf(transect)[0];
+	if (!line || line.length < 2) return null;
+	const a = line[0], b = line[line.length - 1];
+	const hits = [];
+	for (const sl of linesOf(shoreline)) for (let i = 0; i < sl.length - 1; i += 1) {
+		const t = cross(a, b, sl[i], sl[i + 1]);
+		if (t !== null) hits.push(t);
+	}
+	const len = meters(a, b);
+	const pick = hits.length ? hits.sort((x, y) => typeof baseDist === "number" ? Math.abs(x * len - baseDist) - Math.abs(y * len - baseDist) : x - y)[0] : .5;
+	return {
+		lon: a[0] + (b[0] - a[0]) * pick,
+		lat: a[1] + (b[1] - a[1]) * pick,
+		onShore: hits.length > 0
+	};
+}
+var deg = (v) => typeof v === "number" ? v.toFixed(6) : "";
+function surveyCsv({ site, rows, baseScene }) {
+	const lines = surveyRows(rows).map((r) => {
+		const p = basePoint(r.geometry, baseScene?.feature?.geometry, r.dist?.[baseScene?.id]);
+		return [
+			r.priority,
+			site.name,
+			r.id,
+			SURVEY_GROUP[r.group],
+			r.verdict === "advance" ? "전진" : r.verdict === "retreat" ? "후퇴" : "",
+			num(r.change),
+			num(r.threshold),
+			deg(p?.lat),
+			deg(p?.lon),
+			VERDICT[r.verdict]?.note || ""
+		].map(cell).join(",");
+	});
 	return "﻿" + [SURVEY_HEAD.join(","), ...lines].join("\r\n") + "\r\n";
 }
 function surveyFileName(site, today) {
@@ -44659,11 +44699,16 @@ function CardScreen({ site, data, rules, basis = "sd1", onRetry }) {
 	const s = data.summary;
 	const rows = data.rows;
 	const held = rows.filter((r) => !isJudgeable(r.verdict) && r.verdict !== "struct");
+	const fpRow = site.id === "banam" ? falsePositiveRows(rules?.data).find((x) => x.basis === basis) : null;
 	const text = ledgerText({
 		site,
 		rows,
 		period: data.period,
-		today
+		today,
+		expected: fpRow && typeof fpRow.expected === "number" ? {
+			value: fpRow.expected,
+			label: fpRow.label
+		} : null
 	});
 	const rule = rules?.data?.site_rules?.[site.id];
 	const role = roleOf(rule);
@@ -44705,7 +44750,7 @@ function CardScreen({ site, data, rules, basis = "sd1", onRetry }) {
 	const download = () => downloadText(surveyCsv({
 		site,
 		rows,
-		basisLabel
+		baseScene: data.scenes[0]
 	}), surveyFileName(site, today));
 	const copy = async () => {
 		try {
@@ -44744,7 +44789,7 @@ function CardScreen({ site, data, rules, basis = "sd1", onRetry }) {
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: s.total }), "가로선"] }),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: s.judgeable }),
-					"판정 가능(",
+					"기준 초과(",
 					pct(s.judgeableRatio),
 					")"
 				] }),
@@ -44778,7 +44823,7 @@ function CardScreen({ site, data, rules, basis = "sd1", onRetry }) {
 							children: "사업지 해안선 변화와 견주는 비교 해변입니다."
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(KV, { items: [
 							values.length > 0 && ["위성 변화", `가로선 ${values.length}개 ${signed$1(Math.min(...values))}에서 ${signed$1(Math.max(...values))}`],
-							["판정 기준", `변화가 판정 기준 ${thr}\u00a0m보다 작아 판정 가능 가로선이 ${s.judgeable}개입니다.`],
+							["판정 기준", `변화가 판정 기준 ${thr}\u00a0m보다 작아 기준 초과 가로선이 ${s.judgeable}개입니다.`],
 							grades && gradeRuns(grades, 2021) && ["실태조사 침식등급", gradeRuns(grades, 2021)],
 							grades && ["출처", "해양수산부 연안포털, 연안침식실태조사 화진포 침식등급이력(열람 2026. 11. 3.)"]
 						] })]
@@ -44789,7 +44834,7 @@ function CardScreen({ site, data, rules, basis = "sd1", onRetry }) {
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "cs-text",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", { children: [
-								"판정 가능 ",
+								"기준 초과 ",
 								s.judgeable,
 								"/",
 								s.total,
@@ -45201,6 +45246,11 @@ function CardScreen({ site, data, rules, basis = "sd1", onRetry }) {
 								children: "가로선별 판정과 이동 거리,"
 							}),
 							" ",
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "rb-phrase",
+								children: "해안 쪽 기준 점의 위도와 경도,"
+							}),
+							" ",
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 								className: "rb-phrase",
 								children: [
@@ -45241,7 +45291,7 @@ function CardScreen({ site, data, rules, basis = "sd1", onRetry }) {
 							className: "cs-ledger"
 						})] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "cs-state",
-							children: "판정 가능 가로선이 없습니다."
+							children: "기준 초과 가로선이 없습니다."
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							id: "copy-state",
 							role: "status",
@@ -85797,7 +85847,7 @@ function MapScene({ site, data, rules, basis = "sd1", onRetry }) {
 						className: "cs-counts",
 						"aria-label": `${isFinal ? "최종 판정 기준" : "비교 장면 기준"} 판정 개수`,
 						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: sc.judgeable }), "판정 가능"] }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: sc.judgeable }), "기준 초과"] }),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: sc.held }), "판정 보류"] }),
 							sc.excluded > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: sc.excluded }), "구조물 의심 제외"] })
 						]
@@ -85961,122 +86011,129 @@ function StormScreen({ sites, siteData, checks, setChecks, onOpen }) {
 			...patch
 		}
 	}));
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PageHead, {
-		title: "폭풍 뒤 점검 목록",
-		meta: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-				"판정 가능 가로선 ",
-				list.length,
-				"개"
-			] }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-				"점검 완료 ",
-				done,
-				"개"
-			] }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-				"판정 보류 ",
-				heldTotal,
-				"개 제외"
-			] }),
-			exclTotal > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-				"구조물 의심 ",
-				exclTotal,
-				"개 제외"
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PageHead, {
+			title: "점검 순서 목록",
+			meta: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+					"기준 초과 가로선 ",
+					list.length,
+					"개"
+				] }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+					"점검 완료 ",
+					done,
+					"개"
+				] }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+					"판정 보류 ",
+					heldTotal,
+					"개 제외"
+				] }),
+				exclTotal > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+					"구조물 의심 ",
+					exclTotal,
+					"개 제외"
+				] })
 			] })
-		] })
-	}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
-		flush: true,
-		foot: HOLD_ACTION,
-		children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Loading, { rows: 6 }) : !list.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Empty, { children: "판정 가능 가로선이 없습니다." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableWrap, {
-			label: "폭풍 뒤 점검 표",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
-				className: "cs-table",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "순서" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "완료" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "사업지" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-						className: "is-num",
-						children: "가로선"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-						className: "is-num",
-						children: "변화"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "판정" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "현장 메모" })
-				] }) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: list.map((r, i) => {
-					const k = checkKey(r.siteId, r.id);
-					const c = checks[k] || {};
-					const id = `chk-${k.replace(":", "-")}`;
-					return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-						className: c.done ? "is-done" : void 0,
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-								className: "cs-num",
-								children: i + 1
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "krds-form-check",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-									type: "checkbox",
-									id,
-									checked: Boolean(c.done),
-									onChange: (e) => set(k, { done: e.target.checked })
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-									htmlFor: id,
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "cs-text",
+			children: "선택한 기준 장면과 비교 장면의 변화가 큰 가로선부터 점검 순서를 매깁니다."
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
+			flush: true,
+			foot: HOLD_ACTION,
+			children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Loading, { rows: 6 }) : !list.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Empty, { children: "기준 초과 가로선이 없습니다." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableWrap, {
+				label: "점검 순서 표",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
+					className: "cs-table",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "순서" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "완료" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "사업지" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+							className: "is-num",
+							children: "가로선"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+							className: "is-num",
+							children: "변화"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "판정" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "현장 메모" })
+					] }) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: list.map((r, i) => {
+						const k = checkKey(r.siteId, r.id);
+						const c = checks[k] || {};
+						const id = `chk-${k.replace(":", "-")}`;
+						return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
+							className: c.done ? "is-done" : void 0,
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+									className: "cs-num",
+									children: i + 1
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "krds-form-check",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+										type: "checkbox",
+										id,
+										checked: Boolean(c.done),
+										onChange: (e) => set(k, { done: e.target.checked })
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+										htmlFor: id,
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: "sr-only",
+											children: [
+												r.siteName,
+												" 가로선 ",
+												r.id,
+												" 점검 완료"
+											]
+										})
+									})]
+								}) }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "button",
+									className: "cs-rowlink",
+									onClick: () => onOpen(r.siteId),
+									children: r.siteName
+								}) }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+									className: "is-num",
+									children: r.id
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+									className: "is-num",
+									children: signed$1(r.change)
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Verdict, { v: r.verdict }) }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
+									style: { minWidth: "calc(var(--krds-number-21) * 2)" },
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+										htmlFor: `memo-${id}`,
 										className: "sr-only",
 										children: [
 											r.siteName,
 											" 가로선 ",
 											r.id,
-											" 점검 완료"
+											" 현장 메모"
 										]
-									})
-								})]
-							}) }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								type: "button",
-								className: "cs-rowlink",
-								onClick: () => onOpen(r.siteId),
-								children: r.siteName
-							}) }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-								className: "is-num",
-								children: r.id
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-								className: "is-num",
-								children: signed$1(r.change)
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Verdict, { v: r.verdict }) }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
-								style: { minWidth: "calc(var(--krds-number-21) * 2)" },
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-									htmlFor: `memo-${id}`,
-									className: "sr-only",
-									children: [
-										r.siteName,
-										" 가로선 ",
-										r.id,
-										" 현장 메모"
-									]
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-									id: `memo-${id}`,
-									type: "text",
-									className: "cs-input",
-									value: c.memo || "",
-									onChange: (e) => set(k, { memo: e.target.value })
-								})]
-							})
-						]
-					}, k);
-				}) })]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+										id: `memo-${id}`,
+										type: "text",
+										className: "cs-input",
+										value: c.memo || "",
+										onChange: (e) => set(k, { memo: e.target.value })
+									})]
+								})
+							]
+						}, k);
+					}) })]
+				})
 			})
 		})
-	})] });
+	] });
 }
 // src/screens/SourcesScreen.jsx
 var TIDE = {
@@ -86149,7 +86206,7 @@ function SourcesScreen({ sites, siteData, rules, basis = "sd1" }) {
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 									className: "is-num",
-									children: "판정 가능"
+									children: "기준 초과"
 								})
 							] }) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: sites.map((s) => {
 								const x = r?.site_rules?.[s.id];
@@ -86248,7 +86305,7 @@ function SourcesScreen({ sites, siteData, rules, basis = "sd1" }) {
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 									className: "is-num",
-									children: "판정 가능"
+									children: "기준 초과"
 								})
 							] }) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: yearRows.map((y) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
@@ -86297,7 +86354,7 @@ function SourcesScreen({ sites, siteData, rules, basis = "sd1" }) {
 					foot: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "rb-phrase",
-							children: "거짓 판정은 실제 변화가 없는 가로선이 판정 가능으로 나오는 경우입니다."
+							children: "거짓 판정은 실제 변화가 없는 가로선이 기준 초과로 나오는 경우입니다."
 						}),
 						" ",
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
@@ -86338,7 +86395,7 @@ function SourcesScreen({ sites, siteData, rules, basis = "sd1" }) {
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 									className: "is-num is-wrap",
-									children: "반암 판정 가능"
+									children: "반암 기준 초과"
 								})
 							] }) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: fp.map((x) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
 								className: x.basis === basis ? "is-current" : void 0,

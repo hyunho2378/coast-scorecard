@@ -690,7 +690,7 @@ html[data-krds-mode="dark"] {
   --rb-motion-exit-base: calc(var(--rb-motion-base) * 0.75);
   --rb-tip-delay: 400ms;
   --rb-menu-rise: var(--krds-number-5);
-  /* D-21 7장 여백: Figma 변수 모음 'layout'과 같은 이름(layout/* → --layout-*)과 값. 값은 이 한 곳에서만 */
+  /* D-21 7장 여백: Figma 변수 모음 'layout'과 같은 이름(layout/* 대응 --layout-*)과 값. 값은 이 한 곳에서만 */
   --layout-topbar-pad-x: var(--krds-number-8);
   --layout-sidebar-inset: var(--krds-number-5);
   --layout-sidebar-item-pad-y: var(--krds-number-5);
@@ -698,7 +698,7 @@ html[data-krds-mode="dark"] {
   --layout-panel-gap: var(--krds-number-5);
   /* D-21 7-1 사용자 우선(2026. 10. 31.): 판 바깥 8(왼쪽 포함). 공공 깃랩 실측 왼쪽 0은 기록만, 간격 값은 KRDS 규칙이 이긴다 */
   --layout-panel-gap-left: var(--krds-number-5);
-  /* v2 실측: 공공 깃랩 panels-container 모서리 12 → KRDS radius-xlarge1(12) */
+  /* v2 실측: 공공 깃랩 panels-container 모서리 12 대응 KRDS radius-xlarge1(12) */
   --layout-panel-radius: var(--krds-radius-xlarge1);
   /* D-21 7-1 사용자 우선: 본문 최대 1200 가운데(공공 깃랩 1256은 기록만) */
   --layout-container-max: calc(var(--krds-number-21) * 12 + var(--krds-number-16));
@@ -708,7 +708,7 @@ html[data-krds-mode="dark"] {
   --layout-container-pad-x-md: var(--krds-number-12);
   --layout-container-pad-x: var(--krds-number-10);
   --layout-container-pad-x-sm: var(--krds-number-8);
-  /* v2 실측: 판 위 → 경로 줄 8, 경로 줄 위 → 제목 위 40(경로 20 + 간격 20), 제목 → 탭 12, 탭 → 필터 막대 0, 필터 막대 → 첫 행 8 */
+  /* v2 실측 간격: 판 위와 경로 줄 사이 8, 경로 줄 위와 제목 위 사이 40(경로 20 + 간격 20), 제목과 탭 사이 12, 탭과 필터 막대 사이 0, 필터 막대와 첫 행 사이 8 */
   --layout-container-pad-y: var(--krds-number-5);
   --layout-crumb-title-gap: var(--krds-number-9);
   --layout-title-tabs-gap: var(--krds-number-7);
@@ -722,7 +722,7 @@ html[data-krds-mode="dark"] {
   --layout-sidebar-top: var(--krds-number-3);
   /* UX/17 사이드바 실측: 접음 아이콘 열 44, 프로젝트 줄 아래 8(항목 사이 2 + 6), 구분선 위아래 12 + 선 gray-90, 바닥 두 줄 사이 4, 프로젝트 아바타 24 */
   --layout-sidebar-rail-w: var(--krds-number-15);
-  /* 좁은 화면 서랍: 폭 = min(320, 화면 - 72)(공공 깃랩 360 → 288, 768 → 320), 오른쪽 모서리 16 */
+  /* 좁은 화면 서랍: 폭 = min(320, 화면 - 72)(공공 깃랩 360 대응 288, 768 대응 320), 오른쪽 모서리 16 */
   --layout-drawer-w: min(calc(var(--krds-number-12) * 10), calc(100vw - var(--krds-number-19)));
   --layout-drawer-radius: var(--krds-number-8);
   /* 서랍이 되는 폭(단위 없음, 자바스크립트가 읽는다): 공공 깃랩 1200 미만이면 사이드바가 서랍(audit_v3 05-1) */
@@ -733,7 +733,7 @@ html[data-krds-mode="dark"] {
   --krds-radius-medium1: var(--krds-number-5);
   --krds-radius-medium2: var(--krds-number-5);
   /* D-16 4의 배수(감사 v3 배포본 스캔): KRDS 간격 중 4의 배수가 아닌 단계를 가장 가까운 4의 배수로 맞춘다.
-     gap-1, padding-1(2) → 4, padding-4(10) → 8, 원시 number-4(6) → 8, number-6(10) → 8. 선 두께용 number-1(1), number-2(2)는 그대로 */
+     gap-1, padding-1(2) 대응 4, padding-4(10) 대응 8, 원시 number-4(6) 대응 8, number-6(10) 대응 8. 선 두께용 number-1(1), number-2(2)는 그대로 */
   --krds-gap-1: 0.4rem;
   --krds-padding-1: 0.4rem;
   --krds-padding-4: 0.8rem;
@@ -747,11 +747,11 @@ html[data-krds-mode="dark"] {
   --layout-topbar-btn-h: var(--krds-number-12);
   /* 필터 막대 안 단추, 입력 높이 32(공공 깃랩 필터 줄 65 = 16 + 32 + 16 + 선 1, Figma 같음). C2 요청 2026. 10. 31. */
   --layout-filter-control-h: var(--krds-number-12);
-  /* 로그인(공공 깃랩 1440): 두 열 각 420 → 416(96x4 + 32), 열 사이 60 → 64, 위 146 → 144(시스템 띠 아래) */
+  /* 로그인(공공 깃랩 1440): 두 열 각 420 대응 416(96x4 + 32), 열 사이 60 대응 64, 위 146 대응 144(시스템 띠 아래) */
   --layout-login-col: calc(var(--krds-number-21) * 4 + var(--krds-number-12));
   --layout-login-gap: var(--krds-number-18);
   --layout-login-top: calc(var(--krds-number-18) * 2 + var(--krds-number-8));
-  /* 항목 사이: 공공 깃랩 실측 2지만 D-16(4의 배수)이 이긴다 → 4(피치 32). UX/17 5절 */
+  /* 항목 사이: 공공 깃랩 실측 2지만 D-16(4의 배수)이 이긴다 대응 4(피치 32). UX/17 5절 */
   --layout-sidebar-item-gap: var(--krds-number-3);
   --layout-sidebar-project-gap: var(--krds-number-5);
   --layout-sidebar-sep-gap: var(--krds-number-7);
@@ -759,7 +759,7 @@ html[data-krds-mode="dark"] {
   --layout-sidebar-avatar: var(--krds-number-10);
   --layout-sidebar-text-weight: var(--krds-font-weight-regular);
   /* 제목 세 단계(D-16 개정 2026. 10. 31., KRDS PC 글자 크기 토큰만). 모든 화면은 이 변수만 쓴다. 28은 KRDS에 없어 쓰지 않는다
-     화면 제목(공공 깃랩 28~30) → heading-large 32 / 40, 프로젝트 홈 제목(공공 깃랩 30) → heading-large 32 / 40, 섹션 제목 → heading-small 19 / 28 */
+     화면 제목(공공 깃랩 28~30) 대응 heading-large 32 / 40, 프로젝트 홈 제목(공공 깃랩 30) 대응 heading-large 32 / 40, 섹션 제목 대응 heading-small 19 / 28 */
   --layout-title-page: var(--krds-pc-font-size-heading-large);
   --layout-title-page-lh: var(--rb-lh-32);
   --layout-title-project: var(--krds-pc-font-size-heading-large);
@@ -774,8 +774,8 @@ html[data-krds-mode="dark"] {
   --layout-title-lh: var(--layout-title-page-lh);
   --layout-repo-title-size: var(--layout-title-project);
   --layout-repo-title-lh: var(--layout-title-project-lh);
-  /* v2 색 층(공공 깃랩 rgb → 가장 가까운 KRDS gray 단계). 바깥(세로 바, 상단 바) 5,5,6 → gray-100, 판 24,23,29 → gray-95, 판 테두리 58,56,63 → gray-80,
-     필터 막대와 현재 항목 40,39,45 → gray-90, 필터 위 선과 행 구분선 76,75,81 → gray-70, 주제 알약 164,163,168 → gray-30(글자 24,23,29 → gray-95), 보조 글자 191,191,195 → gray-20 */
+  /* v2 색 층(공공 깃랩 rgb 대응 가장 가까운 KRDS gray 단계). 바깥(세로 바, 상단 바) 5,5,6 대응 gray-100, 판 24,23,29 대응 gray-95, 판 테두리 58,56,63 대응 gray-80,
+     필터 막대와 현재 항목 40,39,45 대응 gray-90, 필터 위 선과 행 구분선 76,75,81 대응 gray-70, 주제 알약 164,163,168 대응 gray-30(글자 24,23,29 대응 gray-95), 보조 글자 191,191,195 대응 gray-20 */
   --layout-shell-bg: var(--krds-color-light-gray-100);
   --layout-panel-bg: var(--krds-color-light-gray-95);
   --layout-panel-border: var(--krds-color-light-gray-80);
@@ -1679,7 +1679,7 @@ html, html[data-krds-mode="dark"], html[data-krds-mode="light"] {
 #root .rb-side-scroll, #root .rb-side-foot { padding-inline: var(--rb-side-pad-x); }
 /* 묶음 접기 상자가 현재 항목 왼쪽 막대(상자 밖 8)를 자르지 않게 자르는 선을 바깥으로 8 넓힌다(접힌 동안은 투명이라 보이지 않는다) */
 #root .rb-side-fold > ul { overflow: clip; overflow-clip-margin: var(--rb-side-pad-x); }
-/* Figma 대조(2026. 10. 31.): 경로 줄 13 / 줄 높이 20, 경로 → 본문 간격 24(layout/crumb-title-gap) */
+/* Figma 대조(2026. 10. 31.): 경로 줄 13 / 줄 높이 20, 경로와 본문 사이 간격 24(layout/crumb-title-gap) */
 #root .krds-breadcrumb-wrap.is-path, #root .krds-breadcrumb-wrap.is-path .breadcrumb, #root .krds-breadcrumb-wrap.is-path li, #root .krds-breadcrumb-wrap.is-path li::after, #root .krds-breadcrumb-wrap.is-path .txt { font-size: var(--krds-font-size-body-xsmall); line-height: var(--rb-lh-13); min-height: 0; }
 #root .rb-page > .krds-breadcrumb-wrap.is-path { margin-bottom: calc(var(--layout-crumb-title-gap) - var(--rb-rhythm)); }
 /* 앱 전용 규칙. 값은 KRDS 변수와 공공 깃랩 layout.tokens.css 변수만 쓴다.
