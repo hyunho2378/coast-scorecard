@@ -8338,7 +8338,7 @@ function useRoute() {
 	return [route, go];
 }
 // src/shell/screenMode.js
-var MODES = [
+var MODES$1 = [
 	["dark", "어두운 화면"],
 	["light", "밝은 화면"],
 	["high-contrast", "선명한 화면 모드"],
@@ -8354,7 +8354,7 @@ function apply(mode) {
 }
 function initial() {
 	const m = new URLSearchParams(location.search).get("mode");
-	return MODES.some(([k]) => k === m) ? m : "dark";
+	return MODES$1.some(([k]) => k === m) ? m : "dark";
 }
 function useScreenMode() {
 	const [mode, setMode] = (0, import_react.useState)(initial);
@@ -8551,7 +8551,7 @@ function ModeMenu() {
 			className: "cs-pop is-right",
 			role: "menu",
 			"aria-label": "화면 설정",
-			children: MODES.map(([k, label]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", {
+			children: MODES$1.map(([k, label]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", {
 				role: "none",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					type: "button",
@@ -9342,6 +9342,100 @@ function mergeRules(rules, runs) {
 			sites
 		}
 	};
+}
+function reproToSite(out, { id, name, base, boardRule, structureIds, images = {} }) {
+	const rule = {
+		...boardRule,
+		structureExcluded: [...structureIds ?? boardRule?.structureExcluded ?? []],
+		nTransects: out.base.length
+	};
+	const site = {
+		id,
+		name,
+		region: base.region,
+		country: "새 분석",
+		lat: base.lat,
+		lon: base.lon,
+		zoom: base.zoom,
+		kind: `재현 기준 ${base.name}`,
+		run: true
+	};
+	const params = {
+		mode: "repro",
+		siteId: base.id,
+		siteName: base.name,
+		aoi: base.repro.aoi,
+		spacingM: base.repro.spacingM,
+		halfM: base.repro.halfM
+	};
+	const meta = {
+		seconds: out.seconds,
+		bytes: out.bytes || 0,
+		requests: out.requests || 0,
+		structures: rule.structureExcluded.length
+	};
+	const rows = judgeRows(out.base, rule, out.periods);
+	return {
+		site,
+		data: {
+			status: "ready",
+			scenes: out.scenes,
+			base: out.base,
+			rows,
+			summary: summarize(rows),
+			period: periodOf(out.scenes),
+			before: images.before || null,
+			after: images.after || null,
+			run: {
+				params,
+				meta
+			}
+		},
+		rule,
+		periods: out.periods
+	};
+}
+var dotDate = (d) => {
+	const [y, m, dd] = String(d).split("-").map(Number);
+	return `${y}. ${m}. ${dd}.`;
+};
+function runConditions(run) {
+	const p = run?.data?.run?.params || {};
+	const scenes = [...run?.data?.scenes || []].map((s) => s.date).filter(Boolean).sort();
+	const thr = run?.rule?.holdThresholdM;
+	const nStruct = (run?.rule?.structureExcluded || []).length;
+	const out = [];
+	if (p.mode === "repro") {
+		out.push(["분석 방식", `재현 기준(${p.siteName} 현황판과 같은 장면, 가로선, 구조물 의심 가로선)`]);
+		out.push(["장면", scenes.map(dotDate).join(", ")]);
+		out.push(["구름 기준", "교차점 바다 쪽 30 m 둘레 3 x 3 칸에 구름 그림자와 구름(SCL 3과 9, 10)이 있으면 그 장면 값 제외"]);
+		out.push(["물가선", "장면별 NDWI 오츠 임계값(기준 해안선 앞뒤 250 m 띠), 바다 끝에서 30 m 이상 이어지는 첫 땅 지점"]);
+		out.push(["가로선 간격", `${p.spacingM} m, 가로선 ${run.data.base.length}개, 길이 ${p.halfM * 2} m`]);
+	} else {
+		out.push(["분석 방식", "자동 가로선(새 물가선에서 가로선 생성)"]);
+		out.push(["장면", scenes.map(dotDate).join(", ")]);
+		out.push(["구름 기준", `장면 구름 ${p.maxCloud ?? 10}% 미만, 분석 창 안 구름 ${Math.round((p.maxSceneCloud ?? .05) * 100)}% 이하`]);
+		out.push(["물가선", "NDWI 3집단 오츠 임계값 등치선"]);
+		out.push(["가로선 간격", `${p.spacing} m, 가로선 ${run?.data?.base?.length ?? 0}개, 길이 ${p.transectLength ?? 400} m`]);
+	}
+	out.push(["보류 기준", `${thr} m 이하 이동, 같은 해 장면쌍 차이 ${thr} m 초과, 시점별 장면 2장 미만이면 판정 보류`]);
+	out.push(["구조물 의심 가로선", nStruct ? `${nStruct}개(${(run.rule.structureExcluded || []).join(", ")}번)` : "없음"]);
+	return out;
+}
+function conditionsCsvHead(conds) {
+	const cell = (s) => /[",\r\n]/.test(s) ? `"${String(s).replace(/"/g, "\"\"")}"` : s;
+	return conds.map(([k, v]) => `# ${k},${cell(String(v))}`);
+}
+function runLine(run) {
+	const p = run?.data?.run?.params || {};
+	const dates = [...run?.data?.scenes || []].map((s) => s.date).filter(Boolean).sort().map(dotDate).join(", ");
+	return [
+		["방식", p.mode === "repro" ? `재현 기준(${p.siteName})` : "자동 가로선"],
+		["장면", dates],
+		["구름 기준", p.mode === "repro" ? "SCL 3과 9, 10 제외" : `장면 ${p.maxCloud ?? 10}% 미만, 창 안 ${Math.round((p.maxSceneCloud ?? .05) * 100)}% 이하`],
+		["가로선 간격", `${p.mode === "repro" ? p.spacingM : p.spacing} m`],
+		["보류 기준", `${run?.rule?.holdThresholdM} m`]
+	];
 }
 // src/ui/index.jsx
 var signed$1 = (v) => v === null || v === void 0 ? "" : `${v > 0 ? "+" : ""}${v.toFixed(1)}\u00a0m`;
@@ -48316,6 +48410,406 @@ async function runAnalysis(params, { openTiff, makeImage, fetchFn = fetch, onPro
 		}
 	};
 }
+// src/engine/repro.js
+var REPRO_SET = {
+	res: 10,
+	needM: 30,
+	step: .1,
+	bandHalfM: 250,
+	bandStep: .5,
+	sclBad: [
+		3,
+		9,
+		10
+	],
+	sclBackM: 30,
+	bins: 256,
+	scale: 1e-4
+};
+var REPRO_STAGES = [
+	"장면 불러오기",
+	"장면 읽기",
+	"물가선 추출",
+	"가로선 계산"
+];
+var ITEM_URL = "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/";
+function ndwiDn(g, n) {
+	const out = new Float64Array(g.length);
+	for (let i = 0; i < g.length; i += 1) {
+		const a = g[i] * 1e-4;
+		const b = n[i] * 1e-4;
+		out[i] = (a - b) / (a + b + 1e-9);
+	}
+	return out;
+}
+function medianStack(arrs) {
+	const n = arrs[0].length;
+	const out = new Float64Array(n);
+	const k = arrs.length;
+	const buf = new Float64Array(k);
+	for (let i = 0; i < n; i += 1) {
+		for (let j = 0; j < k; j += 1) buf[j] = arrs[j][i];
+		buf.sort();
+		out[i] = k % 2 ? buf[(k - 1) / 2] : (buf[k / 2 - 1] + buf[k / 2]) / 2;
+	}
+	return out;
+}
+function otsuCenter(values, mask = null, bins = 256) {
+	const edges = new Float64Array(bins + 1);
+	const stepE = 2 / bins;
+	for (let k = 0; k <= bins; k += 1) edges[k] = -1 + k * stepE;
+	edges[bins] = 1;
+	const hist = new Float64Array(bins);
+	for (let i = 0; i < values.length; i += 1) {
+		if (mask && !mask[i]) continue;
+		const v = values[i];
+		if (!Number.isFinite(v) || v < -1 || v > 1) continue;
+		let k = Math.floor((v + 1) * (bins / 2));
+		if (k >= bins) k = bins - 1;
+		if (k > 0 && v < edges[k]) k -= 1;
+		else if (k < bins - 1 && v >= edges[k + 1]) k += 1;
+		hist[k] += 1;
+	}
+	const c = new Float64Array(bins);
+	for (let k = 0; k < bins; k += 1) c[k] = (edges[k] + edges[k + 1]) / 2;
+	const w0 = new Float64Array(bins);
+	const m0 = new Float64Array(bins);
+	let a = 0;
+	let b = 0;
+	for (let k = 0; k < bins; k += 1) {
+		a += hist[k];
+		b += hist[k] * c[k];
+		w0[k] = a;
+		m0[k] = b;
+	}
+	const total = w0[bins - 1];
+	if (!total) return null;
+	const mt = m0[bins - 1];
+	let best = -Infinity;
+	let bestK = -1;
+	for (let k = 0; k < bins; k += 1) {
+		const w1 = total - w0[k];
+		const bv = (mt * w0[k] / total - m0[k]) ** 2 / (w0[k] * w1);
+		if (Number.isNaN(bv)) continue;
+		if (bv > best) {
+			best = bv;
+			bestK = k;
+		}
+	}
+	return bestK < 0 ? null : c[bestK];
+}
+function bilinear(a, w, h, x, y) {
+	x -= .5;
+	y -= .5;
+	const x0 = Math.floor(x);
+	const y0 = Math.floor(y);
+	const dx = x - x0;
+	const dy = y - y0;
+	if (!(x0 >= 0 && x0 < w - 1 && y0 >= 0 && y0 < h - 1)) return NaN;
+	return a[y0 * w + x0] * (1 - dx) * (1 - dy) + a[y0 * w + x0 + 1] * dx * (1 - dy) + a[(y0 + 1) * w + x0] * (1 - dx) * dy + a[(y0 + 1) * w + x0 + 1] * dx * dy;
+}
+function shoreDist(arr, w, h, thr, start, d, L, set = REPRO_SET) {
+	const { step, needM, res } = set;
+	const n = Math.ceil(L / step);
+	const vals = new Float64Array(n);
+	for (let i = 0; i < n; i += 1) {
+		const t = i * step;
+		vals[i] = bilinear(arr, w, h, start[0] + d[0] * t, start[1] + d[1] * t);
+	}
+	const need = Math.trunc(needM / res / step);
+	for (let i = 1; i < n - need; i += 1) if (vals[i - 1] >= thr && vals[i] < thr) {
+		let ok = true;
+		for (let j = i; j < i + need; j += 1) if (!(vals[j] < thr)) {
+			ok = false;
+			break;
+		}
+		if (ok) {
+			const fr = (vals[i - 1] - thr) / (vals[i - 1] - vals[i]);
+			return ((i - 1) * step + fr * step) * res;
+		}
+	}
+	return NaN;
+}
+function transectsToPixels(features, cfg) {
+	const [E0, N1] = cfg.aoi;
+	const res = REPRO_SET.res;
+	const L = 2 * cfg.halfM / res;
+	return features.map((f) => {
+		const c = f.geometry.coordinates;
+		const a = toUtm(c[0][0], c[0][1], cfg.zone, cfg.south);
+		const b = toUtm(c[c.length - 1][0], c[c.length - 1][1], cfg.zone, cfg.south);
+		const s = [(a.x - E0) / res, (N1 - a.y) / res];
+		const e = [(b.x - E0) / res, (N1 - b.y) / res];
+		const len = Math.hypot(e[0] - s[0], e[1] - s[1]);
+		return {
+			id: f.properties.id,
+			start: s,
+			d: [(e[0] - s[0]) / len, (e[1] - s[1]) / len],
+			L,
+			geometry: f.geometry
+		};
+	});
+}
+function reproMeasure(scenes, trs, w, h, set = REPRO_SET) {
+	const res = set.res;
+	const med = medianStack(scenes.map((s) => s.ndwi));
+	const thrMed = otsuCenter(med, null, set.bins);
+	const refD = trs.map((t) => shoreDist(med, w, h, thrMed, t.start, t.d, t.L, set));
+	const band = new Uint8Array(w * h);
+	const bh = set.bandHalfM / res;
+	trs.forEach((t, k) => {
+		const rd = refD[k];
+		if (!Number.isFinite(rd)) return;
+		const lo = Math.max(rd / res - bh, 0);
+		const hi = Math.min(rd / res + bh, t.L);
+		const n = Math.ceil((hi - lo) / set.bandStep);
+		for (let i = 0; i < n; i += 1) {
+			const u = lo + i * set.bandStep;
+			const qx = t.start[0] + t.d[0] * u;
+			const qy = t.start[1] + t.d[1] * u;
+			if (qx >= 0 && qx < w && qy >= 0 && qy < h) band[Math.trunc(qy) * w + Math.trunc(qx)] = 1;
+		}
+	});
+	const bad = new Set(set.sclBad);
+	const back = set.sclBackM / res;
+	return {
+		thrMed,
+		refD,
+		scenes: scenes.map((s) => {
+			const thr = otsuCenter(s.ndwi, band, set.bins);
+			const dist = trs.map((t) => {
+				let v = shoreDist(s.ndwi, w, h, thr, t.start, t.d, t.L, set);
+				if (Number.isFinite(v) && s.scl) {
+					const u = v / res - back;
+					const y = Math.trunc(t.start[1] + t.d[1] * u);
+					const x = Math.trunc(t.start[0] + t.d[0] * u);
+					for (let yy = Math.max(y - 1, 0); yy < Math.min(y + 2, h); yy += 1) for (let xx = Math.max(x - 1, 0); xx < Math.min(x + 2, w); xx += 1) if (bad.has(s.scl[yy * w + xx])) v = NaN;
+				}
+				return v;
+			});
+			return {
+				id: s.id,
+				period: s.period,
+				thr,
+				dist
+			};
+		})
+	};
+}
+function reproRows(trs, measured, periodKeys) {
+	const [pb, pa] = periodKeys;
+	return trs.map((t, k) => {
+		const dist = {};
+		const by = {};
+		for (const s of measured.scenes) {
+			const v = s.dist[k];
+			dist[s.id] = Number.isFinite(v) ? round1(v) : null;
+			(by[s.period] = by[s.period] || []).push(v);
+		}
+		const mean = (xs) => {
+			const f = (xs || []).filter(Number.isFinite);
+			return f.length ? f.reduce((a, b) => a + b, 0) / f.length : NaN;
+		};
+		const mb = mean(by[pb]);
+		const ma = mean(by[pa]);
+		const ch = mb - ma;
+		const samepair = {};
+		for (const p of periodKeys) {
+			const v = by[p] || [];
+			samepair[p] = v.length === 2 && v.every(Number.isFinite) ? round1(Math.abs(v[0] - v[1])) : null;
+		}
+		return {
+			id: t.id,
+			change: Number.isFinite(ch) ? round1(ch) : null,
+			threshold: null,
+			hold: void 0,
+			dist,
+			samepair,
+			start: "sea",
+			before: Number.isFinite(mb) ? round1(mb) : null,
+			after: Number.isFinite(ma) ? round1(ma) : null,
+			verdict: Number.isFinite(ch) ? "hold" : "nodata",
+			geometry: t.geometry
+		};
+	});
+}
+function reproLines(trs, dist, cfg) {
+	const [E0, N1] = cfg.aoi;
+	const res = REPRO_SET.res;
+	const segs = [];
+	let cur = [];
+	trs.forEach((t, k) => {
+		const v = dist[k];
+		if (Number.isFinite(v)) {
+			const u = v / res;
+			const g = fromUtm(E0 + (t.start[0] + t.d[0] * u) * res, N1 - (t.start[1] + t.d[1] * u) * res, cfg.zone, cfg.south);
+			cur.push([Math.round(g.lon * 1e7) / 1e7, Math.round(g.lat * 1e7) / 1e7]);
+		} else if (cur.length) {
+			segs.push(cur);
+			cur = [];
+		}
+	});
+	if (cur.length) segs.push(cur);
+	return segs.filter((s) => s.length > 1);
+}
+function roundHalfEven(v) {
+	const f = Math.floor(v);
+	const r = v - f;
+	if (r > .5) return f + 1;
+	if (r < .5) return f;
+	return f % 2 === 0 ? f : f + 1;
+}
+async function readWindow(openTiff, href, aoi) {
+	const image = await (await openTiff(href)).getImage(0);
+	const [ox, oy] = image.getOrigin();
+	const [rx] = image.getResolution();
+	const [E0, N1, W, H] = aoi;
+	const x0 = roundHalfEven((E0 - ox) / rx);
+	const y0 = roundHalfEven((oy - N1) / rx);
+	const w = roundHalfEven(W / rx);
+	const h = roundHalfEven(H / rx);
+	const [raw] = await image.readRasters({
+		window: [
+			x0,
+			y0,
+			x0 + w,
+			y0 + h
+		],
+		samples: [0],
+		interleave: false,
+		fillValue: 0
+	});
+	return {
+		raw,
+		w,
+		h
+	};
+}
+function upsample2(raw, w, h, W, H) {
+	const out = new Uint8Array(W * H);
+	for (let y = 0; y < H; y += 1) for (let x = 0; x < W; x += 1) {
+		const sy = Math.min(h - 1, y >> 1);
+		const sx = Math.min(w - 1, x >> 1);
+		out[y * W + x] = raw[sy * w + sx];
+	}
+	return out;
+}
+async function loadReproScenes(cfg, { openTiff, fetchFn = fetch, onProgress = () => {}, signal } = {}) {
+	const step = (i, done, total) => onProgress({
+		stage: i,
+		name: REPRO_STAGES[i],
+		done,
+		total
+	});
+	const ids = Object.keys(cfg.periods).flatMap((p) => cfg.periods[p].map((id) => ({
+		id,
+		period: p
+	})));
+	step(0, 0, ids.length);
+	const items = [];
+	for (const [i, s] of ids.entries()) {
+		const res = await fetchFn(ITEM_URL + s.id, { signal });
+		if (!res.ok) throw Object.assign(/* @__PURE__ */ new Error(`장면 ${s.id} 응답 ${res.status}`), { kind: "network" });
+		items.push({
+			...s,
+			item: await res.json()
+		});
+		step(0, i + 1, ids.length);
+	}
+	const scenes = [];
+	step(1, 0, items.length);
+	for (const [i, s] of items.entries()) {
+		if (signal?.aborted) throw Object.assign(/* @__PURE__ */ new Error("중단"), { name: "AbortError" });
+		const a = s.item.assets;
+		const [g, n, c] = await Promise.all([
+			readWindow(openTiff, a.green.href, cfg.aoi),
+			readWindow(openTiff, a.nir.href, cfg.aoi),
+			readWindow(openTiff, a.scl.href, cfg.aoi)
+		]);
+		scenes.push({
+			id: s.id,
+			period: s.period,
+			date: String(s.item.properties.datetime).slice(0, 10),
+			cloud: s.item.properties["eo:cloud_cover"],
+			green: g.raw,
+			nir: n.raw,
+			scl: c.raw,
+			sclW: c.w,
+			sclH: c.h,
+			visual: a.visual?.href
+		});
+		step(1, i + 1, items.length);
+	}
+	return scenes;
+}
+function reproFromScenes(cfg, raw, { onProgress = () => {} } = {}) {
+	const step = (i, done, total) => onProgress({
+		stage: i,
+		name: REPRO_STAGES[i],
+		done,
+		total
+	});
+	const periodKeys = Object.keys(cfg.periods);
+	const W = Math.round(cfg.aoi[2] / REPRO_SET.res);
+	const H = Math.round(cfg.aoi[3] / REPRO_SET.res);
+	step(2, 0, 1);
+	const scenes = raw.map((s) => ({
+		...s,
+		ndwi: ndwiDn(s.green, s.nir),
+		scl: upsample2(s.scl, s.sclW, s.sclH, W, H)
+	}));
+	const trs = transectsToPixels(cfg.features, cfg);
+	const measured = reproMeasure(scenes, trs, W, H);
+	step(2, 1, 1);
+	const base = reproRows(trs, measured, periodKeys);
+	step(3, trs.length, trs.length);
+	return {
+		base,
+		scenes: measured.scenes.map((m, i) => {
+			const lines = reproLines(trs, m.dist, cfg);
+			const s = scenes[i];
+			return {
+				id: m.id,
+				date: s.date,
+				period: m.period,
+				cloud: s.cloud,
+				tideCorrected: false,
+				threshold: Math.round(m.thr * 1e3) / 1e3,
+				geometryType: lines.length > 1 ? "MultiLineString" : "LineString",
+				segments: lines.length,
+				lines,
+				feature: {
+					type: "Feature",
+					properties: {
+						scene: m.id,
+						date: s.date
+					},
+					geometry: lines.length > 1 ? {
+						type: "MultiLineString",
+						coordinates: lines
+					} : lines.length === 1 ? {
+						type: "LineString",
+						coordinates: lines[0]
+					} : null
+				}
+			};
+		}),
+		periods: cfg.periods,
+		measured,
+		items: scenes.map((s) => ({
+			id: s.id,
+			date: s.date,
+			visual: s.visual
+		}))
+	};
+}
+async function runRepro(cfg, opts = {}) {
+	const started = Date.now();
+	return {
+		...reproFromScenes(cfg, await loadReproScenes(cfg, opts), opts),
+		seconds: Math.round((Date.now() - started) / 100) / 10
+	};
+}
 // src/screens/AnalyzeScreen.jsx
 var YEARS = Array.from({ length: 11 }, (_, i) => 2016 + i).map((y) => [y, `${y}년`]);
 var SPACING = [
@@ -48325,6 +48819,24 @@ var SPACING = [
 ].map((v) => [v, `${v} m`]);
 var BOX_M = 2e3;
 var num$2 = (v) => v === "" || v === null ? NaN : Number(v);
+var MODES = [["repro", "재현 기준"], ["auto", "자동 가로선"]];
+var sceneDate = (id) => {
+	const m = String(id).match(/_(\d{4})(\d{2})(\d{2})_/);
+	return m ? `${m[1]}. ${Number(m[2])}. ${Number(m[3])}.` : id;
+};
+function aoiRing(r) {
+	const [E0, N1, W, H] = r.aoi;
+	return [
+		[E0, N1],
+		[E0 + W, N1],
+		[E0 + W, N1 - H],
+		[E0, N1 - H],
+		[E0, N1]
+	].map(([x, y]) => {
+		const g = fromUtm(x, y, r.zone, r.south);
+		return [g.lon, g.lat];
+	});
+}
 function boxRing(lon, lat) {
 	const dy = BOX_M / 2 / 110950;
 	const dx = BOX_M / 2 / (111320 * Math.cos(lat * Math.PI / 180));
@@ -48342,10 +48854,12 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 	const map = (0, import_react.useRef)(null);
 	const [loaded, setLoaded] = (0, import_react.useState)(false);
 	const presets = sites.filter((s) => !s.run);
+	const reproSites = presets.filter((s) => s.repro);
+	const [mode, setMode] = (0, import_react.useState)(reproSites.length ? "repro" : "auto");
 	const [preset, setPreset] = (0, import_react.useState)(presets[0]?.id || "");
 	const [lat, setLat] = (0, import_react.useState)(String(presets[0]?.lat ?? ""));
 	const [lon, setLon] = (0, import_react.useState)(String(presets[0]?.lon ?? ""));
-	const [name, setName] = (0, import_react.useState)(presets[0] ? `${presets[0].name} 새 분석` : "");
+	const [name, setName] = (0, import_react.useState)(presets[0] ? `${presets[0].name} ${reproSites.length ? "재현 기준" : "새 분석"}` : "");
 	const [beforeYear, setBefore] = (0, import_react.useState)(2017);
 	const [afterYear, setAfter] = (0, import_react.useState)(2025);
 	const [season, setSeason] = (0, import_react.useState)("spring");
@@ -48355,21 +48869,43 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 	const [polys, setPolys] = (0, import_react.useState)([]);
 	const drawRef = (0, import_react.useRef)(false);
 	drawRef.current = drawing;
+	const reproRef = (0, import_react.useRef)(false);
 	const la = num$2(lat);
 	const lo = num$2(lon);
 	const posOk = Number.isFinite(la) && Number.isFinite(lo) && Math.abs(la) <= 84 && Math.abs(lo) <= 180;
 	const yearsOk = beforeYear < afterYear;
 	const running = job?.status === "running";
+	reproRef.current = mode === "repro";
 	const canRun = posOk && yearsOk && !running;
-	const choosePreset = (id) => {
+	const choosePreset = (id, m = mode) => {
 		const s = presets.find((x) => x.id === id);
 		setPreset(id);
 		if (s) {
 			setLat(String(s.lat));
 			setLon(String(s.lon));
-			setName(`${s.name} 새 분석`);
+			setName(`${s.name} ${m === "repro" ? "재현 기준" : "새 분석"}`);
 		}
 	};
+	const chooseMode = (m) => {
+		setMode(m);
+		setDrawing(false);
+		setRing([]);
+		if (m === "repro") choosePreset(reproSites.some((s) => s.id === preset) ? preset : reproSites[0]?.id || "", m);
+		else {
+			setPolys([]);
+			choosePreset(preset, m);
+		}
+	};
+	const repro = mode === "repro";
+	const reproSite = repro ? reproSites.find((s) => s.id === preset) || null : null;
+	const presetIds = preset ? rules?.data?.site_rules?.[preset]?.structureExcluded || [] : [];
+	const presetRows = preset && siteData[preset]?.status === "ready" ? siteData[preset].base || siteData[preset].rows : null;
+	const reproRows = reproSite ? presetRows : null;
+	const reproPeriods = reproSite ? rules?.data?.scene_rule?.sites?.[preset]?.periods || null : null;
+	const reproDates = reproPeriods ? Object.values(reproPeriods).flat().map((id) => [id.match(/_(\d{8})_/)?.[1] || id, id]).sort().map(([, id]) => sceneDate(id)) : [];
+	const [reproStructs, setReproStructs] = (0, import_react.useState)(false);
+	const reproStructIds = reproStructs ? presetIds : [];
+	const reproOk = Boolean(reproSite && reproRows && reproPeriods);
 	(0, import_react.useEffect)(() => {
 		const PAL = readPalette();
 		const m = makeMap(host.current, {
@@ -48382,11 +48918,22 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 				"box",
 				"point",
 				"polys",
-				"ring"
+				"ring",
+				"transects"
 			].forEach((id) => m.addSource(id, {
 				type: "geojson",
 				data: EMPTY
 			}));
+			m.addLayer({
+				id: "transects",
+				type: "line",
+				source: "transects",
+				paint: {
+					"line-color": PAL.current,
+					"line-width": 1,
+					"line-opacity": .7
+				}
+			});
 			m.addLayer({
 				id: "box",
 				type: "line",
@@ -48448,7 +48995,7 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 			m.on("click", (e) => {
 				const p = [Math.round(e.lngLat.lng * 1e5) / 1e5, Math.round(e.lngLat.lat * 1e5) / 1e5];
 				if (drawRef.current) setRing((r) => [...r, p]);
-				else {
+				else if (!reproRef.current) {
 					setLon(String(p[0]));
 					setLat(String(p[1]));
 					setPreset("");
@@ -48468,7 +49015,7 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 		const m = map.current;
 		if (!loaded || !m) return;
 		if (posOk) {
-			m.getSource("point").setData(fc([{
+			m.getSource("point").setData(fc(reproSite ? [] : [{
 				type: "Feature",
 				geometry: {
 					type: "Point",
@@ -48479,15 +49026,21 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 				type: "Feature",
 				geometry: {
 					type: "LineString",
-					coordinates: boxRing(lo, la)
+					coordinates: reproSite ? aoiRing(reproSite.repro) : boxRing(lo, la)
 				}
 			}]));
 		}
+		m.getSource("transects").setData(fc(reproSite && reproRows ? reproRows.map((r) => ({
+			type: "Feature",
+			geometry: r.geometry
+		})) : []));
 	}, [
 		loaded,
 		lo,
 		la,
-		posOk
+		posOk,
+		reproSite,
+		reproRows
 	]);
 	(0, import_react.useEffect)(() => {
 		const m = map.current;
@@ -48532,13 +49085,22 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 		ring,
 		drawing
 	]);
-	const presetIds = preset ? rules?.data?.site_rules?.[preset]?.structureExcluded || [] : [];
-	const presetRows = preset && siteData[preset]?.status === "ready" ? siteData[preset].base || siteData[preset].rows : null;
 	const loadStructures = () => {
 		setPolys(structurePolygons(presetRows, presetIds));
 		setRing([]);
 		setDrawing(false);
+		setReproStructs(true);
 	};
+	(0, import_react.useEffect)(() => {
+		if (repro && presetRows) {
+			setPolys(structurePolygons(presetRows, presetIds));
+			setReproStructs(true);
+		}
+	}, [
+		repro,
+		preset,
+		Boolean(presetRows)
+	]);
 	const closeRing = () => {
 		if (ring.length >= 3) {
 			setPolys((x) => [...x, ring]);
@@ -48569,6 +49131,25 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 		polys
 	]);
 	const run = (over = {}) => {
+		if (repro) {
+			if (!reproOk) return;
+			const features = reproRows.map((r) => ({
+				type: "Feature",
+				properties: { id: r.id },
+				geometry: r.geometry
+			}));
+			onRun({
+				mode: "repro",
+				siteId: preset,
+				structureIds: reproStructIds,
+				cfg: {
+					...reproSite.repro,
+					periods: reproPeriods,
+					features
+				}
+			}, name.trim());
+			return;
+		}
 		if (over.season) setSeason(over.season);
 		onRun({
 			...params,
@@ -48582,10 +49163,30 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 		return i < job.stage ? "done" : i === job.stage ? "now" : "wait";
 	};
 	const resData = job?.status === "done" ? siteData[job.id] : null;
+	const resLine = resData?.status === "ready" ? runLine({
+		data: resData,
+		rule: rules?.data?.site_rules?.[job.id]
+	}) : null;
+	const jobRepro = (job?.params?.mode || mode) === "repro";
+	const stages = jobRepro ? REPRO_STAGES : STAGES;
 	const others = SEASONS.filter(([k]) => k !== (job?.params?.season || season));
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PageHead, {
 		title: "사업지 분석",
-		meta: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+		meta: repro && reproSite ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Sentinel-2 L2A" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+				"분석 범위 ",
+				reproSite.repro.aoi[2] / 1e3,
+				" km x ",
+				reproSite.repro.aoi[3] / 1e3,
+				" km"
+			] }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+				"가로선 간격 ",
+				reproSite.repro.spacingM,
+				" m"
+			] })
+		] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Sentinel-2 L2A" }),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "분석 범위 2 km x 2 km" }),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
@@ -48608,7 +49209,7 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 				role: "toolbar",
 				"aria-label": "구조물 다각형",
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					!repro && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						type: "button",
 						className: `krds-btn small ${drawing ? "primary" : "secondary"}`,
 						"aria-pressed": drawing,
@@ -48638,13 +49239,14 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 					}),
 					presetIds.length > 0 && presetRows && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						type: "button",
-						className: "krds-btn small secondary",
+						className: `krds-btn small ${repro && reproStructs ? "primary" : "secondary"}`,
+						"aria-pressed": repro ? reproStructs : void 0,
 						disabled: running,
 						onClick: loadStructures,
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Import, {
 							size: 16,
 							"aria-hidden": "true"
-						}), "기존 사업지 구조물 구간 불러오기"]
+						}), repro ? `구조물 의심 가로선 ${presetIds.length}개 불러오기` : "기존 사업지 구조물 구간 불러오기"]
 					}),
 					polys.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						type: "button",
@@ -48652,16 +49254,12 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 						onClick: () => {
 							setPolys([]);
 							setRing([]);
+							setReproStructs(false);
 						},
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, {
-								size: 16,
-								"aria-hidden": "true"
-							}),
-							"구조물 ",
-							polys.length,
-							"개 지우기"
-						]
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, {
+							size: 16,
+							"aria-hidden": "true"
+						}), repro ? "구조물 의심 가로선 지우기" : `구조물 ${polys.length}개 지우기`]
 					})
 				]
 			})]
@@ -48671,7 +49269,77 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 				title: "분석 조건",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "cs-form",
-					children: [
+					children: [reproSites.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+						label: "분석 방식",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Segmented, {
+							label: "분석 방식",
+							value: mode,
+							options: MODES,
+							onChange: chooseMode,
+							disabled: running
+						})
+					}), repro ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+							label: "사업지 목록",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pick, {
+								label: "사업지 목록",
+								value: preset,
+								options: reproSites.map((s) => [s.id, s.name]),
+								onChange: (id) => choosePreset(id),
+								disabled: running,
+								wide: true
+							})
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dl", {
+							className: "cs-kv is-row",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "장면" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: reproDates.join(", ") || "불러오는 중" })] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "가로선" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: reproRows ? `${reproRows.length}개, ${reproSite?.repro.spacingM} m 간격` : "불러오는 중" })] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "구조물 의심" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: reproStructIds.length ? `${reproStructIds.length}개(${reproStructIds.join(", ")}번)` : "없음" })] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "보류 기준" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", { children: [rules?.data?.site_rules?.[preset]?.holdThresholdM ?? "", " m"] })] })
+							]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+							className: "cs-repro-note",
+							children: [
+								"현황판 ",
+								reproSite?.name,
+								"과 같은 장면과 가로선으로 위성 영상을 다시 읽어 계산합니다."
+							]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+							label: "이름",
+							htmlFor: "an-name",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								id: "an-name",
+								className: "cs-input",
+								value: name,
+								disabled: running,
+								onChange: (e) => setName(e.target.value)
+							})
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "cs-form-actions",
+							children: running ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+								type: "button",
+								className: "krds-btn medium secondary",
+								onClick: onStop,
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Square, {
+									size: 16,
+									"aria-hidden": "true"
+								}), "중지"]
+							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+								type: "button",
+								className: "krds-btn medium primary",
+								disabled: !reproOk,
+								onClick: () => run(),
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Play, {
+									size: 16,
+									"aria-hidden": "true"
+								}), "재현 기준으로 실행"]
+							})
+						})
+					] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
 							label: "사업지 목록",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pick, {
@@ -48803,7 +49471,7 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 								}), "분석 실행"]
 							})
 						})
-					]
+					] })]
 				})
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Box, {
 				title: "진행",
@@ -48813,7 +49481,7 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", {
 						className: "cs-steps",
 						"aria-live": "polite",
-						children: STAGES.map((s, i) => {
+						children: stages.map((s, i) => {
 							const st = stageState(i);
 							const cur = job && job.stage === i && st === "now";
 							return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
@@ -48843,7 +49511,7 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 						className: "cs-fail",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ErrorLine, { children: job.message || FAIL[job.kind] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "cs-box-actions",
-							children: others.map(([k, l]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							children: !jobRepro && others.map(([k, l]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 								type: "button",
 								className: "krds-btn small secondary",
 								onClick: () => run({ season: k }),
@@ -48853,47 +49521,55 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 					}),
 					resData?.status === "ready" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "cs-result",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
-							className: "cs-counts",
-							"aria-label": "분석 결과",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: resData.summary.total }), "가로선"] }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: resData.summary.judgeable }), "기준 초과"] }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: resData.summary.held }), "판정 보류"] }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: resData.summary.excluded }), "구조물 의심"] }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: resData.scenes.length }), "장면"] }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: job.meta.seconds }), "초"] }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: (job.meta.bytes / 1048576).toFixed(1) }), "MB"] })
-							]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "cs-box-actions",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-									type: "button",
-									className: "krds-btn small primary",
-									onClick: () => onOpen(job.id, "card"),
-									children: "판정 카드"
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-									type: "button",
-									className: "krds-btn small secondary",
-									onClick: () => onOpen(job.id, "map"),
-									children: "해안선 지도"
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-									type: "button",
-									className: "krds-btn small secondary",
-									onClick: () => onOpen(job.id, "compare"),
-									children: "전후 영상"
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-									type: "button",
-									className: "krds-btn small secondary",
-									onClick: () => onOpen(job.id, "history"),
-									children: "분석 기록"
-								})
-							]
-						})]
+						children: [
+							resLine && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
+								className: "cs-run-cond",
+								"aria-label": "재현 조건",
+								children: resLine.map(([k, v]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: k }), v] }, k))
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
+								className: "cs-counts",
+								"aria-label": "분석 결과",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: resData.summary.total }), "가로선"] }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: resData.summary.judgeable }), "기준 초과"] }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: resData.summary.held }), "판정 보류"] }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: resData.summary.excluded }), "구조물 의심"] }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: resData.scenes.length }), "장면"] }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: job.meta.seconds }), "초"] }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: (job.meta.bytes / 1048576).toFixed(1) }), "MB"] })
+								]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "cs-box-actions",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										type: "button",
+										className: "krds-btn small primary",
+										onClick: () => onOpen(job.id, "card"),
+										children: "판정 카드"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										type: "button",
+										className: "krds-btn small secondary",
+										onClick: () => onOpen(job.id, "map"),
+										children: "해안선 지도"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										type: "button",
+										className: "krds-btn small secondary",
+										onClick: () => onOpen(job.id, "compare"),
+										children: "전후 영상"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										type: "button",
+										className: "krds-btn small secondary",
+										onClick: () => onOpen(job.id, "history"),
+										children: "분석 기록"
+									})
+								]
+							})
+						]
 					})
 				]
 			})]
@@ -48973,7 +49649,7 @@ function basePoint(transect, shoreline, baseDist) {
 	};
 }
 var deg = (v) => typeof v === "number" ? v.toFixed(6) : "";
-function surveyCsv({ site, rows, baseScene }) {
+function surveyCsv({ site, rows, baseScene, head = [] }) {
 	const lines = surveyRows(rows).map((r) => {
 		const p = basePoint(r.geometry, baseScene?.feature?.geometry, r.dist?.[baseScene?.id]);
 		return [
@@ -48989,7 +49665,11 @@ function surveyCsv({ site, rows, baseScene }) {
 			VERDICT[r.verdict]?.note || ""
 		].map(cell$1).join(",");
 	});
-	return "﻿" + [SURVEY_HEAD.join(","), ...lines].join("\r\n") + "\r\n";
+	return "﻿" + [
+		...head,
+		SURVEY_HEAD.join(","),
+		...lines
+	].join("\r\n") + "\r\n";
 }
 function surveyFileName(site, today) {
 	return `${site.id}_현장측량구간_${today}.csv`;
@@ -49181,10 +49861,15 @@ function CardScreen({ site, data, rules, basis = "sd1", settings, onRetry }) {
 	const score = annexScore(rows, settings);
 	const row = rows.find((r) => r.id === sel);
 	const thr = s.thresholds[0];
+	const runInfo = site.run && data.run ? {
+		data,
+		rule
+	} : null;
 	const download = () => downloadText(surveyCsv({
 		site,
 		rows,
-		baseScene: data.scenes[0]
+		baseScene: data.scenes[0],
+		head: runInfo ? conditionsCsvHead(runConditions(runInfo)) : []
 	}), surveyFileName(site, today));
 	const copy = async () => {
 		try {
@@ -49226,6 +49911,11 @@ function CardScreen({ site, data, rules, basis = "sd1", settings, onRetry }) {
 					"aria-hidden": "true"
 				}), "현장 측량 구간 CSV"]
 			})
+		}),
+		runInfo && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
+			className: "cs-run-cond cs-card-cond",
+			"aria-label": "재현 조건",
+			children: runLine(runInfo).map(([k, v]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: k }), v] }, k))
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BigNumbers, { summary: s }),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Tabs, {
@@ -54453,8 +55143,50 @@ function App() {
 			name
 		});
 		try {
+			if (params.mode === "repro") {
+				const { reproInBrowser } = await __vitePreload(async () => {
+					const { reproInBrowser } = await import("./browser-CLDXZq3d.js");
+					return { reproInBrowser };
+				}, []);
+				const base = cfg.sites.find((s) => s.id === params.siteId);
+				const out = await reproInBrowser(params.cfg, {
+					signal: ctl.signal,
+					onProgress: (e) => setJob((j) => ({
+						...j,
+						stage: e.stage,
+						done: e.done,
+						total: e.total
+					}))
+				});
+				runCount.current += 1;
+				const id = `run${runCount.current}`;
+				const sd = siteData[base.id];
+				const run = reproToSite(out, {
+					id,
+					name: name || `${base.name} 재현 기준`,
+					base,
+					boardRule: rules?.data?.site_rules?.[base.id],
+					structureIds: params.structureIds,
+					images: {
+						before: sd?.before,
+						after: sd?.after
+					}
+				});
+				setRuns((xs) => [...xs, run]);
+				setJob({
+					status: "done",
+					id,
+					params: {
+						mode: "repro",
+						siteId: base.id
+					},
+					name: run.site.name,
+					meta: run.data.run.meta
+				});
+				return id;
+			}
 			const { analyzeInBrowser } = await __vitePreload(async () => {
-				const { analyzeInBrowser } = await import("./browser-vo2GnJVO.js");
+				const { analyzeInBrowser } = await import("./browser-CLDXZq3d.js");
 				return { analyzeInBrowser };
 			}, []);
 			const result = await analyzeInBrowser(params, {
@@ -54616,4 +55348,4 @@ function App() {
 }
 // src/main.jsx
 (0, import_client.createRoot)(document.getElementById("root")).render(/* @__PURE__ */ (0, import_jsx_runtime.jsx)(App, {}));
-export { __toESM as i, runAnalysis as n, __commonJSMin as r, __vitePreload as t };
+export { __toESM as a, __commonJSMin as i, runRepro as n, runAnalysis as r, __vitePreload as t };

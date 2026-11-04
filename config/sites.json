@@ -3,6 +3,7 @@
   "sites": [
     {
       "id": "banam",
+      "repro": { "aoi": [452360, 4253530, 2400, 2400], "zone": 52, "south": false, "halfM": 300, "spacingM": 30 },
       "name": "고성 반암",
       "region": "강원 고성군",
       "country": "대한민국",
@@ -37,6 +38,7 @@
     },
     {
       "id": "jinjin",
+      "repro": { "aoi": [455910, 4248630, 2400, 2400], "zone": 52, "south": false, "halfM": 300, "spacingM": 30 },
       "name": "고성 가진",
       "region": "강원 고성군",
       "country": "대한민국",
@@ -103,6 +105,7 @@
     },
     {
       "id": "aneho",
+      "repro": { "aoi": [330440, 687210, 5000, 2000], "zone": 31, "south": false, "halfM": 400, "spacingM": 50 },
       "name": "토고 Agbodrafo",
       "region": "토고 해안주",
       "country": "토고",

@@ -1,5 +1,5 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/raw-DQQ76u6H.js","assets/basedecoder-BdcHmq9y.js","assets/lzw-bUwKIKGr.js","assets/jpeg-CaW7afAm.js","assets/deflate-BJKwvshb.js","assets/pako.esm-DawxUjt-.js","assets/packbits-CfEyjIQ2.js","assets/lerc-8UvkIsIH.js","assets/index-CqkDSkBy.js","assets/index-__QNoL_r.css","assets/webimage-C0psjdAj.js"])))=>i.map(i=>d[i]);
-import { i as __toESM, n as runAnalysis, r as __commonJSMin, t as __vitePreload } from "./index-CqkDSkBy.js";
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/raw-DQQ76u6H.js","assets/basedecoder-BdcHmq9y.js","assets/lzw-bUwKIKGr.js","assets/jpeg-CaW7afAm.js","assets/deflate-BJKwvshb.js","assets/pako.esm-DawxUjt-.js","assets/packbits-CfEyjIQ2.js","assets/lerc-C01cXn6I.js","assets/index-VMiDqRL8.js","assets/index-WzpajANt.css","assets/webimage-C0psjdAj.js"])))=>i.map(i=>d[i]);
+import { a as __toESM, i as __commonJSMin, n as runRepro, r as runAnalysis, t as __vitePreload } from "./index-VMiDqRL8.js";
 // node_modules/geotiff/dist-module/globals.js
 var fieldTagNames = {
 	315: "Artist",
@@ -648,7 +648,7 @@ addDecoder(6, () => {
 addDecoder(7, () => __vitePreload(() => import("./jpeg-CaW7afAm.js").then((m) => m.default), __vite__mapDeps([3,1])));
 addDecoder([8, 32946], () => __vitePreload(() => import("./deflate-BJKwvshb.js").then((m) => m.default), __vite__mapDeps([4,5,1])));
 addDecoder(32773, () => __vitePreload(() => import("./packbits-CfEyjIQ2.js").then((m) => m.default), __vite__mapDeps([6,1])));
-addDecoder(34887, () => __vitePreload(() => import("./lerc-8UvkIsIH.js").then(async (m) => {
+addDecoder(34887, () => __vitePreload(() => import("./lerc-C01cXn6I.js").then(async (m) => {
 	await m.zstd.init();
 	return m;
 }), __vite__mapDeps([7,8,9,5,1])).then((m) => m.default));
@@ -2963,29 +2963,50 @@ async function makeImage(scene, box) {
 		bounds: box
 	} : null;
 }
-async function analyzeInBrowser(params, { onProgress, signal } = {}) {
+async function counted(fn) {
 	const orig = window.fetch;
-	let bytes = 0;
-	let requests = 0;
+	const c = {
+		bytes: 0,
+		requests: 0
+	};
 	window.fetch = async (...a) => {
 		const res = await orig(...a);
-		requests += 1;
-		bytes += Number(res.headers.get("content-length") || 0);
+		c.requests += 1;
+		c.bytes += Number(res.headers.get("content-length") || 0);
 		return res;
 	};
 	try {
-		const out = await runAnalysis(params, {
-			openTiff,
-			makeImage,
-			fetchFn: orig,
-			onProgress,
-			signal
-		});
-		out.meta.bytes = bytes;
-		out.meta.requests = requests;
-		return out;
+		return {
+			out: await fn(orig),
+			...c
+		};
 	} finally {
 		window.fetch = orig;
 	}
 }
-export { analyzeInBrowser, LercParameters as n, LercAddCompression as t };
+async function analyzeInBrowser(params, { onProgress, signal } = {}) {
+	const { out, bytes, requests } = await counted((orig) => runAnalysis(params, {
+		openTiff,
+		makeImage,
+		fetchFn: orig,
+		onProgress,
+		signal
+	}));
+	out.meta.bytes = bytes;
+	out.meta.requests = requests;
+	return out;
+}
+async function reproInBrowser(cfg, { onProgress, signal } = {}) {
+	const { out, bytes, requests } = await counted((orig) => runRepro(cfg, {
+		openTiff,
+		fetchFn: orig,
+		onProgress,
+		signal
+	}));
+	return {
+		...out,
+		bytes,
+		requests
+	};
+}
+export { analyzeInBrowser, LercParameters as n, reproInBrowser, LercAddCompression as t };
