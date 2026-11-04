@@ -1,0 +1,248 @@
+/* 갈래 layout 보정 CSS. 피그마(KRDS 키트)가 기준. 값은 KRDS 변수만. */
+
+/* 배지 outline disabled: 피그마 1300:54148 선 color/element/disabled-dark, 글자 color/text/disabled.
+   공식 코드는 선 --krds-badge--light-color-disabled-element(정의 없음), 글자 disabled-on(#6D7882) */
+.krds-badge.outline-disabled { border-color: var(--krds-color-element-disabled-dark); color: var(--krds-color-text-disabled); }
+
+/* 배지 outline 폭: 피그마 1300:54134 패딩 좌우 padding/3(8), 선 1 INSIDE → 폭 59.
+   공식 코드는 선이 패딩 바깥에 더해져 폭 60.2. 선 두께만큼 좌우 패딩을 줄인다. */
+.krds-badge[class*="outline-"] {
+  padding-left: calc(var(--krds-padding-3) - var(--krds-light-border-width-variable-regular));
+  padding-right: calc(var(--krds-padding-3) - var(--krds-light-border-width-variable-regular));
+}
+
+/* 탭 secondary(폭 맞춤 탭, 공식 .tab 에 full 없음): 피그마 tab__atomic 340:31827 높이 size-height/6(40), 최소 폭 56(변수 미연결).
+   공식 코드는 높이 size-height-7(48), 최소 폭 6.4rem. 최소 폭은 같은 값의 KRDS 단계 size-height-8(56)을 쓴다. */
+.tab.line:not(.full) .btn-tab,
+.tab.fill:not(.full) .btn-tab { height: var(--krds-size-height-6); min-width: var(--krds-size-height-8); }
+/* 탭 fill secondary: 피그마 1176:66657 좌우 패딩 padding/5(12). 공식 코드는 --krds-tab--fill-button-padding = padding-3(8) */
+.tab.fill:not(.full) .btn-tab { padding-left: var(--krds-padding-5); padding-right: var(--krds-padding-5); }
+
+/* 아코디언: 피그마 accordion(360:44958) 한 변형 = 공식 .accordion-item 하나. 공식 .krds-accordion 묶음의 위아래 패딩 4와 테두리는 피그마 부품에 없다.
+   default 형은 항목 패딩도 없다(피그마 1640:28556 은 버튼 패딩 24 만). */
+.krds-accordion { padding: 0; border-top: 0; border-bottom: 0; }
+.krds-accordion:not(.type-line) .accordion-item { padding: 0; }
+/* 크기 large: 제목 heading/small(19), 공식 기본은 heading/xsmall(17). 피그마 1640:28559, 360:44959 */
+.krds-accordion.large .accordion-item .btn-accordion { font-size: var(--krds-font-size-heading-small); }
+/* 크기 medium: 제목 heading/xsmall. default 형 패딩 위아래 padding/7(20) 좌우 padding/6(16)(피그마 1640:28561), line 형 위아래 padding/5(12)(피그마 1016:57899) */
+.krds-accordion.medium .accordion-item .btn-accordion { font-size: var(--krds-font-size-heading-xsmall); }
+.krds-accordion.medium:not(.type-line) .accordion-item .btn-accordion {
+  padding: var(--krds-padding-7) calc(var(--krds-padding-6) + var(--krds-gap-5) + var(--krds-accordion--button-icon-size)) var(--krds-padding-7) var(--krds-padding-6);
+}
+.krds-accordion.medium:not(.type-line) .accordion-item .btn-accordion::after { top: var(--krds-padding-7); right: var(--krds-padding-6); }
+.krds-accordion.medium.type-line .accordion-item .btn-accordion { padding-top: var(--krds-padding-5); padding-bottom: var(--krds-padding-5); }
+.krds-accordion.medium.type-line .accordion-item .btn-accordion::after { top: var(--krds-padding-5); }
+
+/* 모달 키트 예시 표시용: 피그마 모달 부품(1037:37636)은 배경 없는 상자 하나다. data-f2c-static 을 붙인 모달만 제자리에 그린다.
+   실제 화면의 모달은 공식 스크립트로 띄우고 이 속성을 쓰지 않는다. */
+.krds-modal[data-f2c-static] { display: block; position: relative; z-index: auto; visibility: visible; opacity: 1; width: 100%; height: auto; transition: none; }
+.krds-modal[data-f2c-static] .modal-dialog { height: auto; margin: 0; z-index: auto; }
+.krds-modal[data-f2c-static] .modal-dialog .modal-content { max-height: none; }
+/* 모달 small: 피그마 346:27374 내용 묶음 간격 gap/3(8)(1697:46622), 버튼 줄 아래 패딩 0 → 상자 아래 여백 24(346:27291).
+   medium(1037:37645)과 large 는 공식 값(간격 16, 아래 40)과 같다. */
+.krds-modal .modal-dialog.modal-sm .modal-conts .conts-area { gap: var(--krds-gap-3); }
+.krds-modal .modal-dialog.modal-sm .modal-btn { padding-bottom: var(--krds-padding-8); }
+
+/* 긴급 공지: 피그마 critical_alerts(343:54455) 한 변형 = 공식 .critical-ban 하나. 공식 목록 ul 의 바깥 패딩(PC 20, 모바일 16)은 피그마 부품에 없다.
+   피그마 배너는 선 1 INSIDE + 그림자 없음(343:54456). 공식은 border(크기 +2)와 그림자. INSIDE 선은 inset box-shadow 로 그린다. */
+.krds-critical-alerts { padding: 0; }
+.krds-critical-alerts .critical-ban {
+  border: 0;
+  box-shadow: inset 0 0 0 var(--krds-critical-alerts--banner-border-width) var(--krds-critical-alerts--banner-color-border);
+}
+/* 긴급 공지 모바일: 피그마 1726:81138 모서리 radius/medium4(8). 공식은 PC와 같은 radius-large2(10) */
+@media (max-width: 767px) {
+  .krds-critical-alerts .critical-ban { border-radius: var(--krds-radius-medium4); }
+  .krds-critical-alerts { padding: 0; }
+}
+/* 긴급 공지 모바일 "자세히 보기" 글자: 공식 마크업은 span.m-hide 인데 공식 CSS 어디에도 .m-hide 규칙이 없어 보인다.
+   피그마 1726:81138 은 화살표만 있다. 화면에서는 숨기고 화면 낭독기에는 읽히게 공식 .sr-only 와 같은 방식으로 숨긴다. */
+@media (max-width: 767px) {
+  .krds-critical-alerts .m-hide { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+}
+
+/* 텍스트 목록 한 줄(피그마 list 324:52107, Level 1~3): 공식 CSS 는 깊이를 ul 중첩으로만 정한다. 피그마는 레벨별 한 줄 부품을 쌓아 목록을 만들므로
+   data-level 로 공식 깊이 변수(--krds-info-list--depthN-…)를 그대로 적용한다. */
+.krds-info-list[data-level="2"] > li { padding-left: var(--krds-info-list--depth2-padding-left); font-size: var(--krds-info-list--pc-text-depth2); color: var(--krds-info-list--depth2-color-text); }
+.krds-info-list[data-level="3"] > li { padding-left: var(--krds-info-list--depth3-padding-left); font-size: var(--krds-info-list--pc-text-depth3); color: var(--krds-info-list--depth3-color-text); }
+@media (max-width: 767px) {
+  .krds-info-list[data-level="2"] > li { font-size: var(--krds-info-list--mobile-text-depth2); }
+  .krds-info-list[data-level="3"] > li { font-size: var(--krds-info-list--mobile-text-depth3); }
+}
+/* 텍스트 목록 ordered 3단계 번호(①): 피그마 3238:127227 번호 칸 왼쪽 패딩 padding/3(8), 번호 글자 body/xsmall(13). 공식은 left 0, 줄 글자 크기(15) */
+.krds-info-list.ordered[data-level="3"] > li .num,
+.krds-info-list > li > .krds-info-list > li > .krds-info-list.ordered > li .num {
+  left: var(--krds-padding-3);
+  font-size: var(--krds-font-size-body-xsmall);
+}
+/* 같은 줄 글자 시작: 피그마 번호 칸 폭 24(size-height/4 와 같은 값) + 간격 gap/2(4) = 28. 공식 depth3 padding-left 는 16 */
+.krds-info-list.ordered[data-level="3"] > li,
+.krds-info-list > li > .krds-info-list > li > .krds-info-list.ordered > li {
+  padding-left: calc(var(--krds-size-height-4) + var(--krds-gap-2));
+}
+
+/* 텍스트 목록 묶음(피그마 list_group 727:14880) 이 2, 3레벨일 때: 피그마 묶음 자체에 바깥 여백이 있다.
+   2레벨 727:15198 위 padding/6(16) 왼쪽 padding/9(32), 3레벨 727:15822 위 padding/5(12) 왼쪽 gap/10(48). 줄 간격은 공식 깊이 변수(gap-3, 8)와 같다. */
+.krds-info-list[data-group-level="2"] { padding: var(--krds-padding-6) 0 0 var(--krds-padding-9); gap: var(--krds-info-list--gap-layout-depth2-li-li); }
+.krds-info-list[data-group-level="3"] { padding: var(--krds-padding-5) 0 0 var(--krds-gap-10); gap: var(--krds-info-list--gap-layout-depth3-li-li); }
+
+/* 캐러셀 버튼 비활성: 피그마 343:23938, 343:23870 채움 color/action/disabled, 선 없음, 아이콘 color/icon/gray.
+   공식은 prev, next 만 비활성 규칙이 있고(아이콘 icon-disabled-on), play, stop, more 는 없다. 다섯 종 모두 피그마 값으로. */
+.swiper-button-prev.swiper-button-disabled, .swiper-button-next.swiper-button-disabled,
+.swiper-button-play.swiper-button-disabled, .swiper-button-stop.swiper-button-disabled, .swiper-button-more.swiper-button-disabled {
+  background-color: var(--krds-color-action-disabled); border-color: transparent; opacity: 1;
+}
+.swiper-button-prev.swiper-button-disabled::after, .swiper-button-next.swiper-button-disabled::after,
+.swiper-button-play.swiper-button-disabled::after, .swiper-button-stop.swiper-button-disabled::after, .swiper-button-more.swiper-button-disabled::after {
+  background-color: var(--krds-color-icon-gray);
+}
+
+/* 캐러셀 불릿 묶음: 피그마 carousel__dot 343:23517 좌우 패딩 padding/6(16), 불릿 간격 gap/2(4), 불릿 모서리 radius/max.
+   공식은 패딩 padding-5(12)이고 불릿 모양과 간격은 swiper-bundle.min.css(플러그인, 불릿 사이 8)에 맡긴다. 플러그인이 있어도 피그마 간격이 되게 swiper 변수도 0 으로. */
+.swiper-indicator .swiper-pagination:not(.swiper-pagination-fraction) {
+  --swiper-pagination-bullet-horizontal-gap: 0;
+  padding: 0 var(--krds-padding-6);
+  gap: var(--krds-gap-2);
+}
+.swiper-pagination .swiper-pagination-bullet { display: inline-block; margin: 0; border-radius: var(--krds-radius-max); }
+
+/* 캐러셀 좌우 큰 버튼(피그마 carousel__arrow 343:24138): 피그마가 40짜리 버튼을 크기 조절한 부품. 버튼은 KRDS 높이 변수,
+   아이콘은 버튼의 0.6(피그마 40 버튼에 아이콘 24 비율)으로 피그마 값(38.4, 28.8, 24, 19.2)과 같게 쓴다.
+   KRDS 원본 값을 옮기는 것이라 정수 규칙 S6 예외(work_layout.md). */
+[class^=swiper-button-].large { width: var(--krds-size-height-9); height: var(--krds-size-height-9); }
+[class^=swiper-button-].medium { width: var(--krds-size-height-7); height: var(--krds-size-height-7); }
+[class^=swiper-button-].small { width: var(--krds-size-height-6); height: var(--krds-size-height-6); }
+[class^=swiper-button-].xsmall { width: var(--krds-size-height-5); height: var(--krds-size-height-5); }
+[class^=swiper-button-].large::after { width: calc(var(--krds-size-height-9) * 0.6); height: calc(var(--krds-size-height-9) * 0.6); }
+[class^=swiper-button-].medium::after { width: calc(var(--krds-size-height-7) * 0.6); height: calc(var(--krds-size-height-7) * 0.6); }
+[class^=swiper-button-].small::after { width: calc(var(--krds-size-height-6) * 0.6); height: calc(var(--krds-size-height-6) * 0.6); }
+[class^=swiper-button-].xsmall::after { width: calc(var(--krds-size-height-5) * 0.6); height: calc(var(--krds-size-height-5) * 0.6); }
+
+/* 구조화 목록 카드(피그마 card 1496:30842): 마크업을 피그마 순서로 짜고(사용자 결정, WCAG 1.3.2) 배치 값은 피그마 변수(인라인 var)로 준다.
+   공식 배치 규칙 중 피그마와 충돌하는 것만 끈다: 그리드 3칸, card-btn 오른쪽 위 absolute, 첫 요소 아래 여백, 체크 영역 위 패딩. */
+.krds-structured-list[data-f2c-card] { display: block; }
+.krds-structured-list[data-f2c-card] .card-btn { position: static; }
+.krds-structured-list[data-f2c-card] .card-top:first-child, .krds-structured-list[data-f2c-card] .krds-check-area:first-child { margin-bottom: 0; }
+.krds-structured-list[data-f2c-card] .card-btm { margin-top: 0; border-top: 0; }  /* 피그마 선은 인라인 inset box-shadow */
+/* 메타데이터 줄: 공식 .c-txt-ul 규칙은 type-full, type2 에만 걸려 있다. 피그마 meta(1496:45858) 가로 wrap, 간격 8(구분선 양옆), 줄 간격 12, 구분선 1x16 color/divider/gray-light */
+.krds-structured-list[data-f2c-card] .c-txt-ul { display: flex; flex-wrap: wrap; align-items: center; row-gap: var(--krds-gap-4); }
+.krds-structured-list[data-f2c-card] .c-txt-ul li { display: inline-flex; align-items: center; }
+.krds-structured-list[data-f2c-card] .c-txt-ul li:not(:last-child)::after {
+  content: ""; display: inline-flex; width: var(--krds-light-border-width-variable-regular); height: var(--krds-size-height-2);
+  margin: 0 var(--krds-gap-3); background-color: var(--krds-color-divider-gray-light);
+}
+/* 카드 바깥 li: 공식 패딩(32), 간격(16), 채움, 선, 모서리를 비우고 피그마 루트 값(인라인 변수)만 쓴다. 이미지형 루트(1496:30867)는 패딩, 채움, 선이 없다 */
+.krds-structured-list[data-f2c-card] > li { padding: 0; gap: 0; background-color: transparent; border: 0; border-radius: 0; }
+/* 카드 체크박스: 공식 .krds-check-area 위 패딩 0.4rem 은 피그마 checkbox__item(1496:30844, 24x24, 카드 패딩 바로 아래)에 없다 */
+.krds-structured-list[data-f2c-card] .krds-check-area { padding-top: 0; }
+
+/* 규칙 C9: 피그마는 한 줄 글자 상자 높이를 정수로 올린다(17px x 150% = 25.5 → 26). 행간은 KRDS 150% 그대로 두고 한 줄 최소 높이만 올린다. */
+.krds-info-list > li { min-height: round(up, 1lh, 1px); }
+.krds-structured-list[data-f2c-card] .c-txt-ul li { min-height: round(up, 1lh, 1px); }
+
+/* 달력 키트 예시 표시용: 피그마 달력 부품(343:51868 등)은 떠 있는 팝업이 아니라 제자리 상자다. data-f2c-static 을 붙인 달력만 제자리에 그린다.
+   실제 화면은 공식 스크립트로 띄우고 이 속성을 쓰지 않는다. */
+.krds-calendar-area[data-f2c-static] { display: block; z-index: auto; }
+.krds-calendar-area[data-f2c-static] .calendar-wrap { position: relative; top: 0; }
+/* 날짜 칸 하나 예시(data-f2c-cell): 표 바깥 여백(table-wrap 좌우 gap-5, td 위아래 padding-1)과 달력 상자(폭 38.4rem, 채움, 선, 그림자)를 비운다.
+   피그마 calendar_d__atoimc(343:51983) 한 변형 = 공식 td > button 하나(44x44) */
+.krds-calendar-area[data-f2c-cell] .calendar-wrap { width: auto; background: none; border: 0; box-shadow: none; border-radius: 0; overflow: visible; }
+.krds-calendar-area[data-f2c-cell] .calendar-body .calendar-table-wrap { padding: 0; }
+.krds-calendar-area[data-f2c-cell] .calendar-body .calendar-table-wrap .calendar-tbl td { padding: 0; width: auto; }
+
+/* 달력 이벤트 날짜: 피그마 1420:79129 숫자(26 높이, 규칙 C9)와 "이벤트" 글자 칸(높이 12, Bold 11px)을 세로로 쌓아 가운데(위 3). 공식은 숫자를 가운데 두고
+   "이벤트"를 1rem 으로 bottom -38% 에 겹쳐 그린다. 11px 와 칸 높이 12 는 피그마 변수 없는 KRDS 원본 값이라 S6 예외로 그대로 쓴다.
+   밑줄이 "이벤트"로 번지지 않게 ::before 는 절대 배치 그대로 둔다(절대 배치 요소에는 글자 장식이 전파되지 않는다). */
+.krds-calendar-area .calendar-wrap .calendar-body .calendar-table-wrap .calendar-tbl td.day-event .btn-set-date span {
+  display: block; box-sizing: border-box; min-height: calc(round(up, 1lh, 1px) + 1.2rem); padding-bottom: 1.2rem;
+}
+.krds-calendar-area .calendar-wrap .calendar-body .calendar-table-wrap .calendar-tbl td.day-event .btn-set-date span::before {
+  bottom: 0; height: 1.2rem; line-height: 1.2rem; font-size: 1.1rem; white-space: nowrap;
+}
+
+/* 달력 연월 선택 버튼(피그마 calendar_header__atoimc 343:51967). 칸 하나 예시는 머리 패딩(padding-8)을 비운다. */
+.krds-calendar-area[data-f2c-cell] .calendar-wrap .calendar-head { padding: 0; }
+/* 글자 heading/small(19), 공식은 머리 글자 heading-xsmall(17) 상속. 아이콘 color/icon/gray, 공식은 text-basic. (1420:80741, 1420:80742) */
+.krds-calendar-area .calendar-wrap .calendar-head .calendar-switch-wrap .btn-cal-switch { font-size: var(--krds-font-size-heading-small); }
+.krds-calendar-area .calendar-wrap .calendar-head .calendar-switch-wrap .btn-cal-switch::after { background-color: var(--krds-color-icon-gray); }
+/* selected: 채움 color/action/secondary-selected(343:51977). 공식 .active 는 pressed 색 */
+.krds-calendar-area .calendar-wrap .calendar-head .calendar-switch-wrap .btn-cal-switch.active { background-color: var(--krds-color-action-secondary-selected); }
+/* disabled: 채움 color/action/secondary(투명), 글자 disabled-on, 아이콘 icon/gray(343:51980). 공식은 흰 채움, 아이콘 disabled-on */
+.krds-calendar-area .calendar-wrap .calendar-head .calendar-switch-wrap .btn-cal-switch:disabled { background-color: var(--krds-color-action-secondary); }
+.krds-calendar-area .calendar-wrap .calendar-head .calendar-switch-wrap .btn-cal-switch:disabled::after { background-color: var(--krds-color-icon-gray); }
+
+/* ===== 달력 전체(피그마 calendar 343:51868) ===== */
+/* 머리 연, 월 버튼 사이 간격 0(피그마 date 1446:127937 gap 0). 공식 gap-2 */
+.krds-calendar-area .calendar-wrap .calendar-head .calendar-switch-wrap { gap: 0; }
+/* 이전, 다음 달 버튼: 피그마는 carousel__arrow xsmall(32 원, 흰 채움 color/action/white, 선 color/border/gray-light 1 INSIDE, 아이콘 32 의 0.6) */
+.krds-calendar-area .calendar-wrap .calendar-head .btn-cal-move {
+  background-color: var(--krds-color-action-white);
+  box-shadow: inset 0 0 0 var(--krds-light-border-width-variable-regular) var(--krds-color-border-gray-light);
+}
+.krds-calendar-area .calendar-wrap .calendar-head .btn-cal-move::before { width: calc(var(--krds-size-height-5) * 0.6); height: calc(var(--krds-size-height-5) * 0.6); }
+/* 요일 줄과 날짜 행 세로 간격: 피그마 요일 줄 높이 size-height-4(24) → 간격 gap-3(8) → 연월 제목 칸(위 padding-3 8 + heading/xxsmall 한 줄) → 간격 gap-1(2) → 날짜 행(44, 행 사이 gap-1 2).
+   공식은 요일 아래 4.6rem, 제목 top 4.6rem, 날짜 칸 위아래 padding-1. */
+.krds-calendar-area .calendar-wrap .calendar-body .calendar-table-wrap .calendar-tbl th {
+  height: var(--krds-size-height-4);
+  padding-bottom: calc(var(--krds-gap-3) + var(--krds-padding-3) + round(up, calc(var(--krds-font-size-heading-xxsmall) * 1.5), 1px) + var(--krds-gap-1));
+  vertical-align: top;
+}
+.krds-calendar-area .calendar-wrap .calendar-body .calendar-table-wrap .calendar-tbl caption { top: calc(var(--krds-size-height-4) + var(--krds-gap-3) + var(--krds-padding-3)); }
+.krds-calendar-area .calendar-wrap .calendar-body .calendar-table-wrap .calendar-tbl td { padding: 0 0 var(--krds-gap-1); }
+/* 가로 위치: 피그마는 요일과 날짜를 양끝 맞춤(SPACE_BETWEEN)으로 놓는다(첫 칸 왼쪽 끝, 끝 칸 오른쪽 끝, 사이 같은 간격). 표 의미는 유지하고
+   칸 폭만 바꾼다: 가운데 다섯 칸 (100% - 버튼 44)/6, 양끝 칸은 그 절반 + 22 이고 바깥쪽 여백만큼 안쪽 패딩. 44 는 공식 날짜 버튼 크기(공식 CSS 44px 고정)라 그대로 쓴다. */
+.krds-calendar-area .calendar-wrap .calendar-body .calendar-table-wrap .calendar-tbl th,
+.krds-calendar-area .calendar-wrap .calendar-body .calendar-table-wrap .calendar-tbl td { width: calc((100% - 4.4rem) / 6); }
+.krds-calendar-area .calendar-wrap .calendar-body .calendar-table-wrap .calendar-tbl th:first-child,
+.krds-calendar-area .calendar-wrap .calendar-body .calendar-table-wrap .calendar-tbl td:first-child { width: calc((100% - 4.4rem) / 12 + 2.2rem); padding-right: calc((100% - 4.4rem) / 12 - 2.2rem); }
+.krds-calendar-area .calendar-wrap .calendar-body .calendar-table-wrap .calendar-tbl th:last-child,
+.krds-calendar-area .calendar-wrap .calendar-body .calendar-table-wrap .calendar-tbl td:last-child { width: calc((100% - 4.4rem) / 12 + 2.2rem); padding-left: calc((100% - 4.4rem) / 12 - 2.2rem); }
+/* 오늘: 피그마 343:51990 흰 원 채움 color/element/inverse. 공식은 채움 없음 */
+.krds-calendar-area .calendar-wrap .calendar-body .calendar-table-wrap .calendar-tbl td.today .btn-set-date::after { background-color: var(--krds-color-element-inverse); }
+/* 기간 달력(calendar-wrap 에 single 없음, 피그마 Type=period 1479:60505): 피그마 기간 띠는 날짜 버튼 높이(44)와 같고(공식은 위아래 2씩 줄인 40),
+   시작 날짜는 왼쪽만 둥근 남색(모서리 1000/0/0/1000), 끝 날짜는 오른쪽만 둥근 남색, 띠는 color/action/white. 띠는 시작 날짜 가운데부터 끝 날짜 가운데까지.
+   행 끝 칸은 띠 끝이 둥글고(피그마 끝 칸 원), 행 첫 칸은 띠 왼쪽이 평평하다(피그마 keep 사각형 1479:60555 가 칸 왼쪽 끝에서 시작). */
+.krds-calendar-area .calendar-wrap:not(.single) .calendar-body .calendar-table-wrap .calendar-tbl td::after {
+  top: 0; transform: none; height: calc(100% - var(--krds-gap-1));
+}
+.krds-calendar-area .calendar-wrap:not(.single) .calendar-body .calendar-table-wrap .calendar-tbl td.period::after { background-color: var(--krds-color-action-white); }
+.krds-calendar-area .calendar-wrap:not(.single) .calendar-body .calendar-table-wrap .calendar-tbl td.period:last-child::after {
+  border-top-right-radius: var(--krds-radius-max); border-bottom-right-radius: var(--krds-radius-max);
+}
+.krds-calendar-area .calendar-wrap:not(.single) .calendar-body .calendar-table-wrap .calendar-tbl td.start::after {
+  left: 50%; right: auto; width: 50%; height: calc(100% - var(--krds-gap-1)); border-radius: 0; background-color: var(--krds-color-action-white);
+}
+.krds-calendar-area .calendar-wrap:not(.single) .calendar-body .calendar-table-wrap .calendar-tbl td.end::after {
+  left: 0; right: auto; width: 50%; height: calc(100% - var(--krds-gap-1)); border-radius: 0; background-color: var(--krds-color-action-white);
+}
+.krds-calendar-area .calendar-wrap:not(.single) .calendar-body .calendar-table-wrap .calendar-tbl td.period.start > .btn-set-date,
+.krds-calendar-area .calendar-wrap:not(.single) .calendar-body .calendar-table-wrap .calendar-tbl td.period.start > .btn-set-date::after {
+  border-radius: var(--krds-radius-max) 0 0 var(--krds-radius-max);
+}
+.krds-calendar-area .calendar-wrap:not(.single) .calendar-body .calendar-table-wrap .calendar-tbl td.period.end > .btn-set-date,
+.krds-calendar-area .calendar-wrap:not(.single) .calendar-body .calendar-table-wrap .calendar-tbl td.period.end > .btn-set-date::after {
+  border-radius: 0 var(--krds-radius-max) var(--krds-radius-max) 0;
+}
+.krds-calendar-area .calendar-wrap:not(.single) .calendar-body .calendar-table-wrap .calendar-tbl td.period:not(.start):not(.end) .btn-set-date { background-color: transparent; }
+/* 기간 띠(td::after)는 날짜 버튼 뒤에 그린다. 공식은 쌓임 순서가 없어 시작, 끝 칸의 남색 버튼 절반을 띠가 덮었다 */
+.krds-calendar-area .calendar-wrap:not(.single) .calendar-body .calendar-table-wrap .calendar-tbl td::after { z-index: 0; }
+.krds-calendar-area .calendar-wrap:not(.single) .calendar-body .calendar-table-wrap .calendar-tbl td > button { z-index: 1; }
+/* 기간 달력은 요일 줄과 날짜 묶음 사이가 gap/4(12)(피그마 1479:60516). 하루 달력은 gap/3(8) */
+.krds-calendar-area .calendar-wrap:not(.single) .calendar-body .calendar-table-wrap .calendar-tbl th {
+  padding-bottom: calc(var(--krds-gap-4) + var(--krds-padding-3) + round(up, calc(var(--krds-font-size-heading-xxsmall) * 1.5), 1px) + var(--krds-gap-1));
+}
+.krds-calendar-area .calendar-wrap:not(.single) .calendar-body .calendar-table-wrap .calendar-tbl caption { top: calc(var(--krds-size-height-4) + var(--krds-gap-4) + var(--krds-padding-3)); }
+/* 날짜 칸 하나 예시(data-f2c-cell): 위 '달력 전체'의 td 아래 패딩(gap-1)과 칸 폭 규칙보다 우선 */
+.krds-calendar-area[data-f2c-cell] .calendar-wrap .calendar-body .calendar-table-wrap .calendar-tbl td,
+.krds-calendar-area[data-f2c-cell] .calendar-wrap .calendar-body .calendar-table-wrap .calendar-tbl td:first-child,
+.krds-calendar-area[data-f2c-cell] .calendar-wrap .calendar-body .calendar-table-wrap .calendar-tbl td:last-child { padding: 0; width: auto; }
+
+/* ===== 피그마 INSIDE 선 = inset box-shadow (회귀 확인에서 찾은 +1, +2 높이) ===== */
+/* 모달 상자: 피그마 1037:37637 선 color/border/gray 1 INSIDE. 공식 border 는 높이를 2 늘린다 */
+.krds-modal .modal-dialog .modal-content {
+  border: 0;
+  box-shadow: inset 0 0 0 var(--krds-modal--border-width) var(--krds-modal--wrap-color-border), var(--krds-modal--wrap-shadow);
+}
+/* 표 칸: 피그마 288:27084, 288:27088 아래 선 1 INSIDE. 공식 border-bottom 은 높이를 1 늘린다 */
+.krds-table-wrap .tbl.data thead th { border-bottom: 0; box-shadow: inset 0 calc(var(--krds-table--data-border-width) * -1) 0 0 var(--krds-table--data-thead-border); }
+.krds-table-wrap .tbl.data tbody th, .krds-table-wrap .tbl.data tbody td { border-bottom: 0; box-shadow: inset 0 calc(var(--krds-table--data-border-width) * -1) 0 0 var(--krds-table--data-tbody-color-divider); }

@@ -1,0 +1,14 @@
+/* KRDS 피그마 전용 부품: Progress bar (묶음 4107:97921). 공식 코드 키트에 없다. 값은 피그마 변수 그대로. */
+.krds-progress { width:100%; display:flex; flex-direction:column; align-items:stretch; gap:var(--krds-gap-3); /* 4107:97893 itemSpacing gap/3 */ }
+.krds-progress .progress-track { position:relative; width:100%; overflow:hidden; background-color:var(--krds-color-element-disabled-light); border-radius:var(--krds-radius-small1); height:var(--krds-size-height-1); /* large 8 */ }
+.krds-progress.medium .progress-track { border-radius:var(--krds-radius-xsmall1); height:var(--krds-number-3); /* 피그마 4107:98117 높이 4, 피그마는 변수 연결 없음. size-height 단계에 4가 없어 primitive number-3(4px) 사용 */ }
+.krds-progress .progress-bar { position:absolute; left:0; top:0; bottom:0; border-radius:inherit; background-color:var(--krds-color-element-primary); }
+.krds-progress.success .progress-bar { background-color:var(--krds-color-element-success); }
+.krds-progress.error .progress-bar { background-color:var(--krds-color-element-danger); }
+.krds-progress .progress-msg { display:flex; align-items:flex-start; gap:var(--krds-gap-2); color:var(--krds-color-text-subtle); }
+.krds-progress .progress-msg .svg-icon { flex-shrink:0; width:var(--krds-size-height-2); height:var(--krds-size-height-2); margin-top:var(--krds-padding-1); }
+.krds-progress.success .progress-msg { color:var(--krds-color-text-success); }
+.krds-progress.error .progress-msg { color:var(--krds-color-text-danger); }
+/* 메시지 아이콘: 피그마 icon/system-danger 원 채움 color/icon/danger(I4107:101075;1408:38863), 성공은 color/icon/success. 공식 마스크 아이콘의 색은 배경색이 정한다 */
+.krds-progress.success .progress-msg .svg-icon { background-color:var(--krds-color-icon-success); }
+.krds-progress.error .progress-msg .svg-icon { background-color:var(--krds-color-icon-danger); }

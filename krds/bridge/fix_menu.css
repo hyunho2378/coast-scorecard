@@ -1,0 +1,233 @@
+/* 갈래 menu 보정: 메인 메뉴, 사이드 메뉴. 값은 KRDS 변수만. 규칙마다 피그마 노드 id 와 이유. */
+
+/* 1. 원자 부품 단독 표시(f2c-atom): 공식 페이지 배치용 여백, 바탕, 테두리를 뺀다. 실제 화면 마크업에는 f2c-atom 이 없다. */
+.krds-side-navigation.f2c-atom { padding: 0; background-color: transparent; overflow: visible; }
+.krds-side-navigation.f2c-side-last .lnb-list .lnb-item,
+.krds-side-navigation.f2c-side-3depth .lnb-list .lnb-item { border-bottom: 0; box-shadow: none; }  /* 2depth 원자는 아래 회색 선(331:31036 divider/gray-light)이 부품 안에 있어 유지 */
+.krds-main-menu.f2c-atom { border-bottom: 0; }
+.krds-main-menu.f2c-atom .inner { padding-left: 0; padding-right: 0; }
+/* 원자 last depth: 펼친 하위 목록의 위아래 패딩 8 은 목록 단위 장식(피그마 last depth 한 줄 333:32100 에는 없음) */
+.krds-side-navigation.f2c-side-last .lnb-list .lnb-item.active .lnb-submenu { padding: 0; }  /* last depth 원자만. 2depth_open 묶음(333:50680)은 피그마도 위아래 8 */
+/* 원자 3depth 제목: 공식은 왼쪽에서 밀려 들어오는 절대 배치 판. 단독 표시는 제자리 */
+.krds-side-navigation.f2c-atom .lnb-list .lnb-item .lnb-submenu-lv2 { position: static; height: auto; background-color: transparent; }
+
+/* 2. 사이드 메뉴 2depth 눌림과 선택(피그마 331:31042, 333:30785): 아래 강조선 3이 꽉 찬다. 공식은 hover 와 링크 active 에만 있음 */
+.krds-side-navigation .lnb-list > li > .lnb-btn:active::before,
+.krds-side-navigation .lnb-list > li > .lnb-btn.selected::before { left: 0; width: 100%; }
+
+/* 3. 사이드 메뉴 last depth(피그마 333:32100): 글머리 칸 12(bullet 3380:81085) 다음 바로 글자, 간격 0. 공식은 글머리 너비 글자만큼 + gap 8 */
+.krds-side-navigation .lnb-list .lnb-item .lnb-submenu .lnb-btn { gap: 0; }
+.krds-side-navigation .lnb-list .lnb-item .lnb-submenu .lnb-btn::before { flex-shrink: 0; width: var(--krds-gap-4); text-align: center; }
+
+/* 4. 사이드 메뉴 3depth 제목(피그마 331:30944): 글자 navigation/title-small, 색 text-bolder, 아래 여백 0. 공식은 title-medium(24), 아래 8 */
+.krds-side-navigation .lnb-list .lnb-item .lnb-submenu-lv2 .lnb-btn-tit {
+  font-size: var(--krds-font-size-navigation-title-small);
+  color: var(--krds-color-text-bolder);
+}
+/* 3depth 제목 원자 단독(331:30944)만 아래 여백 0. 전체 판(393:29840)은 피그마도 제목과 목록 사이 8 이라 공식 margin-bottom(padding-3) 유지 */
+.krds-side-navigation.f2c-side-3depth .lnb-list .lnb-item .lnb-submenu-lv2 .lnb-btn-tit { margin-bottom: 0; }
+
+/* 5. 메인 메뉴 1depth(피그마 317:46424): 글자와 아이콘 한 줄(Hug). 공식은 줄바꿈 허용이라 좁은 칸에서 두 줄 */
+.krds-main-menu .gnb-menu .gnb-main-trigger { white-space: nowrap; flex-shrink: 0; }
+.krds-main-menu .gnb-menu .gnb-main-trigger::after { flex-shrink: 0; }
+/* 선택(피그마 317:46433): 글자색 text-secondary. 공식 .selected 는 아래 강조선만 */
+.krds-main-menu .gnb-menu .gnb-main-trigger.selected { color: var(--krds-color-text-secondary); }
+.krds-main-menu .gnb-menu .gnb-main-trigger.selected::after { background-color: var(--krds-color-text-secondary); }
+/* 6. (삭제) .gnb-main-trigger.selected::before 는 scss 직접 빌드(krds-built.css)에 들어 있어 보정 불필요 */
+
+/* 7. 메인 메뉴 펼침판 원자 단독 표시(f2c-panel): 판의 절대 배치, 최대 높이, 위 여백, 왼쪽 열 바탕(::before), 목록 패딩, 판 왼쪽 266 오프셋을 뺀다 */
+.krds-main-menu.f2c-panel .gnb-toggle-wrap { position: static; margin-top: 0; max-height: none; overflow: visible; background-color: transparent; }
+.krds-main-menu.f2c-panel .gnb-toggle-wrap .gnb-main-list { max-width: none; }
+.krds-main-menu.f2c-panel .gnb-toggle-wrap .gnb-main-list::before { display: none; }
+.krds-main-menu.f2c-panel .gnb-toggle-wrap .gnb-main-list > ul { padding: 0; }
+.krds-main-menu.f2c-panel .gnb-toggle-wrap .gnb-main-list > ul > li { width: 100%; }
+.krds-main-menu.f2c-panel .gnb-toggle-wrap .gnb-sub-list.f2c-sub { position: static; min-height: 0; padding: 0; }
+
+/* 8. 메인 메뉴 3depth 제목 링크(피그마 325:30379, navigation/title-small 19): 공식 `.gnb-sub-content > ul a` 의 17px(sub-menu-trigger 글자)이
+   특이도가 더 높아 `.tit` 의 19 를 덮는다. 제목 링크는 h3.tit 글자 크기를 물려받게 한다 */
+.krds-main-menu .gnb-toggle-wrap .gnb-sub-list .gnb-sub-content > ul.type-description li .tit a { font-size: inherit; }
+
+/* 9. 사이드 2depth 열림 묶음 아래 선(피그마 333:50678 open-list 선 0/0/1/0 color/divider/gray-light): 공식은 열린 항목 선을 selected 색으로 바꾼다. 피그마 기준 회색 유지 */
+.krds-side-navigation .lnb-list .lnb-item.active { border-bottom-color: var(--krds-color-divider-gray-light); }
+
+/* 10. 규칙 C9(행간 반올림): KRDS 행간 150% 는 그대로 두고, 한 줄 글자 칸 높이만 정수로 올린다(피그마는 17 x 150% = 25.5 를 26 으로 그림).
+   사이드 메뉴 버튼은 글자가 버튼 안에 바로 있어(공식 마크업) 버튼 최소 높이 = 올린 한 줄 + 위아래 패딩 으로 쓴다. */
+.krds-side-navigation .lnb-list .lnb-item .lnb-btn {
+  min-height: calc(round(up, 1lh, 1px) + var(--krds-side-navigation--btn-padding-y) * 2);
+}
+.krds-side-navigation .lnb-list .lnb-item [class*=lnb-toggle][aria-expanded="true"] {
+  min-height: calc(round(up, 1lh, 1px) + var(--krds-side-navigation--btn-padding-y) + var(--krds-side-navigation--btn-padding-y-selected));
+}
+.krds-side-navigation .lnb-list .lnb-item .lnb-submenu .lnb-btn {
+  min-height: calc(round(up, 1lh, 1px) + var(--krds-side-navigation--3depth-btn-padding-y) * 2);
+}
+
+/* 11. 사이드 2depth 항목 아래 선은 피그마에서 INSIDE(331:31036 선 divider/gray-light, 333:50678 open-list 아래 선)라 높이 58, 486 안에 들어 있다.
+   공식 border-bottom 은 높이에 1을 더하므로 C9 로 글자 칸을 정수로 올리면 1px 커진다. inset 그림자로 그리고, 강조선(::before)도 항목 안쪽 아래(0)에 둔다. */
+.krds-side-navigation .lnb-list .lnb-item {
+  border-bottom: 0;
+  box-shadow: inset 0 calc(-1 * var(--krds-border-width-static-regular)) 0 var(--krds-color-divider-gray-light);
+}
+.krds-side-navigation .lnb-list > li > .lnb-btn::before { bottom: 0; }
+
+/* ===== 추가 유형: 메인 메뉴 간단형 .gnb-main-list.type-simple (사용자 결정 2026. 10. 30.) =====
+   공식 코드에 없는 판 형태. 피그마 main_menu_open_simple(4638:159952)과 2depth 항목 main_menu_open_2depth__atomic__pc(4638:142619).
+   공식 구조(.gnb-toggle-wrap > .gnb-main-list > ul > li > .gnb-sub-trigger)와 공식 변수를 그대로 쓰고, 이 유형 안에서만 모양을 바꾼다.
+   이름은 공식 type- 접두 체계(type-line, type-full, type-description)를 따른다. */
+/* 왼쪽 2depth 열 회색 바탕 없음 */
+.krds-main-menu .gnb-toggle-wrap .gnb-main-list.type-simple::before { display: none; }
+/* 2depth 항목(4638:142620): 모서리 8(radius-medium3), 패딩 16(padding-6) 사방, 글자와 아이콘 간격 8(gap-3), 바탕 color/action/secondary 계열 */
+.krds-main-menu .gnb-toggle-wrap .gnb-main-list.type-simple .gnb-sub-trigger {
+  gap: var(--krds-gap-3);
+  padding: var(--krds-padding-6);
+  border-radius: var(--krds-radius-medium3);
+  background-color: var(--krds-color-action-secondary);
+  /* 규칙 C9: 한 줄 글자 칸을 정수로(26) */
+  min-height: calc(round(up, 1lh, 1px) + var(--krds-padding-6) * 2);
+}
+.krds-main-menu .gnb-toggle-wrap .gnb-main-list.type-simple .gnb-sub-trigger:hover { background-color: var(--krds-color-action-secondary-hover); }
+.krds-main-menu .gnb-toggle-wrap .gnb-main-list.type-simple .gnb-sub-trigger:active { background-color: var(--krds-color-action-secondary-pressed); }
+.krds-main-menu .gnb-toggle-wrap .gnb-main-list.type-simple .gnb-sub-trigger.active { background-color: var(--krds-color-action-secondary-selected); }
+/* 바로가기와 새 창(More depth=No, 4638:142620): 글자 바로 뒤 아이콘(공식 is-link 와 같음) */
+
+/* --- 추가 유형 type-simple 판 전체(피그마 main_menu_open_simple 4638:159952). 피그마 변수가 있는 값은 변수, 없는 칸 폭(306, 408)과 그림 칸 높이(120)는 숫자(피그마에도 변수 없음) --- */
+.krds-main-menu .gnb-toggle-wrap:has(> .gnb-main-list.type-simple) {
+  display: flex; flex-direction: column; gap: var(--krds-gap-7);
+  padding: var(--krds-padding-6) 0; background-color: var(--krds-color-surface-white-subtler);
+}
+.krds-main-menu .gnb-toggle-wrap .gnb-main-list.type-simple { display: flex; align-items: stretch; max-width: none; margin: 0; }
+/* 1depth 칸(4638:159790): 폭 306, 오른쪽 24(gap/7), 세로 간격 4(gap/2) */
+.krds-main-menu .gnb-main-list.type-simple > .simple-head {
+  flex: none; width: 30.6rem; gap: var(--krds-gap-2); padding-right: var(--krds-gap-7); align-items: flex-start;
+}
+.krds-main-menu .gnb-main-list.type-simple > .simple-head > .gnb-sub-banner { margin-top: calc(var(--krds-gap-9) - var(--krds-gap-2)); flex: 1; }
+/* 2depth 칸(4638:159793): 2depth 형 408, 3depth 형 306, 위 8(padding/3), 오른쪽 24(gap/7) */
+.krds-main-menu .gnb-toggle-wrap .gnb-main-list.type-simple > ul { flex: none; width: 40.8rem; padding: var(--krds-padding-3) var(--krds-gap-7) 0 0; }
+.krds-main-menu .gnb-toggle-wrap .gnb-main-list.type-simple.simple-3depth > ul { width: 30.6rem; }
+.krds-main-menu .gnb-toggle-wrap .gnb-main-list.type-simple > ul > li { width: 100%; }
+/* 3depth 칸(4638:160099): Fill, 패딩 8/24/0/24, 간격 16(gap/5), 왼쪽 안쪽 선 divider/gray-light */
+.krds-main-menu .gnb-toggle-wrap .gnb-main-list.type-simple > .gnb-sub-list {
+  position: static; display: flex; flex: 1; min-height: 0; max-width: 128rem;
+  padding: var(--krds-padding-3) var(--krds-padding-8) 0;
+  box-shadow: inset var(--krds-border-width-static-regular) 0 0 var(--krds-color-divider-gray-light);
+}
+.krds-main-menu .gnb-main-list.type-simple > .gnb-sub-list > .gnb-sub-content { gap: var(--krds-gap-5); }
+.krds-main-menu .gnb-main-list.type-simple .simple-sub-head { display: flex; align-items: center; gap: var(--krds-gap-5); }
+/* 3depth 제목(325:30379): 공식 type-description 제목과 같은 값 */
+.krds-main-menu .gnb-main-list.type-simple .simple-sub-head .tit { font-size: var(--krds-main-menu--sub-menu-description-title-font-size); font-weight: var(--krds-font-weight-bold); }
+.krds-main-menu .gnb-main-list.type-simple .simple-sub-head .tit a {
+  display: inline-flex; align-items: center; gap: var(--krds-gap-2);
+  padding: var(--krds-main-menu--sub-menu-description-title-padding); border-radius: var(--krds-main-menu--sub-menu-description-title-radius);
+}
+.krds-main-menu .gnb-main-list.type-simple .simple-sub-head .tit a:hover { background-color: var(--krds-main-menu--sub-menu-color-action-hover); }
+.krds-main-menu .gnb-main-list.type-simple .simple-sub-head .tit a:active { background-color: var(--krds-main-menu--sub-menu-color-action-pressed); }
+/* last depth 열(4638:160103): 열 간격 24(gap/7), 항목 간격 8(gap/3), 위에서 아래로 채움 */
+.krds-main-menu .gnb-toggle-wrap .gnb-main-list.type-simple .gnb-sub-content > ul.simple-cols {
+  grid-template-columns: repeat(var(--simple-cols), 1fr); grid-template-rows: repeat(var(--simple-rows), auto);
+  grid-auto-flow: column; column-gap: var(--krds-gap-7); row-gap: var(--krds-gap-3);
+}
+/* 배너(가로 4638:159843, 세로 4638:160679): 공식 .gnb-sub-banner 값 + 세로형은 세로 쌓기 */
+.krds-main-menu .gnb-main-list.type-simple .gnb-sub-banner.simple-banner-col,
+.krds-main-menu .gnb-toggle-wrap .gnb-sub-banner.simple-banner-col { flex-direction: column; align-items: flex-start; gap: var(--krds-gap-3); padding: var(--krds-padding-8); }
+.krds-main-menu .gnb-toggle-wrap > .gnb-sub-banner.simple-banner-row { display: flex; align-items: center; gap: var(--krds-gap-5); }
+/* 그림 칸(피그마 dummy-image 338:49841 자리표시): 높이 120(변수 없음), 바탕 surface/white, 안쪽 선 border/gray. 실제 그림이 들어갈 자리 */
+.krds-main-menu .gnb-sub-banner .banner-img {
+  align-self: stretch; height: 12rem; background-color: var(--krds-color-surface-white);
+  box-shadow: inset 0 0 0 var(--krds-border-width-static-regular) var(--krds-color-border-gray);
+}
+/* 배너 바탕과 모서리: 공식 값은 .gnb-sub-list 안 배너에만 걸려 있어 type-simple 의 배너에는 따로 준다(피그마 4638:159843, 4638:160679 바탕 surface/gray-subtle, 모서리 8) */
+.krds-main-menu .gnb-toggle-wrap .gnb-sub-banner.simple-banner-col,
+.krds-main-menu .gnb-toggle-wrap > .gnb-sub-banner.simple-banner-row {
+  background: var(--krds-main-menu--banner-background); border-radius: var(--krds-main-menu--banner-radius);
+}
+.krds-main-menu .gnb-toggle-wrap > .gnb-sub-banner.simple-banner-row { padding: var(--krds-main-menu--banner-padding-y) var(--krds-main-menu--banner-padding-x); }
+/* 1depth 제목(4638:159791, main_menu_open_title 324:51953): 공식 .sub-title 값은 .gnb-sub-list 안에만 걸려 있어 type-simple 머리 칸에 같은 공식 변수로 준다 */
+.krds-main-menu .gnb-main-list.type-simple > .simple-head > .sub-title {
+  display: flex; align-items: center; gap: var(--krds-gap-5);
+  height: var(--krds-main-menu--sub-menu-title-size-height); padding: 0 var(--krds-padding-2);
+  font-size: var(--krds-main-menu--sub-menu-title-font-size); font-weight: var(--krds-font-weight-bold);
+}
+/* 머리 칸 배치: 공식 .gnb-sub-content 의 flex 세로 배치도 .gnb-sub-list 안에만 걸려 있어 따로 준다 */
+.krds-main-menu .gnb-main-list.type-simple > .simple-head { display: flex; flex-direction: column; }
+
+/* 12. 펼침판 전체 단독 표시(f2c-open): 판을 제자리에 두고 최대 높이를 푼다(실제 화면은 공식 그대로 헤더 아래 절대 배치) */
+.krds-main-menu.f2c-open .gnb-toggle-wrap { position: static; margin-top: 0; max-height: none; overflow: visible; }
+/* 13. 펼침판 last depth 격자 행 간격(피그마 709:16790 column gap 8 = gap/3): 공식 격자는 열 간격만 있고 행 간격 0 */
+.krds-main-menu .gnb-toggle-wrap .gnb-sub-list .gnb-sub-content > ul { row-gap: var(--krds-gap-3); }
+/* 14. 오른쪽 세로 배너형 판(.between) 내용과 배너 사이(피그마 325:26629, 325:29471 menu-open gap 40 = gap/9): 공식 gap-5(16). 내용 폭 588 이 피그마와 같아진다 */
+.krds-main-menu .gnb-toggle-wrap .gnb-sub-list.between { gap: var(--krds-gap-9); }
+
+/* 15. 사이드 메뉴 전체 단독 표시(f2c-side-full, 393:29596): 피그마 1depth 제목 칸(393:29325) 위 패딩 24. 실제 화면은 공식 nav 위아래 패딩 40 이 대신한다 */
+.krds-side-navigation.f2c-side-full > .lnb-tit { padding-top: var(--krds-padding-8); }  /* fix_nav.css 의 .f2c-atom{padding:0 !important} 때문에 nav 대신 제목에 둔다 */
+/* 16. 4depth 판 링크(393:29843, side_navigation_last_depth 와 같은 모양): 공식은 .lnb-item .lnb-btn(굵게, 패딩 16/8)을 받아 2depth 처럼 보인다. 글머리, 보통 굵기, 패딩 8/16, 모서리 6 */
+.krds-side-navigation .lnb-list .lnb-item .lnb-submenu-lv2 > ul .lnb-btn {
+  gap: 0; padding: var(--krds-side-navigation--3depth-btn-padding-y) var(--krds-side-navigation--3depth-btn-padding-x);
+  border-radius: var(--krds-side-navigation--3depth-btn-radius); font-weight: var(--krds-font-weight-regular);
+}
+.krds-side-navigation .lnb-list .lnb-item .lnb-submenu-lv2 > ul .lnb-btn::before { content: "•"; flex-shrink: 0; width: var(--krds-gap-4); text-align: center; }
+.krds-side-navigation .lnb-list .lnb-item .lnb-submenu-lv2 > ul .lnb-btn.selected { color: var(--krds-side-navigation--color-text-selected); font-weight: var(--krds-font-weight-bold); }
+/* 4depth 판 단독 표시: 절대 배치 해제(원자 3depth 와 같은 이유) */
+.krds-side-navigation.f2c-side-4depth .lnb-list .lnb-item { box-shadow: none; }
+.krds-side-navigation.f2c-side-4depth .lnb-list .lnb-item .lnb-submenu-lv2 { position: static; height: auto; }
+.krds-side-navigation .lnb-list .lnb-item .lnb-submenu-lv2 > ul .lnb-btn { min-height: calc(round(up, 1lh, 1px) + var(--krds-side-navigation--3depth-btn-padding-y) * 2); }
+/* 17. 공식 오타: `.lnb-submenu-lv2 > ul` 패딩이 정의되지 않은 변수 --krds-side-navigation--4depth-padidng 을 써서 0 이 된다(정의된 이름은 4depth-padding = padding-6, 16).
+   피그마 393:29842 open-list 위아래 16 과 같은 정의된 변수로 다시 준다 */
+.krds-side-navigation .lnb-list .lnb-item .lnb-submenu-lv2 > ul { padding: var(--krds-side-navigation--4depth-padding) 0; }
+/* 18. 피그마 INSIDE 선(393:29842 open-list 위아래, 393:29325 1depth 제목 아래)을 inset 그림자로. 공식 border 는 높이를 1~2 키운다 */
+.krds-side-navigation .lnb-list .lnb-item .lnb-submenu-lv2 > ul {
+  border-top: 0; border-bottom: 0;
+  box-shadow: inset 0 var(--krds-border-width-static-regular) 0 var(--krds-side-navigation--4depth-color-border), inset 0 calc(-1 * var(--krds-border-width-static-regular)) 0 var(--krds-side-navigation--4depth-color-border);
+}
+.krds-side-navigation .lnb-tit {
+  border-bottom: 0;
+  box-shadow: inset 0 calc(-1 * var(--krds-border-width-static-regular)) 0 var(--krds-side-navigation--title-color-border);
+}
+
+/* 19. 모바일 메뉴 원자 단독 표시(f2c-mo): 공식 .gnb-wrap 은 화면 전체를 덮는 절대 배치 판(높이 100%). 단독 표시에서만 제자리, 내용 높이, 판 안쪽 여백 0 */
+.krds-main-menu-mobile.f2c-mo:not(.f2c-mo-full) .gnb-wrap { position: static; height: auto; width: 100%; }
+.krds-main-menu-mobile.f2c-mo:not(.f2c-mo-full) .gnb-body,
+.krds-main-menu-mobile.f2c-mo:not(.f2c-mo-full) .gnb-menu,
+.krds-main-menu-mobile.f2c-mo:not(.f2c-mo-full) .submenu-wrap,
+.krds-main-menu-mobile.f2c-mo:not(.f2c-mo-full) .menu-wrap { height: auto; min-height: 0; padding: 0; margin: 0; overflow: visible; border: 0; background: none; width: 100%; }
+.krds-main-menu-mobile.f2c-mo:not(.f2c-mo-full) .gnb-sub-list,
+.krds-main-menu-mobile.f2c-mo:not(.f2c-mo-full) .gnb-sub-list > ul,
+.krds-main-menu-mobile.f2c-mo:not(.f2c-mo-full) .menu-wrap > ul { padding: 0; margin: 0; border: 0; }
+/* 19 보강: 공식 모바일 규칙은 선택자가 깊어(.krds-main-menu-mobile .gnb-wrap .gnb-body .gnb-menu …) 위 규칙을 이긴다. 단독 표시용이라 !important 로 둔다(실제 화면에는 f2c-mo 없음) */
+.krds-main-menu-mobile.f2c-mo:not(.f2c-mo-full) .gnb-sub-list,
+.krds-main-menu-mobile.f2c-mo:not(.f2c-mo-full) .gnb-sub-list > ul,
+.krds-main-menu-mobile.f2c-mo:not(.f2c-mo-full) .menu-wrap,
+.krds-main-menu-mobile.f2c-mo:not(.f2c-mo-full) .menu-wrap > ul { padding: 0 !important; margin: 0 !important; border: 0 !important; }
+.krds-main-menu-mobile.f2c-mo:not(.f2c-mo-full) .menu-wrap { width: auto !important; background: none !important; }
+.krds-main-menu-mobile.f2c-mo:not(.f2c-mo-full) .f2c-mo-host > .depth3-wrap { margin-top: 0 !important; }  /* last depth 원자 단독만 */
+
+/* 20. 모바일 1depth 열 항목(394:25521): 피그마 높이 58 = 패딩 16 + 글자 26 + 16(C9). 공식은 고정 높이 size-height-9(64). 눌림(394:25527) 바탕 secondary-on-pressed: 공식은 :focus 에만 있음 */
+.krds-main-menu-mobile .gnb-wrap .gnb-body .gnb-menu .menu-wrap .gnb-main-trigger {
+  height: auto; min-height: calc(round(up, 1lh, 1px) + var(--krds-padding-6) * 2); padding-top: var(--krds-padding-6); padding-bottom: var(--krds-padding-6);
+}
+.krds-main-menu-mobile .gnb-wrap .gnb-body .gnb-menu .menu-wrap .gnb-main-trigger:active { background-color: var(--krds-main-menu-mobile--main-trigger-color-action-pressed); }
+/* 21. 모바일 서브 목록 제목(394:26278): 패딩 4/8/12/8(padding-2, padding-3, padding-5), 아래 선 INSIDE. 공식은 8/8/16/8 + border(높이 +1) */
+.krds-main-menu-mobile .gnb-wrap .gnb-body .gnb-menu .submenu-wrap .gnb-sub-list .sub-title {
+  padding: var(--krds-padding-2) var(--krds-padding-3) var(--krds-padding-5);
+  border-bottom: 0; box-shadow: inset 0 calc(-1 * var(--krds-main-menu-mobile--sub-title-border-width)) 0 var(--krds-main-menu-mobile--sub-title-color-border);
+}
+/* 22. 모바일 3depth 목록(398:26646, 394:25564): 항목 사이 0(피그마 항목 46 이 붙어 쌓임, 공식 depth3-gap 8), 글머리 칸 12 다음 바로 글자(공식 gap 8). 사이드 메뉴 last depth 와 같은 방식 */
+.krds-main-menu-mobile .gnb-wrap .gnb-body .gnb-menu .submenu-wrap .gnb-sub-list .depth3-wrap > ul { gap: 0; }
+.krds-main-menu-mobile .gnb-wrap .gnb-body .gnb-menu .submenu-wrap .gnb-sub-list .depth3-wrap .depth3-trigger { gap: 0; }
+.krds-main-menu-mobile .gnb-wrap .gnb-body .gnb-menu .submenu-wrap .gnb-sub-list .depth3-wrap .depth3-trigger::before { flex-shrink: 0; width: var(--krds-gap-4); text-align: center; }
+/* 23. type-simple 2depth 원자 단독(f2c-simple-atom): 판 패딩, 바탕, 2depth 칸 폭과 패딩은 판 전체에만 해당(원자 4638:142620 은 항목 하나) */
+.krds-main-menu.f2c-simple-atom .gnb-toggle-wrap:has(> .gnb-main-list.type-simple) { padding: 0; background: none; }
+.krds-main-menu.f2c-simple-atom .gnb-toggle-wrap .gnb-main-list.type-simple > ul { width: 100%; padding: 0; }
+
+/* 24. 모바일 전체 메뉴(main_menu__mo 398:27627) 단독 표시(f2c-mo-full): 공식 .gnb-wrap 절대 배치만 푼다. 판 안 여백은 공식 값 그대로 */
+.krds-main-menu-mobile.f2c-mo-full .gnb-wrap { position: static; height: auto; flex-direction: column; }
+.krds-main-menu-mobile.f2c-mo-full .gnb-body { height: auto; }
+/* 모바일 서브 목록 배너(피그마 3780:84208, 1depth 블록 아래 가로형): 공식 모바일에는 배너가 없어 PC 공식 배너 변수(바탕 surface/gray-subtle, 모서리 8, 패딩 12/16, 간격 16)를 쓴다 */
+.krds-main-menu-mobile .gnb-sub-list .gnb-sub-banner.f2c-mo-banner {
+  display: flex; align-items: center; gap: var(--krds-gap-5);
+  padding: var(--krds-padding-5) var(--krds-padding-6); border-radius: var(--krds-radius-medium3);
+  background: var(--krds-color-surface-gray-subtle);
+}
+/* 25. 모바일 서브 목록 블록(main_menu_1depth_open__atomic__mo 398:27011): 패딩 16/16/0/16. 공식은 사방 16 이라 블록마다 16 길어진다 */
+.krds-main-menu-mobile .gnb-wrap .gnb-body .gnb-menu .submenu-wrap .gnb-sub-list { padding-bottom: 0; }
+/* 26. 모바일 1depth 열 폭(398:28056 1depth-bar 140, 피그마에도 변수 없음): 공식 12.4rem 이면 "Depth-bar" 가 두 줄 */
+.krds-main-menu-mobile { --krds-main-menu-mobile--menu-left-width: 14rem; }

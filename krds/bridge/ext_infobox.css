@@ -1,0 +1,32 @@
+/* KRDS 피그마 전용 부품: Infobox (묶음 343:54598). 값은 피그마 변수 그대로. 목록은 공식 .krds-info-list 사용 */
+.krds-infobox { box-sizing:border-box; width:100%; display:flex; flex-direction:column; align-items:flex-start;
+  gap:var(--krds-number-7); /* 343:54599 itemSpacing number/7 */ padding:var(--krds-padding-card-xsmall);
+  background-color:var(--krds-color-surface-secondary-subtler); border:var(--krds-border-width-static-regular) solid var(--krds-color-border-secondary-light);
+  border-radius:var(--krds-radius-xlarge2); }
+.krds-infobox.secondary { gap:var(--krds-gap-3); background-color:var(--krds-color-surface-gray-subtler); border-color:var(--krds-color-border-gray-light); }
+.krds-infobox .infobox-title { width:100%; display:flex; align-items:center; gap:var(--krds-gap-3); color:var(--krds-color-text-secondary); margin:0; }
+.krds-infobox.secondary .infobox-title { color:var(--krds-color-text-basic); }
+.krds-infobox .svg-icon { flex-shrink:0; width:var(--krds-size-height-3); height:var(--krds-size-height-3); background-color:var(--krds-color-icon-secondary); }
+.krds-infobox.secondary .svg-icon { background-color:var(--krds-color-icon-gray); }
+.krds-infobox .infobox-body { width:100%; box-sizing:border-box; display:flex; flex-direction:column; gap:var(--krds-gap-4);
+  padding-left:calc(var(--krds-size-height-3) + var(--krds-gap-3)); /* 343:54603 왼쪽 패딩 28 = 아이콘 20 + 간격 8, 피그마는 변수 연결 없음 */ color:var(--krds-color-text-subtle); }
+.krds-infobox .infobox-body > p { margin:0; }
+.krds-infobox .infobox-divider { width:100%; height:0; border:0; border-top:var(--krds-border-width-static-regular) dashed var(--krds-color-divider-gray); margin:0; }
+.krds-infobox .infobox-body .krds-info-list { gap:var(--krds-gap-3); }
+/* slim */
+.krds-infobox.slim { flex-direction:row; align-items:center; gap:var(--krds-gap-3); border-radius:var(--krds-radius-medium3); color:var(--krds-color-text-secondary); }
+.krds-infobox.slim.secondary { align-items:flex-start; color:var(--krds-color-text-basic); }
+.krds-infobox.slim .infobox-icon { flex-shrink:0; display:flex; align-items:center; height:round(up, calc(var(--krds-font-size-body-medium) * var(--krds-line-height-ratio)), 1px); /* 피그마 3857:128981 아이콘 틀 높이 26(변수 없음) = 본문 17 x 150% 행간 */ }
+.krds-infobox.slim > p { margin:0; flex:1 1 0; }
+/* 시스템 아이콘(ext_icons.css)의 원 색을 인포박스 색으로(피그마 primary color/icon/secondary, secondary color/icon/gray) */
+.krds-infobox .svg-icon.ico-sys-info { background-color:var(--krds-color-icon-secondary); }
+.krds-infobox.secondary .svg-icon.ico-sys-info { background-color:var(--krds-color-icon-gray); }
+/* 목록: 피그마 list(324:52111 Level 2) 글머리 20 + 간격 4 = 글자 시작 24, Level 3(324:52114) 글머리 16 + 간격 4 = 20. 공식 depth1 들여쓰기(number-12) 대신 피그마 값 */
+/* 단계는 목록 클래스로 정한다(피그마 list Level). Level 1(.decimal)은 공식 값과 피그마가 같다(글머리 24 + 8). */
+.krds-infobox .krds-info-list.dash > li { padding-left:calc(var(--krds-size-height-3) + var(--krds-gap-2)); font-size:var(--krds-font-size-body-medium); color:var(--krds-color-text-subtle); }
+.krds-infobox .krds-info-list.hollow > li { padding-left:calc(var(--krds-size-height-2) + var(--krds-gap-2)); font-size:var(--krds-font-size-body-small); color:var(--krds-color-text-subtle); }
+/* 피그마 선은 INSIDE(크기에 안 더해짐). CSS border 는 높이를 2px 늘리므로 안쪽 그림자로 그린다 */
+.krds-infobox { border:0; box-shadow:inset 0 0 0 var(--krds-border-width-static-regular) var(--krds-color-border-secondary-light); }
+.krds-infobox.secondary { box-shadow:inset 0 0 0 var(--krds-border-width-static-regular) var(--krds-color-border-gray-light); }
+/* 글자 안 링크(피그마 부분 스타일 밑줄): 글자색은 그대로, 밑줄 */
+.krds-infobox a.text-link { color:inherit; text-decoration:underline; text-underline-position:under; }

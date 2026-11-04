@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="ko" data-krds-mode="dark"><head><meta charset="utf-8"><title>반응형 확인</title>
+<link rel="stylesheet" href="krds/resources/css/component/krds-built.css" />
+<style>body{margin:0;background:var(--krds-color-background-white);color:var(--krds-color-text-basic)}p{margin:var(--krds-gap-3) var(--krds-gap-5)}iframe{display:block;margin:0 auto;border:0}</style></head>
+<body><p id="cap"></p><iframe id="f" title="확인 화면"></iframe>
+<script>
+const q = new URLSearchParams(location.search)
+const w = Number(q.get('w') || 390), h = Number(q.get('h') || 844)
+const f = document.getElementById('f')
+f.width = w; f.height = h; f.style.width = w + 'px'; f.style.height = h + 'px'
+f.src = './' + (q.get('mode') ? '?mode=' + q.get('mode') : '') + (q.get('hash') ? '#' + q.get('hash') : '')
+document.getElementById('cap').textContent = '확인 폭 ' + w + ' x ' + h
+</script></body></html>

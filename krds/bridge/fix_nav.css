@@ -1,0 +1,142 @@
+/* 갈래 nav 보정 CSS. 덮은 규칙마다 피그마 노드와 공식 코드 값을 적는다. */
+
+/* 부품 하나만 놓을 때(f2c-atom f2c-nav, nav 갈래 템플릿만. 다른 갈래 원자 부품에는 걸리지 않게 2026. 10. 30. 범위를 좁힘): 공식 CSS 의 페이지 배치용 바깥 여백을 뺀다.
+   공식 .krds-pagination margin-top 40(gap-9), .krds-breadcrumb-wrap padding-top 24 margin-bottom 40, 콘텐츠 내 탐색 영역 패딩과 테두리.
+   피그마 원자 부품(pagination__atomic 340:31025, breadcrumb__atomic 340:31501, in_page_navigation__atomic 333:51836)에는 바깥 여백이 없다.
+   화면 전체를 공식 마크업으로 그릴 때는 이 클래스가 붙지 않으므로 공식 여백이 그대로 쓰인다. */
+.f2c-atom.f2c-nav { margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; box-shadow: none !important; min-height: 0 !important; }
+.f2c-atom.f2c-nav .in-page-navigation-list ul { margin: 0; padding: 0; }
+/* 공식 .krds-in-page-navigation-area 는 PC 에서 position:fixed(top 256, 오른쪽 고정 패널). 원자 부품은 제자리에 둔다. */
+.f2c-atom.f2c-nav.krds-in-page-navigation-area, .f2c-atom.f2c-nav .krds-in-page-navigation-area { position: static !important; width: 100% !important; }
+/* 피그마 breadcrumb__atomic 340:31502 등: 항목 높이 24(size-height/4) Fixed, 글자 세로 가운데. 공식 .txt 는 높이 없음(글자 줄 높이 22.5)이라 글자가 1px 위로 붙는다. */
+.krds-breadcrumb-wrap .breadcrumb li .txt { min-height: var(--krds-size-height-4); }
+/* 피그마 breadcrumb__atomic 글자 스타일 underline/small(340:31518 등): 밑줄 두께 1px(2배 렌더 2행), 글자 아래 위치는 공식 offset 0.3rem 과 0.5px 차이라 그대로 둔다.
+   공식 .txt 는 두께 지정 없음(글꼴 기본 약 1.5px). 두께만 KRDS 선 두께 변수로 맞춘다. */
+.krds-breadcrumb-wrap .breadcrumb li a.txt { text-decoration-thickness: var(--krds-border-width-static-regular); }
+
+/* 운영기관 식별자. 피그마 identifier__pc 343:55136 Type=footer-out 343:55141: 높이 40(size-height/6), 좌우 패딩 16(padding/6), 간격 8(gap/3), 모서리 없음.
+   공식 .krds-identifier 는 모서리 6(radius-medium1). 피그마에 맞춰 모서리를 없앤다. */
+.krds-identifier { border-radius: 0; }
+/* footer-in(343:55137, 모바일 343:55145): 공식 코드에 없는 변형. 어두운 바탕(color/surface/inverse), 글자 color/text/bolder-inverse,
+   PC 는 패딩 0(콘텐츠 폭 안에 붙음), 모바일은 8/16. 로고는 공식 선명한 화면 모드 로고(흰 글자)를 쓴다. */
+.krds-identifier.f2c-footer-in { background-color: var(--krds-color-surface-inverse); padding: 0; }
+.krds-identifier.f2c-footer-in .ban-txt { color: var(--krds-color-text-bolder-inverse); }
+.krds-identifier.f2c-footer-in .logo { background-image: url(../resources/img/component/icon/ico_logo_krds_high_contrast.svg); }
+@media (max-width: 767px) { .krds-identifier.f2c-footer-in { padding: var(--krds-padding-3) var(--krds-padding-6); } }
+/* 피그마 identifier logo/KRDS 인스턴스 77x24(PC 343:55137, 343:55141). 공식 .logo 폭 6.8rem. 피그마 로고 폭은 변수에 묶이지 않은 고정값이라 그 값을 쓴다(예외: 변수 없는 값). */
+.krds-identifier .logo { width: 7.7rem; }
+/* 모바일 343:55145, 343:55148: logo/KRDS 64.17x20(피그마 소수). 공식 5.8rem. 정수로 6.4rem. */
+@media (max-width: 767px) { .krds-identifier .logo { width: 6.4rem; } }
+
+/* 헤더 유틸리티(피그마 header_utility_small__atomic 424:61163): 글자와 아이콘이 가로 한 줄(오토레이아웃 HORIZONTAL, gap 2 = gap/1, 세로 가운데).
+   공식 .krds-btn.text 는 inline-block + white-space normal 이라 폭이 모자라면 아이콘이 다음 줄로 내려간다. 헤더 유틸리티 안에서만 피그마 배치로 맞춘다. */
+#krds-header .header-utility .krds-btn.text { display: inline-flex; align-items: center; gap: var(--krds-gap-1); white-space: nowrap; }
+#krds-header .header-utility .krds-btn.text .svg-icon { margin-bottom: 0; }
+
+/* 헤더 로고(사용자 결정 2026. 10. 30.): 공식 #krds-header 구조는 지키고 로고는 h2.logo > a > img(피그마 로고 SVG, alt 기관명).
+   기관 로고로 바뀌는 자리라 배경 이미지보다 img 가 교체와 접근성에 낫다. img 가 있을 때만 공식 배경 로고와 고정 폭 13.7rem 을 끈다. */
+#krds-header .header-container .logo:has(img) { width: auto; height: auto; }
+#krds-header .header-container .logo a:has(img) { background-image: none; display: inline-flex; width: auto; height: auto; }
+/* 피그마 header__pc 변형 자체(폭 1200)는 좌우 패딩이 없다. 공식 .inner 의 좌우 패딩 24(콘텐츠 래퍼 1248)는 페이지 폭에서 쓰는 값이라
+   부품 폭이 1200 이하일 때만 뺀다(f2c-atom-x). 1440 이상 화면에서는 공식 .inner 가 그대로 1200 가운데 정렬을 만든다. */
+.inner.f2c-atom-x { padding-left: 0 !important; padding-right: 0 !important; max-width: none !important; }
+/* 헤더 슬로건: 피그마 header__pc MI/slogan(로고와 간격 20 = gap/6, 위 정렬). 공식 마크업에 없는 요소. KRDS 헤더 지침상 정체성 정보라 img alt 에 슬로건 문구를 넣는다(tpl_nav.py SLOGAN_ALT). */
+#krds-header .header-branding .f2c-slogan { display: inline-flex; margin-left: var(--krds-gap-6); align-self: flex-start; }
+/* 피그마 button_text(300:26102)에는 선이 없다. 공식 .krds-btn 은 모든 버튼에 테두리 1px(border-width-variable-regular, text 버튼은 투명)을 두어
+   폭이 2px 넓어진다(헤더 유틸리티 항목 48 → 50). 헤더 유틸리티 안에서만 테두리 폭을 0 으로. 다른 text 버튼 전반은 action 갈래 확인 필요. */
+#krds-header .header-utility .krds-btn.text { border-width: 0; }
+/* 헤더 메뉴 아이콘 색: 피그마 header_menu__atomic(322:41847) 아이콘 채움 color/icon/gray(#33363D). 공식 ::before 는 text-basic(#1E2124). */
+#krds-header .header-container .btn-navi::before { background-color: var(--krds-color-icon-gray); }
+/* 가로형(Type=horizontal 324:50141): 패딩 0/12/0/12, 높이 40, 세로 가운데. 공식 .navi-row 는 세로형 패딩(위 4)을 그대로 써서 내용이 2px 아래. */
+#krds-header .header-container .btn-navi.navi-row { padding: 0 var(--krds-padding-5); align-items: center; justify-content: center; }
+/* 헤더 유틸리티 줄: 피그마 Utility-small 높이 32(size-height/5) Fixed, 항목 세로 가운데. 공식 .utility-list 는 높이 없음(24)이라 줄 전체가 위로 4px 붙는다. */
+#krds-header .header-utility .utility-list { min-height: var(--krds-size-height-5); align-items: center; }
+/* 세로형 헤더 메뉴(Type=vertical 324:50169): 높이 56(size-height/8) Fixed. 공식 min-height 40(size-height-6). */
+#krds-header .header-container .btn-navi:not(.navi-row) { min-height: var(--krds-size-height-8); }
+/* 공식 배너 문구: 피그마 masthead__mo(343:54218)는 360 폭에서 한 줄(공식누리집 문구 Hug, 줄바꿈 없음). 공식은 줄바꿈 허용이라 "다."가 다음 줄로 내려간다. */
+#krds-masthead .nuri-txt { white-space: nowrap; }
+/* 가로형 헤더 메뉴는 모바일에서도 가로(피그마 header__mo Type=horizontal 1402:69674 의 전체메뉴). 공식은 1023px 이하에서 .navi-row 를 세로로 되돌린다. */
+@media (max-width: 1023px) { #krds-header .header-container .btn-navi.navi-row { flex-direction: row; } }
+/* 모바일 헤더 행: 피그마 header__mo MO_Service identity 높이 72(size-height/10) Fixed, 내용 세로 가운데.
+   공식은 높이 없음이라 가로형 메뉴(높이 40)일 때 행이 56 으로 줄고 위로 붙는다. */
+@media (max-width: 1023px) { #krds-header .header-container .inner { min-height: var(--krds-size-height-10); justify-content: center; } }
+/* 원자 드롭다운 항목(utility_dropdown__atomic 391:27862): 드롭다운 판을 펼친 상태로 제자리에(공식은 display none, absolute, 가운데 이동, 말풍선 꼬리). */
+.f2c-atom.f2c-nav.drop-menu { display: block !important; position: static !important; transform: none !important; min-width: 0 !important; }
+.f2c-atom.f2c-nav.drop-menu::before { display: none !important; }
+
+/* 푸터 로고: 헤더와 같은 결정(피그마 로고 SVG 를 img 로). img 가 있을 때만 공식 배경 로고와 고정 폭을 끈다. */
+#krds-footer .f-logo:has(img) { background-image: none; width: auto; height: auto; display: inline-flex; }
+/* 푸터 2열 .f-cs(공식 CSS 에 있음): 피그마 columns-2 값 글자는 body/medium-bold. 공식은 .info-tit 만 regular 로 지정하고 dd 굵기는 정하지 않아 400 이 된다. */
+#krds-footer .f-cnt .f-cs dl dd { font-weight: var(--krds-font-weight-bold); }
+/* 푸터 정책 링크: 피그마 footer_copyright__atomic 정책 = button_text Size=small(label/small 15). 공식 .f-menu a 는 본문 크기(17)를 물려받는다. */
+#krds-footer .f-btm .f-btm-text .f-menu a { font-size: var(--krds-font-size-label-small); }
+/* 모바일 푸터(피그마 footer__mo 1548:41060, 360 폭): 글자는 PC 와 같은 body/medium(17), navigation/depth-medium(17).
+   공식은 767px 이하에서 .f-info, .f-cs dl, 관련 사이트 링크를 body-small(15)로 줄이고 관련 사이트 칸을 46 으로 줄인다. 피그마 값으로 되돌린다. */
+@media (max-width: 767px) {
+  #krds-footer .foot-quick .inner .link { font-size: var(--krds-font-size-navigation-depth-medium); min-height: var(--krds-size-height-8); }
+  #krds-footer .f-cnt .f-info, #krds-footer .f-cnt .f-cs dl { font-size: var(--krds-font-size-body-medium); }
+}
+/* footer-in 식별자(피그마 footer__mo 맨 아래 어두운 띠 343:55145): 공식 푸터에는 f-btm 안 식별자 하나뿐. 푸터 밖 띠는 #krds-footer 바로 아래 자식으로 둔다(f2c-footer-in 은 6번 보정). */
+#krds-footer > .krds-identifier.f2c-footer-in { width: 100%; }
+/* 모바일 푸터 3열(피그마 footer__mo columns-3 1548:42947): 유틸리티 링크와 SNS 사이 간격 24(gap-7). 공식은 767px 이하 gap-8(32). */
+@media (max-width: 767px) { #krds-footer .f-cnt .f-link { gap: var(--krds-gap-7); } }
+
+/* 푸터 인증마크 자리 .f-mark(공식 f- 규칙의 추가 요소, 사용자 결정 2026. 10. 30.).
+   피그마 footer_copyright__atomic__mo 1548:41650 의 "추가영역"(dummy-image 4칸, 높이 48, 가로 간격 8 = gap-3, 칸마다 Fill, 세로 가운데)은 자리표시라
+   템플릿은 그림을 넣지 않는다. 실제 인증마크 그림이 들어오면 이 배치를 쓴다: <div class="f-mark"><img …>…</div> 를 .f-menu 와 .f-copy 사이에. */
+#krds-footer .f-btm .f-mark { display: flex; align-items: center; gap: var(--krds-gap-3); min-height: var(--krds-size-height-7); }
+#krds-footer .f-btm .f-mark > * { flex: 1 1 0; min-width: 0; height: var(--krds-size-height-7); object-fit: contain; }
+/* 공식 아이콘이 없는 SNS(카카오스토리, 카카오톡 채널): 피그마 social 337:34824, 337:34829 아이콘 SVG 를 마스크로(그림 주소는 템플릿이 인라인 mask-image 로 넣는다). 색과 크기는 공식 .svg-icon 그대로. */
+.svg-icon.f2c-mask { -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center; -webkit-mask-size: contain; mask-size: contain; }
+/* 푸터 정책 링크 묶음(피그마 footer_copyright__atomic 정책: 가로 줄바꿈, 간격 8, 줄 간격 4, 항목 button_text small = 좌우 패딩 2).
+   공식 .f-menu a 는 패딩이 없고 줄 간격이 가로 간격과 같다. */
+#krds-footer .f-btm .f-btm-text .f-menu { row-gap: var(--krds-gap-2); }
+#krds-footer .f-btm .f-btm-text .f-menu a { padding: 0 var(--krds-padding-1); }
+@media (max-width: 767px) {
+  /* 모바일 유틸리티 링크: 피그마 button_text medium(label/medium 17). 공식 모바일 버튼 글자 축소(15)를 되돌린다 */
+  #krds-footer .f-cnt .f-link .link-go .krds-btn.text.medium { font-size: var(--krds-font-size-label-medium); }
+  /* 모바일 저작권: 피그마 footer_copyright__atomic__mo 1548:41566 body/xsmall(13). 공식 모바일은 body-small(15) */
+  #krds-footer .f-btm .f-btm-text .f-copy { font-size: var(--krds-font-size-body-xsmall); }
+}
+/* 모바일 푸터 하단: 피그마 footer__mo content 간격 24(저작권 묶음 → 식별자). 공식 .f-btm 간격 gap-9(40). */
+@media (max-width: 767px) { #krds-footer .f-btm { gap: var(--krds-gap-7); } }
+/* SNS 버튼(피그마 social 337:34801): 바탕 color/action/secondary(투명), 선 color/border/gray-light 1. 공식 xlarge icon border 는 흰 바탕이라 회색 푸터 위에서 흰 원으로 보인다. */
+#krds-footer .f-cnt .f-link .link-sns .krds-btn.icon { background-color: var(--krds-color-action-secondary); border-color: var(--krds-color-border-gray-light); }
+/* 푸터 유틸리티 링크 오른쪽 아이콘: 피그마 button_text medium 의 icon/arrow-right 20x20(icon size medium). */
+#krds-footer .f-cnt .f-link .link-go .krds-btn.text .svg-icon { width: var(--krds-icon--size-medium); height: var(--krds-icon--size-medium); }
+/* 모바일 관련 사이트(피그마 footer__mo Related Site 1548:41062): 틀 위 선 1(INSIDE, divider-gray-light), 칸마다 아래 선 1(INSIDE, border-gray-light), 칸 높이 56, 전체 224.
+   공식은 틀 위아래 선이 바깥(+2px)이고 칸 사이 선이 칸 위쪽이라 전체가 226 이 된다. 선을 안쪽으로 옮겨 피그마 높이에 맞춘다. */
+@media (max-width: 767px) {
+  #krds-footer .foot-quick { border-top: 0; border-bottom: 0; box-shadow: inset 0 var(--krds-border-width-static-regular) 0 var(--krds-color-divider-gray-light); }
+  #krds-footer .foot-quick .inner .link { border-top: 0; border-bottom: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); }
+}
+/* 정책 링크 항목 높이 24(피그마 button_text Size=small 높이 24 고정, 세로 가운데). 공식은 글자 줄 높이(22.5). */
+#krds-footer .f-btm .f-btm-text .f-menu a { min-height: var(--krds-size-height-4); display: inline-flex; align-items: center; }
+
+/* 화면 크기 글자 견본 아이콘 원자 부품(utility_dropdown_font_size__atomic 393:25984)만 놓을 때: 항목의 패딩, 높이, 바탕을 빼고 아이콘(::before)만 남긴다. */
+.krds-resize .drop-list .item-link.f2c-atom-icon { padding: 0 !important; min-height: 0 !important; height: auto !important; gap: 0 !important; background: none !important; width: auto !important; }
+
+/* 헤더 유틸리티 링크 왼쪽 아이콘(피그마 button_text Show left icon, 예: 글자·화면 설정의 icon/view-mode 16): 공식 svg-icon 을 글자 앞에, 크기 small(16). */
+#krds-header .header-utility .krds-btn.text .svg-icon { width: var(--krds-icon--size-small); height: var(--krds-icon--size-small); }
+/* 푸터 정보 줄(피그마 footer 전화번호 "내용" 1548:42919 등): 레이블과 contents 묶음(값 | 추가 정보)이 가로 줄바꿈 배치(간격 8 = gap-3, 줄 간격 2 = gap-1).
+   공식 CSS 클래스(.key-info, .more-info)를 쓰되, 값과 추가 정보를 한 묶음(.key-info)으로 감싸 줄이 모자라면 묶음째 다음 줄로 가게 한다.
+   묶음 안에서는 .key-info 간격 8 이 값과 구분선 사이 간격이라 .more-info 의 왼쪽 패딩을 뺀다. */
+#krds-footer .f-cnt .f-info .info-cs li { flex-wrap: wrap; column-gap: var(--krds-gap-3); row-gap: var(--krds-gap-1); }
+#krds-footer .f-cnt .f-info .info-cs li .key-info .more-info { padding-left: 0; }
+
+/* 규칙 C9(행간 반올림): KRDS 행간 150% 는 그대로, 한 줄 글자 상자만 정수로 올린다(피그마 글자 상자 25.5 → 26, 19.5 → 20, 22.5 → 23).
+   공식 부품 글자(푸터)에 같은 선언. 여러 줄 글자(.f-copy 등)는 넣지 않는다. */
+#krds-footer .f-cnt .f-info .info-addr,
+#krds-footer .f-cnt .f-info .info-cs li > strong,
+#krds-footer .f-cnt .f-info .info-cs li .key-info > span,
+#krds-footer .f-cnt .f-info .info-cs li .key-info .more-info,
+#krds-footer .f-cnt .f-cs dl dt,
+#krds-footer .f-cnt .f-cs dl dd { min-height: round(up, 1lh, 1px); }
+.krds-identifier .ban-txt { min-height: round(up, 1lh, 1px); }
+/* 푸터 하단 위 선: 피그마 footer_copyright__atomic(PC 337:34854, 모바일 1548:41650) 위 선 1 INSIDE(divider-gray-light), 위 패딩 16.
+   공식 .f-btm 은 border-top 이 패딩 바깥에 더해져 내용이 1px 아래. 선을 inset 그림자로 옮긴다(규칙 C9 의 INSIDE 선 처리). */
+#krds-footer .f-btm { border-top: 0; box-shadow: inset 0 var(--krds-border-width-static-regular) 0 var(--krds-color-divider-gray-light); }
+/* 세로형 헤더 메뉴(피그마 header_menu__atomic Type=vertical 324:50169): 주축 CENTER(아이콘 + 간격 4 + 글자 묶음을 세로 가운데).
+   공식 .btn-navi 는 justify-content: space-between 이라 글자가 버튼 아래 끝에 붙는다. PC(글자 17)에서는 여유가 2px 라 차이가 작지만,
+   모바일(글자 15, navigation/depth-small-bold, 행간 23)에서는 글자가 2.5px 아래로 내려간다. */
+#krds-header .header-container .btn-navi:not(.navi-row) { justify-content: center; }

@@ -1,0 +1,173 @@
+{
+  "note": "사업지 목록과 자료 파일. files 항목은 앞에서부터 읽고 처음 열리는 파일을 씀. 경로는 앱 기본 주소(vite base) 기준 상대 경로이며 scripts/copy_data.mjs가 분석 폴더에서 복사함. 판정 보류 기준은 data/sensitivity_and_rules_v3.json의 site_rules 값을 씀",
+  "sites": [
+    {
+      "id": "banam",
+      "name": "고성 반암",
+      "region": "강원 고성군",
+      "country": "대한민국",
+      "lat": 38.4236,
+      "lon": 128.4637,
+      "zoom": 14.8,
+      "kind": "잠제, 돌제, 해빈복원",
+      "completion": null,
+      "files": {
+        "shorelines": [
+          "data/banam/shorelines.geojson"
+        ],
+        "transects": [
+          "data/banam/transects.geojson"
+        ],
+        "before": [
+          "data/banam/before.png"
+        ],
+        "after": [
+          "data/banam/after.png"
+        ]
+      },
+      "labelOffset": [
+        14,
+        -22
+      ],
+      "typeRules": [
+        "structures",
+        "nourishment",
+        "seasonal"
+      ]
+    },
+    {
+      "id": "jinjin",
+      "name": "고성 가진",
+      "region": "강원 고성군",
+      "country": "대한민국",
+      "lat": 38.38,
+      "lon": 128.5026,
+      "zoom": 14.8,
+      "kind": "잠제, 해빈복원",
+      "completion": null,
+      "files": {
+        "shorelines": [
+          "data/jinjin/shorelines.geojson"
+        ],
+        "transects": [
+          "data/jinjin/transects.geojson"
+        ],
+        "before": [
+          "data/jinjin/before.png"
+        ],
+        "after": [
+          "data/jinjin/after.png"
+        ]
+      },
+      "labelOffset": [
+        14,
+        18
+      ],
+      "typeRules": [
+        "structures",
+        "nourishment",
+        "seasonal"
+      ]
+    },
+    {
+      "id": "hwajinpo",
+      "name": "고성 화진포",
+      "region": "강원 고성군",
+      "country": "대한민국",
+      "lat": 38.4789,
+      "lon": 128.4397,
+      "zoom": 14.6,
+      "kind": "연안침식 모니터링 지점",
+      "completion": null,
+      "files": {
+        "shorelines": [
+          "data/hwajinpo/shorelines.geojson"
+        ],
+        "transects": [
+          "data/hwajinpo/transects.geojson"
+        ],
+        "before": [
+          "data/hwajinpo/before.png"
+        ],
+        "after": [
+          "data/hwajinpo/after.png"
+        ]
+      },
+      "labelOffset": [
+        14,
+        -62
+      ],
+      "typeRules": [
+        "seasonal"
+      ]
+    },
+    {
+      "id": "aneho",
+      "name": "토고 Agbodrafo",
+      "region": "토고 해안주",
+      "country": "토고",
+      "lat": 6.2041,
+      "lon": 1.4901,
+      "zoom": 13.2,
+      "kind": "해안 보호 사업 지역",
+      "completion": null,
+      "files": {
+        "shorelines": [
+          "data/aneho/shorelines.geojson"
+        ],
+        "transects": [
+          "data/aneho/transects.geojson"
+        ],
+        "before": [
+          "data/aneho/before.png"
+        ],
+        "after": [
+          "data/aneho/after.png"
+        ]
+      },
+      "labelOffset": [
+        12,
+        -12
+      ],
+      "typeRules": [
+        "seasonal"
+      ]
+    },
+    {
+      "id": "sandmotor",
+      "name": "네덜란드 Sand Motor",
+      "region": "남홀란트주",
+      "country": "네덜란드",
+      "lat": 52.045,
+      "lon": 4.1829,
+      "zoom": 13.0,
+      "kind": "대규모 양빈",
+      "completion": null,
+      "files": {
+        "shorelines": [
+          "data/sandmotor/shorelines.geojson"
+        ],
+        "transects": [
+          "data/sandmotor/transects.geojson"
+        ],
+        "before": [
+          "data/sandmotor/before.png"
+        ],
+        "after": [
+          "data/sandmotor/after.png"
+        ],
+        "corrected": [
+          "data/sandmotor/sandmotor_spring_vs_jarkus_rows.json"
+        ]
+      },
+      "labelOffset": [
+        12,
+        -34
+      ],
+      "typeRules": [
+        "nourishment",
+        "seasonal"
+      ]
+    }
+  ]
+}

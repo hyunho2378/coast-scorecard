@@ -1,0 +1,44 @@
+/* KRDS 피그마 전용 부품: Search (묶음 723:16041 search__pc, 1482:27845 search__mo).
+   크기 xlarge/large/medium, 상태 default/focused/completed/error. 모바일 값은 767px 이하 또는 .mo 클래스(모바일 고정 배치) */
+.krds-search { box-sizing:border-box; width:100%; display:flex; flex-direction:column; align-items:flex-start; gap:var(--krds-gap-3); }
+.krds-search.xlarge { gap:var(--krds-gap-4); }
+.krds-search .search-row { width:100%; display:flex; align-items:flex-end; gap:var(--krds-gap-5); }
+.krds-search .search-field { flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:var(--krds-gap-3); }
+.krds-search .search-field > label { color:var(--krds-color-text-subtle); }
+.krds-search .search-box { box-sizing:border-box; width:100%; display:flex; align-items:center; gap:var(--krds-gap-3);
+  height:var(--krds-size-height-8); padding:0 var(--krds-padding-6); border-radius:var(--krds-radius-medium3);
+  background-color:var(--krds-color-input-surface);
+  /* 피그마 선 INSIDE → 안쪽 그림자 */
+  box-shadow:inset 0 0 0 var(--krds-border-width-variable-regular) var(--krds-color-input-border); }
+.krds-search.medium .search-box { height:var(--krds-size-height-7); border-radius:var(--krds-radius-medium1); }
+.krds-search.xlarge .search-box { height:var(--krds-size-height-11); padding:0 var(--krds-padding-8); gap:var(--krds-gap-5); border-radius:var(--krds-radius-large2); }
+.krds-search.focused .search-box { box-shadow:inset 0 0 0 var(--krds-border-width-variable-medium) var(--krds-color-input-border-active); }
+.krds-search.error .search-box { box-shadow:inset 0 0 0 var(--krds-border-width-variable-medium) var(--krds-color-input-border-error); }
+.krds-search .search-scope { flex-shrink:0; display:flex; align-items:center; gap:var(--krds-gap-5); }
+.krds-search .search-divider { flex-shrink:0; width:var(--krds-border-width-static-regular); height:var(--krds-size-height-5); background-color:var(--krds-color-divider-gray); }
+.krds-search .search-keyword { flex:1 1 0; min-width:0; display:flex; align-items:center; gap:var(--krds-gap-3); }
+.krds-search .search-input { flex:1 1 0; min-width:0; border:0; outline:0; padding:0; margin:0; background:none; color:var(--krds-color-text-basic); font-family:inherit; }
+.krds-search .search-input::placeholder { color:var(--krds-color-text-disabled); opacity:1; }
+.krds-search .search-actions { flex-shrink:0; display:flex; align-items:center; gap:var(--krds-gap-3); }
+.krds-search.xlarge .search-actions { gap:var(--krds-gap-4); }
+.krds-search .search-actions > button { display:inline-flex; padding:0; border:0; background:none; cursor:pointer; }
+.krds-search .svg-icon.ico-search { flex-shrink:0; background-color:var(--krds-color-icon-gray); }
+.krds-search .svg-icon.ico-search { -webkit-mask:url(icons/search.svg) no-repeat center / contain; mask:url(icons/search.svg) no-repeat center / contain; }
+/* 피그마 icon/delete(317:27348)는 두 색: 원 color/icon/gray-fill, X color/icon/gray. 두 겹 마스크 */
+.krds-search .svg-icon.ico-delete { position:relative; flex-shrink:0; background-color:var(--krds-color-icon-gray-fill);
+  -webkit-mask:url(icons/delete_shape.svg) no-repeat center / contain; mask:url(icons/delete_shape.svg) no-repeat center / contain; }
+.krds-search .svg-icon.ico-delete::after { content:""; position:absolute; inset:0; background-color:var(--krds-color-icon-gray);
+  -webkit-mask:url(icons/delete_mark.svg) no-repeat center / contain; mask:url(icons/delete_mark.svg) no-repeat center / contain; }
+.krds-search .search-adv { flex-shrink:0; display:flex; flex-direction:column; padding:var(--krds-padding-5) 0; }
+.krds-search.medium .search-adv { padding:var(--krds-padding-3) 0; }
+/* 모바일 xlarge(1482:27846): 상자 64, 패딩 16, 간격 8, 모서리 8 */
+.krds-search.mo.xlarge .search-box { height:var(--krds-size-height-9); padding:0 var(--krds-padding-6); gap:var(--krds-gap-3); border-radius:var(--krds-radius-medium3); }
+@media (max-width: 767px) {
+  .krds-search.xlarge .search-box { height:var(--krds-size-height-9); padding:0 var(--krds-padding-6); gap:var(--krds-gap-3); border-radius:var(--krds-radius-medium3); }
+}
+/* 모바일 고정 배치(.mo)는 화면 폭과 관계없이 모바일 글자 크기. 피그마 search__mo 의 heading/medium 은 mobile 22 */
+.krds-search.mo .krds-text-heading-medium { font-size:var(--krds-mobile-font-size-heading-medium); }
+/* 범위 필터 셀렉트 폭 120(피그마 1366:15263 FIXED, 변수 연결 없음, KRDS 단계에 120 없음) */
+.krds-search .search-scope .krds-form-select-sort { width:12rem; flex-shrink:0; }
+/* 모바일 large/medium(1482:27902): 입력 묶음이 세로 배치의 직접 자식이고 폭 채우기(FILL) */
+.krds-search > .search-field, .krds-search > .search-box { align-self:stretch; flex:0 0 auto; }
