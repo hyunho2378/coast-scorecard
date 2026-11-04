@@ -28,12 +28,14 @@ test('문구에 가운뎃점과 줄표가 없다', () => {
   const t = ledgerText({ ...base, rows: [{ id: 1, change: 30, threshold: 10, verdict: 'advance' }] })
   assert.doesNotMatch(t, /[·—–]/)
 })
-test('기대 수 줄: 첫 줄 아래에 기준 초과 개수와 오차만으로 나올 수 있는 기대 수', () => {
-  const rows = [{ id: 26, change: 41.2, threshold: 22.9, verdict: 'advance' }, { id: 27, change: 40.3, threshold: 22.9, verdict: 'advance' }, { id: 1, change: 3, threshold: 22.9, verdict: 'hold' }]
-  const t = ledgerText({ ...base, rows, expected: { value: 6.3, label: '1표준편차' } }).split('\n')
-  assert.equal(t[1], '기준 초과 2개, 같은 기준에서 오차만으로 나올 수 있는 기대 수 6.3개(1표준편차)')
+test('개수 줄: 첫 줄 아래에 기준 초과(보류 기준, 판정 대상 수)와 보류, 구조물 의심 개수만', () => {
+  const rows = [{ id: 26, change: 41.2, threshold: 22.9, verdict: 'advance' }, { id: 27, change: 40.3, threshold: 22.9, verdict: 'advance' }, { id: 1, change: 3, threshold: 22.9, verdict: 'hold' }, { id: 2, change: 60, threshold: 22.9, verdict: 'struct' }]
+  const t = ledgerText({ ...base, rows }).split('\n')
+  assert.equal(t[1], '기준 초과 2개(보류 기준 22.9 m 초과, 판정 대상 3개 중), 보류 1개, 구조물 의심 1개')
   assert.match(t[2], /구간 평균 해빈폭/)
-  const t95 = ledgerText({ ...base, rows, expected: { value: 1, label: '95%' } }).split('\n')
-  assert.equal(t95[1], '기준 초과 2개, 같은 기준에서 오차만으로 나올 수 있는 기대 수 1.0개(95%)')
-  assert.doesNotMatch(ledgerText({ ...base, rows, expected: { value: null, label: '1표준편차' } }), /기대 수/)
+  assert.doesNotMatch(t.join('\n'), /기대 수|오차만으로|표준편차|95%/)
+})
+test('개수 줄: 보류 기준이 가로선마다 다르면 기준 값을 빼고 판정 대상 수만', () => {
+  const rows = [{ id: 1, change: 30, threshold: 20, verdict: 'advance' }, { id: 2, change: 3, threshold: 25, verdict: 'hold' }]
+  assert.equal(ledgerText({ ...base, rows }).split('\n')[1], '기준 초과 1개(판정 대상 2개 중), 보류 1개, 구조물 의심 0개')
 })

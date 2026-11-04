@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { readPalette } from '../lib/palette.js'
 import { useModeTick } from '../shell/screenMode.js'
-import { isJudgeable, beachWidthScore } from '../lib/judge.js'
+import { isJudgeable, beachWidthScore, TIER } from '../lib/judge.js'
 import { EMPTY, fc, makeMap } from './basemap.js'
 import { Bar, TableWrap, Verdict, signed } from '../ui/index.jsx'
 
@@ -17,9 +17,9 @@ export function BigNumbers({ summary }) {
   if (!summary) return null
   return (
     <dl className="cs-big" aria-label="판정 요약">
-      <div className="is-key"><dt>기준 초과</dt><dd className="cs-num">{summary.judgeable}<span>/{summary.total}</span></dd></div>
-      <div><dt>구조물 의심</dt><dd className="cs-num">{summary.excluded}</dd></div>
-      <div><dt>판정 보류</dt><dd className="cs-num">{summary.held}</dd></div>
+      <div className="is-key"><dt>기준 초과<span className="cs-big-tier">{TIER.exceed}</span></dt><dd className="cs-num">{summary.judgeable}<span>/{summary.total}</span></dd></div>
+      <div><dt>구조물 의심<span className="cs-big-tier">{TIER.struct}</span></dt><dd className="cs-num">{summary.excluded}</dd></div>
+      <div><dt>판정 보류<span className="cs-big-tier">{TIER.hold}</span></dt><dd className="cs-num">{summary.held}</dd></div>
     </dl>
   )
 }

@@ -193,8 +193,8 @@ export function falsePositiveRows(rules) {
   const b = rules?.site_rules?.banam
   if (!f || !b) return []
   return [
-    { basis: 'sd1', label: '1표준편차', thresholdM: b.holdThresholdM, rate: f.analytic_sd1, n: f.banam_pass_sd1, expected: f.banam_expected_false_sd1, judgeable: b.judgeableCount },
-    { basis: 'p95', label: '95%', thresholdM: b.p95?.threshold_m, rate: f.analytic_p95, n: f.banam_pass_p95, expected: f.banam_expected_false_p95, judgeable: b.p95?.judgeable }
+    { basis: 'sd1', label: '기본', thresholdM: b.holdThresholdM, rate: f.analytic_sd1, n: f.banam_pass_sd1, expected: f.banam_expected_false_sd1, judgeable: b.judgeableCount },
+    { basis: 'p95', label: '엄격', thresholdM: b.p95?.threshold_m, rate: f.analytic_p95, n: f.banam_pass_p95, expected: f.banam_expected_false_p95, judgeable: b.p95?.judgeable }
   ]
 }
 
@@ -225,7 +225,7 @@ export function samepairFromCorrected(rows, corrected) {
 
 // 오차 유형별 민감도(sensitivity, poc5 형식). 해외 사이트 별표 10 입력에만 쓴다. 사이트마다 쓸 오차 크기를 고른다.
 // 동해안 사전 오차가 있는 한국 사이트는 16.21 m, 측량 대조가 있는 사이트는 변화량 RMSE, 나머지는 첫 항목의 오차.
-// 표 값은 사업 전 해빈폭 50 m, 목표해안선 바다 쪽 10 m 조건의 1표준편차 점수
+// 표 값은 사업 전 해빈폭 50 m, 목표해안선 바다 쪽 10 m 조건의 기본 보류 기준 점수
 export const SENS_MODES = [
   ['bias_independent', '치우침'],
   ['mixed_sandmotor', '혼합'],

@@ -5,8 +5,8 @@ import { PageHead, SiteState, TableWrap, signed, pct } from '../ui/index.jsx'
 import { ledgerText, fmtDate } from '../lib/ledger.js'
 import { downloadText, surveyCsv, surveyFileName } from '../lib/survey.js'
 import { conditionsCsvHead, runConditions, runLine } from '../lib/runs.js'
-import { falsePositiveRows, projectFactsFor, unifiedFor } from '../lib/loader-core.js'
-import { BASES, beachWidthScore, roleOf, ROLE } from '../lib/judge.js'
+import { projectFactsFor, unifiedFor } from '../lib/loader-core.js'
+import { beachWidthScore, roleOf, ROLE } from '../lib/judge.js'
 import { annexScore, gradeWith } from '../lib/annex.js'
 import { stamp } from '../lib/docs.js'
 import { BigNumbers, TransectDetail, TransectList, listOrder } from '../parts/transect.jsx'
@@ -32,7 +32,7 @@ export function Tabs({ value, onChange, label, items }) {
   )
 }
 
-export default function CardScreen({ site, data, rules, basis = 'sd1', settings, onRetry }) {
+export default function CardScreen({ site, data, rules, settings, onRetry }) {
   const [tab, setTab] = useState('judge')
   const [copied, setCopied] = useState(false)
   const areaRef = useRef(null)
@@ -41,15 +41,13 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', settings,
   const [sel, setSel] = useState(first)
   useEffect(() => { setSel(first) }, [first])
   const today = stamp()
-  const basisLabel = (BASES.find(([k]) => k === basis) || BASES[0])[1]
   if (!ready) return <><PageHead title={`${site.name} 판정 카드`} /><SiteState data={data} onRetry={onRetry} /></>
 
   const s = data.summary
   const rows = data.rows
   const rule = rules?.data?.site_rules?.[site.id]
   const role = site.run ? 'project' : roleOf(rule)
-  const fpRow = site.id === 'banam' ? falsePositiveRows(rules?.data).find((x) => x.basis === basis) : null
-  const text = ledgerText({ site, rows, period: data.period, today, expected: fpRow && typeof fpRow.expected === 'number' ? { value: fpRow.expected, label: fpRow.label } : null })
+  const text = ledgerText({ site, rows, period: data.period, today })
   const unified = role === 'control' ? null : unifiedFor(rules?.data, site.id)
   const facts = projectFactsFor(rules?.data, site.id)
   const score = annexScore(rows, settings)
@@ -65,7 +63,7 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', settings,
   return (
     <>
       <PageHead title={`${site.name} 판정 카드`}
-        meta={<><span>{site.run ? '새 분석' : ROLE[role]}</span><span>{fmtDate(data.period.from)}부터 {fmtDate(data.period.to)}까지</span><span>보류 기준 {thr}{'\u00a0'}m({basisLabel})</span>{s.sectionN > 0 && <span>구간 평균 {signed(s.sectionMean)}</span>}</>}
+        meta={<><span>{site.run ? '새 분석' : ROLE[role]}</span><span>{fmtDate(data.period.from)}부터 {fmtDate(data.period.to)}까지</span><span>보류 기준 {thr}{'\u00a0'}m</span>{s.sectionN > 0 && <span>구간 평균 {signed(s.sectionMean)}</span>}</>}
         actions={<button type="button" className="krds-btn small primary" onClick={download}><Download size={16} aria-hidden="true" />현장 측량 구간 CSV</button>} />
       {runInfo && <ul className="cs-run-cond cs-card-cond" aria-label="재현 조건">{runLine(runInfo).map(([k, v]) => <li key={k}><b>{k}</b>{v}</li>)}</ul>}
       <BigNumbers summary={s} />
@@ -83,7 +81,7 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', settings,
                 <h2 className="cs-section-title">대장 옮김 문구</h2>
                 {text && <button type="button" className="krds-btn small secondary" onClick={copy}>{copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}{copied ? '복사 완료' : '복사'}</button>}
               </div>
-              {text ? <><label htmlFor="ledger" className="sr-only">대장 옮김 문구</label><textarea id="ledger" ref={areaRef} readOnly value={text} rows={Math.min(10, text.split('\n').length + 1)} className="cs-ledger" /></> : <p className="cs-state">기준 초과 가로선 없음</p>}
+              {text ? <><label htmlFor="ledger" className="sr-only">대장 옮김 문구</label><textarea id="ledger" ref={areaRef} readOnly value={text} rows={Math.min(10, text.split('\n').length + 1)} className="cs-ledger" /></> : <p className="cs-state">변화 확인 구간(기준 초과 가로선) 없음</p>}
               <p role="status" className="sr-only">{copied ? '문구 복사 완료' : ''}</p>
             </section>
           </aside>
@@ -124,7 +122,7 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', settings,
         <div id="panel-detail" role="tabpanel" aria-labelledby="tab-detail" className="cs-col">
           {unified && (
             <section aria-label="오차 유형별 점수 변동">
-              <h2 className="cs-section-title">오차 유형별 점수 변동 <span className="cs-sub">위성 위치 오차 {unified.errorM}{'\u00a0'}m, 1표준편차</span></h2>
+              <h2 className="cs-section-title">오차 유형별 점수 변동 <span className="cs-sub">위성 위치 오차 {unified.errorM}{'\u00a0'}m</span></h2>
               <TableWrap label="오차 유형별 점수 변동 표">
                 <table className="cs-table is-grouped">
                   <thead>
@@ -152,7 +150,6 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', settings,
             <dl className="cs-detail-kv is-wide">
               <div><dt>사업 내용</dt><dd>{site.kind}</dd></div>
               {facts && <div><dt>사업비</dt><dd>약 {facts.eok}억 원</dd></div>}
-              {fpRow && <div><dt>오차만으로 나올 기대 수</dt><dd className="cs-num">{fpRow.expected.toFixed(1)}개({fpRow.label})</dd></div>}
               <div><dt>구조물 의심 가로선</dt><dd className="cs-num">{rows.filter((r) => r.verdict === 'struct').map((r) => r.id).join(', ') || '없음'}</dd></div>
               <div><dt>장면</dt><dd className="cs-num">{data.scenes.map((x) => fmtDate(x.date)).join(', ')}</dd></div>
             </dl>

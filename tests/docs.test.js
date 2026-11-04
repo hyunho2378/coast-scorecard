@@ -16,10 +16,11 @@ test('가로선 GeoJSON: 가로선마다 Feature 하나, 판정 글자와 이동
   const g = JSON.parse(transectsGeojson(site, rows))
   assert.equal(g.type, 'FeatureCollection')
   assert.equal(g.features.length, 3)
-  assert.equal(g.features[0].properties.verdict, '기준 초과 전진')
-  assert.equal(g.features[2].properties.verdict, '구조물 의심 가로선')
+  assert.equal(g.features[0].properties.verdict, '변화 확인(기준 초과 전진)')
+  assert.equal(g.features[2].properties.verdict, '구조물 의심')
   assert.equal(g.features[1].properties.change_m, 5)
-  assert.equal(verdictText('few'), '판정 보류')
+  assert.equal(verdictText('few'), '정규 측량 일정(판정 보류)')
+  assert.equal(g.features[1].properties.verdict, '정규 측량 일정(판정 보류)')
 })
 
 test('해안선 GeoJSON: 장면마다 Feature 하나', () => {
@@ -34,7 +35,7 @@ test('판정 부록 CSV: UTF-8 BOM, CRLF, 머리 열, 사업지별 행', () => {
   assert.equal(t.charCodeAt(0), 0xfeff)
   const lines = t.slice(1).split('\r\n')
   assert.equal(lines[0], '사업지,가로선,이동 거리(m),보류 기준(m),판정,판정 내용')
-  assert.equal(lines[1], '시험 해변,1,30.0,22.9,기준 초과 전진,바다 쪽 이동')
+  assert.equal(lines[1], '시험 해변,1,30.0,22.9,변화 확인(기준 초과 전진),바다 쪽 이동')
   assert.equal(appendixRows(list).length, 3)
 })
 

@@ -1,6 +1,6 @@
 // 운영 기준. 보류 기준과 장면 규칙, 별표 10 계산기 입력. 값을 바꾸면 모든 사업지 판정과 점수를 바로 다시 센다
 import { Box, Field, PageHead, Pick, Segmented, TableWrap, signed } from '../ui/index.jsx'
-import { BASES, scoresSite, thresholdOf } from '../lib/judge.js'
+import { scoresSite, thresholdOf } from '../lib/judge.js'
 import { annexScore, gradeWith, tideShift } from '../lib/annex.js'
 
 const pt = (v) => (typeof v === 'number' ? `${v.toFixed(1)}점` : '')
@@ -29,12 +29,12 @@ export default function RulesScreen({ sites, siteData, rules, settings, setSetti
 
   return (
     <>
-      <PageHead title="운영 기준" meta={<><span>판정 기준 {(BASES.find(([k]) => k === settings.basis) || BASES[0])[1]}</span><span>시점별 장면 {settings.minScenes}장 이상</span></>} />
+      <PageHead title="운영 기준" meta={<><span>보류 기준 {settings.basis === 'p95' ? `${korea?.p95?.threshold_m ?? 44.9} m(엄격)` : `${korea?.holdThresholdM ?? 22.9} m(기본)`}</span><span>시점별 장면 {settings.minScenes}장 이상</span></>} />
       <div className="cs-split is-even">
         <div className="cs-col">
           <Box title="판정 보류 기준">
             <div className="cs-form">
-              <Field label="보류 기준"><Segmented label="보류 기준" value={settings.basis} options={[['sd1', `1표준편차 ${korea?.holdThresholdM ?? 22.9} m`], ['p95', `95% ${korea?.p95?.threshold_m ?? 44.9} m`]]} onChange={set('basis')} /></Field>
+              <Field label="보류 기준"><Segmented label="보류 기준" value={settings.basis} options={[['sd1', `${korea?.holdThresholdM ?? 22.9} m(기본)`], ['p95', `${korea?.p95?.threshold_m ?? 44.9} m(엄격)`]]} onChange={set('basis')} /></Field>
             </div>
           </Box>
           <Box title="장면 규칙">

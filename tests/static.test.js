@@ -53,3 +53,26 @@ test('소스와 README에 폭풍, 파고, 판정 가능, 판정 전진, 해안�
   walk(`${root}src`); files.push(`${root}README.md`, `${root}index.html`)
   for (const p of files) assert.doesNotMatch(fs.readFileSync(p, 'utf8'), /폭풍|파고|판정 가능|판정 전진|판정 후퇴|해안선 성적표/, p)
 })
+
+test('화면 소스에 기대 수 문장과 1표준편차, 95% 표기가 없다', () => {
+  const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => e.isDirectory() ? walk(`${d}/${e.name}`) : [`${d}/${e.name}`])
+  for (const f of walk(`${root}src`).filter((x) => /\.jsx?$/.test(x))) {
+    const t = fs.readFileSync(f, 'utf8').split('\n').filter((l) => !/^\s*\/\//.test(l)).join('\n')
+    assert.doesNotMatch(t, /기대 수|오차만으로|1표준편차|['"`]95%/, f)
+  }
+})
+test('보류 기준 선택지 이름: 22.9 m(기본)과 44.9 m(엄격)', () => {
+  const t = fs.readFileSync(`${root}src/screens/RulesScreen.jsx`, 'utf8')
+  assert.match(t, / m\(기본\)`/); assert.match(t, / m\(엄격\)`/)
+})
+test('판정 카드 머리: 보류 기준 값만(괄호 설명 없음)', () => {
+  const t = fs.readFileSync(`${root}src/screens/CardScreen.jsx`, 'utf8')
+  assert.match(t, /<span>보류 기준 \{thr\}\{'\\u00a0'\}m<\/span>/)
+})
+test('사업지 분석: 1023 폭 이하에서 분석 조건을 지도보다 앞에, 지도 단추는 왼쪽 위', () => {
+  const css = fs.readFileSync(`${root}src/styles.css`, 'utf8')
+  assert.match(css, /@media \(max-width: 1023px\) \{\s*\.cs-split\.is-tool > \.cs-col \{ display: contents; \}\s*\.cs-split\.is-tool > \.cs-col > :first-child \{ order: -1; \}/)
+  const a = fs.readFileSync(`${root}src/screens/AnalyzeScreen.jsx`, 'utf8')
+  assert.match(a, /`구조물 \$\{presetIds\.length\}개 불러오기`/)
+  assert.doesNotMatch(a, />\{repro \? `구조물 의심 가로선 \$\{presetIds\.length\}개 불러오기`/)
+})

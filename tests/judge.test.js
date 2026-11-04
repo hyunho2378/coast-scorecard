@@ -45,3 +45,10 @@ test('점검 목록: 기준 초과만, 변화 큰 순서', () => {
   ])
   assert.deepEqual(list.map((x) => `${x.siteId}${x.id}`), ['b1', 'a1'])
 })
+
+test('서류 세 등급 이름: 변화 확인 구간, 정규 측량 일정 구간, 구조물 의심 구간', async () => {
+  const { TIER, tierOf, BASES } = await import('../src/lib/judge.js')
+  assert.deepEqual(TIER, { exceed: '변화 확인 구간', hold: '정규 측량 일정 구간', struct: '구조물 의심 구간' })
+  assert.deepEqual(['advance', 'retreat', 'hold', 'nodata', 'few', 'struct'].map(tierOf), ['exceed', 'exceed', 'hold', 'hold', 'hold', 'struct'])
+  assert.deepEqual(BASES, [['sd1', '기본'], ['p95', '엄격']])
+})

@@ -182,8 +182,8 @@ export default function AnalyzeScreen({ sites, siteData, rules, settings, job, o
           <div className="cs-maptools" role="toolbar" aria-label="구조물 다각형">
             {!repro && <button type="button" className={`krds-btn small ${drawing ? 'primary' : 'secondary'}`} aria-pressed={drawing} onClick={() => { setDrawing(!drawing); setRing([]) }}><Pentagon size={16} aria-hidden="true" />구조물 그리기</button>}
             {drawing && <button type="button" className="krds-btn small secondary" disabled={ring.length < 3} onClick={closeRing}><Check size={16} aria-hidden="true" />닫기 {ring.length}점</button>}
-            {presetIds.length > 0 && presetRows && <button type="button" className={`krds-btn small ${repro && reproStructs ? 'primary' : 'secondary'}`} aria-pressed={repro ? reproStructs : undefined} disabled={running} onClick={loadStructures}><Import size={16} aria-hidden="true" />{repro ? `구조물 의심 가로선 ${presetIds.length}개 불러오기` : '기존 사업지 구조물 구간 불러오기'}</button>}
-            {polys.length > 0 && <button type="button" className="krds-btn small secondary" onClick={() => { setPolys([]); setRing([]); setReproStructs(false) }}><Trash2 size={16} aria-hidden="true" />{repro ? '구조물 의심 가로선 지우기' : `구조물 ${polys.length}개 지우기`}</button>}
+            {presetIds.length > 0 && presetRows && <button type="button" className={`krds-btn small ${repro && reproStructs ? 'primary' : 'secondary'}`} aria-pressed={repro ? reproStructs : undefined} disabled={running} onClick={loadStructures} aria-label={repro ? `구조물 의심 가로선 ${presetIds.length}개 불러오기` : '기존 사업지 구조물 구간 불러오기'}><Import size={16} aria-hidden="true" />{repro ? `구조물 ${presetIds.length}개 불러오기` : '기존 구조물 불러오기'}</button>}
+            {polys.length > 0 && <button type="button" className="krds-btn small secondary" onClick={() => { setPolys([]); setRing([]); setReproStructs(false) }}><Trash2 size={16} aria-hidden="true" />{repro ? '구조물 지우기' : `구조물 ${polys.length}개 지우기`}</button>}
           </div>
         </div>
         <div className="cs-col">

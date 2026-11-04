@@ -123,8 +123,13 @@ export const ROLE = {
 export const roleOf = (rule) => ROLE[rule?.role] ? rule.role : 'project'
 export const scoresSite = (rule) => roleOf(rule) !== 'control'
 
-// 보류 기준 선택: sd1(1표준편차, 기본)과 p95(95%). 95% 값이 없는 사이트는 1표준편차 기준을 그대로 쓴다
-export const BASES = [['sd1', '1표준편차'], ['p95', '95%']]
+// 보류 기준 선택: sd1(기본, 선행 연구 위치 오차 16.21 m를 두 시점 변화 오차로 환산한 22.9 m)과 p95(엄격, 44.9 m).
+// p95 값이 없는 사이트는 기본 기준을 그대로 쓴다. 화면 이름은 BASES 두 번째 값
+export const BASES = [['sd1', '기본'], ['p95', '엄격']]
+
+// 서류의 세 등급 이름. exceed: 보류 기준 초과(보완 측량 1순위), hold: 보류 기준 이하, struct: 구조물 의심
+export const TIER = { exceed: '변화 확인 구간', hold: '정규 측량 일정 구간', struct: '구조물 의심 구간' }
+export const tierOf = (v) => (v === 'struct' ? 'struct' : isJudgeable(v) ? 'exceed' : 'hold')
 export function thresholdOf(rule, basis = 'sd1') {
   if (!rule || typeof rule.holdThresholdM !== 'number') return null
   if (basis === 'p95' && typeof rule.p95?.threshold_m === 'number') return rule.p95.threshold_m

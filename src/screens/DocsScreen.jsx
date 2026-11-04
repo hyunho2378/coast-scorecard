@@ -3,10 +3,9 @@ import { Download, Printer } from 'lucide-react'
 import { PageHead, SiteState, TableWrap, signed } from '../ui/index.jsx'
 import { downloadText, surveyCsv, surveyFileName, surveyRows } from '../lib/survey.js'
 import { ledgerText, fmtDate } from '../lib/ledger.js'
-import { falsePositiveRows } from '../lib/loader-core.js'
 import { appendixCsv, appendixRows, shorelinesGeojson, stamp, transectsGeojson, verdictText } from '../lib/docs.js'
 import { annexScore } from '../lib/annex.js'
-import { BASES } from '../lib/judge.js'
+import { thresholdOf } from '../lib/judge.js'
 import { SiteTabs } from './HomeScreen.jsx'
 
 export default function DocsScreen({ sites, siteData, rules, settings, site, onSite }) {
@@ -14,11 +13,10 @@ export default function DocsScreen({ sites, siteData, rules, settings, site, onS
   const ready = data?.status === 'ready'
   const today = stamp()
   const list = sites.map((s) => ({ site: s, data: siteData[s.id] })).filter((x) => x.data?.status === 'ready')
-  const head = <PageHead title="문서 센터" meta={<><span>{site.name}</span><span>판정 기준 {(BASES.find(([k]) => k === settings.basis) || BASES[0])[1]}</span></>} actions={<button type="button" className="krds-btn small primary" onClick={() => window.print()}><Printer size={16} aria-hidden="true" />판정 부록 인쇄</button>} />
+  const head = <PageHead title="문서 센터" meta={<><span>{site.name}</span>{typeof thresholdOf(rules?.data?.site_rules?.[site.id], settings.basis) === 'number' && <span>보류 기준 {thresholdOf(rules?.data?.site_rules?.[site.id], settings.basis)}{'\u00a0'}m</span>}</>} actions={<button type="button" className="krds-btn small primary" onClick={() => window.print()}><Printer size={16} aria-hidden="true" />판정 부록 인쇄</button>} />
   if (!ready) return <>{head}<SiteTabs sites={sites} siteData={siteData} siteId={site.id} onSelect={onSite} /><SiteState data={data} /></>
 
-  const fpRow = site.id === 'banam' ? falsePositiveRows(rules?.data).find((x) => x.basis === settings.basis) : null
-  const ledger = ledgerText({ site, rows: data.rows, period: data.period, today, expected: fpRow ? { value: fpRow.expected, label: fpRow.label } : null })
+  const ledger = ledgerText({ site, rows: data.rows, period: data.period, today })
   const geoT = transectsGeojson(site, data.rows)
   const geoS = shorelinesGeojson(site, data.scenes)
   const files = [
@@ -53,7 +51,7 @@ export default function DocsScreen({ sites, siteData, rules, settings, site, onS
         <h2 className="cs-section-title">판정 부록 <span className="cs-sub">{fmtDate(today)} 작성</span></h2>
         <TableWrap label="사업지별 판정 요약 표">
           <table className="cs-table">
-            <thead><tr><th>사업지</th><th className="is-num">가로선</th><th className="is-num">기준 초과</th><th className="is-num">구조물 의심</th><th className="is-num">판정 보류</th><th className="is-num">구간 평균</th><th className="is-num">위성 두 항목</th></tr></thead>
+            <thead><tr><th>사업지</th><th className="is-num">가로선</th><th className="is-num is-wrap">변화 확인<span className="is-sub"> 기준 초과</span></th><th className="is-num is-wrap">구조물 의심</th><th className="is-num is-wrap">정규 측량 일정<span className="is-sub"> 판정 보류</span></th><th className="is-num">구간 평균</th><th className="is-num">위성 두 항목</th></tr></thead>
             <tbody>
               {list.map(({ site: s, data: d }) => {
                 const a = annexScore(d.rows, settings)

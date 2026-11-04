@@ -85,3 +85,15 @@ test('재현 기준 결과: 사업지 형식, 구조물 의심 15개, 조건 한
   assert.ok(lines.some((l) => l.startsWith('# 보류 기준,')))
   assert.ok(lines.some((l) => l.startsWith('# 구조물 의심 가로선,') && l.includes('15개')))
 })
+
+test('재현 기준 반암: 가로선별 이동 거리 차이 0.0 m(소수 첫째 자리), 판정 7, 14, 15', () => {
+  const site = sites.find((s) => s.id === 'banam')
+  const periods = rules.scene_rule.sites.banam.periods
+  const tr = read('public/data/banam/transects.geojson')
+  const out = reproFromScenes({ ...site.repro, periods, features: tr.features }, fixture('banam'))
+  const cmp = compareWithBoard(out.base, tr.features)
+  const max = Math.max(...cmp.map((c) => Math.abs(c.diff)))
+  assert.equal(max.toFixed(1), '0.0')
+  const s = summarize(judgeRows(out.base, rules.site_rules.banam, periods))
+  assert.deepEqual([s.total, s.judgeable, s.held, s.excluded], [36, 7, 14, 15])
+})

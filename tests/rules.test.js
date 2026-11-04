@@ -112,16 +112,17 @@ test('반암 구간 평균: 구조물 의심을 뺀 가로선 20개 +16.0 m, 민
   assert.match(t, /고성 반암 구간 평균 해빈폭 \+16\.0 m 변화/)
   assert.doesNotMatch(t, /가로선 (10|15|24|33)번/)
 })
-test('반암 대장 문구: 기준 초과 7개와 거짓 판정 표의 기대 수 6.3개(1표준편차, 판정 대상 20개)', { skip: !has('banam') }, () => {
+test('반암 대장 문구: 기준 초과 7개(보류 기준 22.9 m, 판정 대상 20개 중), 보류 14개, 구조물 의심 15개', { skip: !has('banam') }, () => {
   const rows = siteRows('banam')
   const fp = falsePositiveRows(rules).find((x) => x.basis === 'sd1')
-  assert.equal(fp.expected, 6.3); assert.equal(fp.n, 20)
-  const t = ledgerText({ site: { name: '고성 반암' }, rows, period: { from: '2017-04-13', to: '2025-05-30' }, today: '2026-11-03', expected: { value: fp.expected, label: fp.label } }).split('\n')
-  assert.equal(t[1], '기준 초과 7개, 같은 기준에서 오차만으로 나올 수 있는 기대 수 6.3개(1표준편차)')
+  assert.equal(fp.n, 20); assert.equal(fp.label, '기본')
+  const t = ledgerText({ site: { name: '고성 반암' }, rows, period: { from: '2017-04-13', to: '2025-05-30' }, today: '2026-11-03' }).split('\n')
+  assert.equal(t[1], '기준 초과 7개(보류 기준 22.9 m 초과, 판정 대상 20개 중), 보류 14개, 구조물 의심 15개')
+  assert.doesNotMatch(t.join('\n'), /기대 수|6\.3개/)
   assert.match(t.join('\n'), /가로선 26번 해빈폭 \+41\.2 m 변화\(판정 보류 기준 22\.9 m\), 기준 초과 전진\./)
   assert.equal(falsePositiveRows(rules).find((x) => x.basis === 'p95').expected, 1.0)
 })
-test('기준 선택: 95% 44.9 m에서 반암 0개, 기본값은 1표준편차 22.9 m', { skip: !has('banam') }, () => {
+test('기준 선택: 엄격 44.9 m에서 반암 0개, 기본값은 22.9 m', { skip: !has('banam') }, () => {
   assert.equal(thresholdOf(rules.site_rules.banam), 22.9)
   assert.equal(thresholdOf(rules.site_rules.banam, 'p95'), 44.9)
   assert.equal(thresholdOf(rules.site_rules.sandmotor, 'p95'), 57.2)

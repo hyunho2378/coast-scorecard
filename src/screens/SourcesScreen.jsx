@@ -34,7 +34,7 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
   const m = (v) => (typeof v === 'number' ? `${v.toFixed(1)}\u00a0m` : '없음')
   return (
     <>
-      <PageHead title="자료와 출처" meta={<><span>사업지 {sites.length}곳</span><span>판정 기준 {basisLabel}</span></>} />
+      <PageHead title="자료와 출처" meta={<><span>사업지 {sites.length}곳</span><span>보류 기준 {basisLabel}</span></>} />
       <div className="cs-two">
         <div className="cs-col">
           <Box title="판정 보류 기준" sub={`${basisLabel} 기준`} flush>
@@ -57,7 +57,7 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
             <Box title="연도별 큰 값" sub="같은 계절 장면쌍 90퍼센타일" flush>
               <TableWrap label="연도별 장면쌍 90퍼센타일 표">
                 <table className="cs-table">
-                  <thead><tr><th>사업지</th><th className="is-num">2017년</th><th className="is-num">2025년</th><th className="is-num is-wrap">두 해 합친 값</th><th className="is-num is-wrap">연도별 큰 값</th><th className="is-num is-wrap">1표준편차 기준</th><th className="is-num">기준 초과</th></tr></thead>
+                  <thead><tr><th>사업지</th><th className="is-num">2017년</th><th className="is-num">2025년</th><th className="is-num is-wrap">두 해 합친 값</th><th className="is-num is-wrap">연도별 큰 값</th><th className="is-num is-wrap">보류 기준</th><th className="is-num">기준 초과</th></tr></thead>
                   <tbody>
                     {yearRows.map((y) => (
                       <tr key={`${y.id}-${y.part}`}>
@@ -77,10 +77,10 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
             <Box title="보류 기준과 거짓 판정" sub="고성 반암, 판정 대상 20개" flush>
               <TableWrap label="보류 기준과 거짓 판정 표">
                 <table className="cs-table">
-                  <thead><tr><th>기준</th><th className="is-num">보류 기준</th><th className="is-num is-wrap">거짓 판정 비율</th><th className="is-num is-wrap">기대 거짓 판정</th><th className="is-num is-wrap">반암 기준 초과</th></tr></thead>
+                  <thead><tr><th>기준</th><th className="is-num">보류 기준</th><th className="is-num is-wrap">거짓 판정 비율</th><th className="is-num is-wrap">반암 기준 초과</th></tr></thead>
                   <tbody>
                     {fp.map((x) => (
-                      <tr key={x.basis} className={x.basis === basis ? 'is-current' : undefined}><td>{x.label}{x.basis === basis && <span className="is-sub"> 선택</span>}</td><td className="is-num">{x.thresholdM}{'\u00a0'}m</td><td className="is-num">{(x.rate * 100).toFixed(1)}%</td><td className="is-num">{x.expected.toFixed(1)}개</td><td className="is-num">{x.judgeable}개</td></tr>
+                      <tr key={x.basis} className={x.basis === basis ? 'is-current' : undefined}><td>{x.label}{x.basis === basis && <span className="is-sub"> 선택</span>}</td><td className="is-num">{x.thresholdM}{'\u00a0'}m</td><td className="is-num">{(x.rate * 100).toFixed(1)}%</td><td className="is-num">{x.judgeable}개</td></tr>
                     ))}
                   </tbody>
                 </table>
@@ -137,7 +137,7 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
           </Box>
           <Box title="판정 규칙">
             <KV items={[
-              r?.hold_rule && ['판정 보류', '1표준편차 22.92 m, 95% 44.9 m'],
+              r?.hold_rule && ['보류 기준', '22.9 m(기본, 선행 연구 위치 오차 16.21 m를 두 시점 변화 오차로 환산), 44.9 m(엄격)'],
               r?.structure_rule && ['구조물 의심', '구조물 30 m 이내 물가선'],
               ['지도 프로그램', 'geotiff.js(MIT), MapLibre GL(BSD)'],
               r?.annex10 && ['점수 식', r.annex10.source.replace(' 개정문 hwpx', '')],
