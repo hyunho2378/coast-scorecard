@@ -1,6 +1,7 @@
 // 가로선 작업 부품: 지도, 큰 숫자 3개, 선택 가로선 상세, 가로선 목록. 지도와 목록은 같은 선택(selected)을 쓴다
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { readPalette } from '../lib/palette.js'
+import { mapReady } from '../lib/guard.js'
 import { useModeTick } from '../shell/screenMode.js'
 import { isJudgeable, beachWidthScore, TIER } from '../lib/judge.js'
 import { EMPTY, fc, makeMap } from './basemap.js'
@@ -121,14 +122,14 @@ export function TransectMap({ site, data, selected, onSelect, label, extraClass 
 
   useEffect(() => {
     const m = map.current
-    if (!loaded || !m || !ready) return
+    if (!ready || !mapReady(m, loaded, ['base', 'last', 'transects'])) return
     m.getSource('base').setData(fc([data.scenes[0]?.feature]))
     m.getSource('last').setData(fc([data.scenes[data.scenes.length - 1]?.feature]))
     m.getSource('transects').setData(fc(data.rows.map((r) => ({ type: 'Feature', geometry: r.geometry, properties: { id: r.id, verdict: r.verdict } }))))
   }, [loaded, ready, data])
   useEffect(() => {
     const m = map.current
-    if (!loaded || !m) return
+    if (!mapReady(m, loaded, [], ['tr-sel', 'tr-sel-halo'])) return
     const f = ['==', ['get', 'id'], selected ?? -1]
     m.setFilter('tr-sel', f)
     m.setFilter('tr-sel-halo', f)

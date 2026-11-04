@@ -126,8 +126,8 @@ export default function CardScreen({ site, data, rules, settings, onRetry }) {
               <TableWrap label="오차 유형별 점수 변동 표">
                 <table className="cs-table is-grouped">
                   <thead>
-                    <tr><th rowSpan={2}>오차 유형</th><th colSpan={2} className="is-group">해빈폭</th><th colSpan={2} className="is-group">적합도</th><th colSpan={2} className="is-group">상관</th><th colSpan={2} className="is-group">합계</th><th colSpan={2} className="is-group">등급 변경</th></tr>
-                    <tr>{Array.from({ length: 5 }, (_, i) => [<th key={`a${i}`} className="is-num">상하한 전</th>, <th key={`b${i}`} className="is-num">후</th>])}</tr>
+                    <tr><th rowSpan={2}>오차 유형</th><th colSpan={2} className="is-group">해빈폭</th><th colSpan={2} className="is-group">적합도</th><th colSpan={2} className="is-group">상관</th><th colSpan={2} className="is-group">합계</th></tr>
+                    <tr>{Array.from({ length: 4 }, (_, i) => [<th key={`a${i}`} className="is-num">상하한 전</th>, <th key={`b${i}`} className="is-num">후</th>])}</tr>
                   </thead>
                   <tbody>
                     {unified.rows.map((r) => (
@@ -137,7 +137,6 @@ export default function CardScreen({ site, data, rules, settings, onRetry }) {
                         <td className="is-num">{pt(r.fit[0])}</td><td className="is-num">{pt(r.fit[1])}</td>
                         <td className="is-num">{two(r.corr[0])}</td><td className="is-num">{two(r.corr[1])}</td>
                         <td className="is-num">{pt(r.total[0])}</td><td className="is-num"><strong>{pt(r.total[1])}</strong></td>
-                        <td className="is-num">{typeof r.pGrade[0] === 'number' ? pct(r.pGrade[0]) : ''}</td><td className="is-num">{typeof r.pGrade[1] === 'number' ? pct(r.pGrade[1]) : ''}</td>
                       </tr>
                     ))}
                   </tbody>

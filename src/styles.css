@@ -82,6 +82,7 @@ html[data-krds-mode="light"] { --cs-line-base: var(--krds-color-light-success-50
 /* 빈 상태와 오류: GitHub처럼 상자 안 한 줄 */
 .cs-state { display: flex; align-items: center; gap: var(--krds-gap-3); min-height: var(--rb-row-h); padding: var(--krds-padding-4) var(--krds-padding-7); font-size: var(--rb-step-15); line-height: var(--rb-lh-15); color: var(--krds-color-text-subtle); }
 .cs-state.is-error { color: var(--rb-status-danger); }
+.cs-samepair { margin: 0; font-size: var(--rb-step-15); line-height: var(--rb-lh-15); color: var(--krds-color-text-basic); overflow-wrap: anywhere; }
 .cs-state .krds-btn { margin-inline-start: auto; }
 .cs-skel { display: block; height: var(--krds-number-6); border-radius: var(--krds-radius-small2); background: var(--krds-color-surface-gray-subtle); }
 .cs-skel-row { display: flex; align-items: center; gap: var(--krds-gap-5); height: var(--rb-row-h); padding: 0 var(--krds-padding-7); border-bottom: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); }

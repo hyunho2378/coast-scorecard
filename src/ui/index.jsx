@@ -74,11 +74,11 @@ export function Loading({ rows = 4, label = '불러오는 중' }) {
 export function Empty({ children }) {
   return <p className="cs-state" role="status"><Info size={16} aria-hidden="true" />{children}</p>
 }
-export function ErrorLine({ children, onRetry }) {
+export function ErrorLine({ children, onRetry, retryLabel = '다시 읽기' }) {
   return (
     <div className="cs-state is-error" role="alert">
       <CircleAlert size={16} aria-hidden="true" /><span>{children}</span>
-      {onRetry && <Button onClick={onRetry}>다시 읽기</Button>}
+      {onRetry && <Button onClick={onRetry}>{retryLabel}</Button>}
     </div>
   )
 }

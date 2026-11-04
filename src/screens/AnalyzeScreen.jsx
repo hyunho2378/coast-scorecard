@@ -8,6 +8,7 @@ import { Box, ErrorLine, Field, PageHead, Pick, Segmented } from '../ui/index.js
 import { readPalette } from '../lib/palette.js'
 import { useModeTick } from '../shell/screenMode.js'
 import { EMPTY, fc, makeMap } from '../parts/basemap.js'
+import { mapReady } from '../lib/guard.js'
 import { SEASONS } from '../engine/stac.js'
 import { FAIL, STAGES } from '../engine/analyze.js'
 import { REPRO_STAGES } from '../engine/repro.js'
@@ -116,7 +117,7 @@ export default function AnalyzeScreen({ sites, siteData, rules, settings, job, o
 
   useEffect(() => {
     const m = map.current
-    if (!loaded || !m) return
+    if (!mapReady(m, loaded, ['point', 'box', 'transects'])) return
     if (posOk) {
       m.getSource('point').setData(fc(reproSite ? [] : [{ type: 'Feature', geometry: { type: 'Point', coordinates: [lo, la] } }]))
       m.getSource('box').setData(fc([{ type: 'Feature', geometry: { type: 'LineString', coordinates: reproSite ? aoiRing(reproSite.repro) : boxRing(lo, la) } }]))
@@ -131,7 +132,7 @@ export default function AnalyzeScreen({ sites, siteData, rules, settings, job, o
   }, [loaded, preset]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     const m = map.current
-    if (!loaded || !m) return
+    if (!mapReady(m, loaded, ['polys', 'ring'])) return
     m.getSource('polys').setData(fc(polys.map((p) => ({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [[...p, p[0]]] } }))))
     m.getSource('ring').setData(fc(ring.length ? [{ type: 'Feature', geometry: ring.length > 1 ? { type: 'LineString', coordinates: ring } : { type: 'Point', coordinates: ring[0] } }, ...ring.map((p) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: p } }))] : []))
     m.getCanvas().style.cursor = drawing ? 'crosshair' : ''

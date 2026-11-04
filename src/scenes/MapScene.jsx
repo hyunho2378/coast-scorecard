@@ -2,6 +2,7 @@
 // 시간 축 개수와 표는 판정 카드와 같은 judgeRows 로 센다. 마지막 장면은 최종 판정 기준(카드와 같은 값),
 // 중간 장면은 기준 장면과 그 장면의 거리 차이로 센 비교 장면 기준. 가로선 색은 최종 판정을 쓴다
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { mapReady } from '../lib/guard.js'
 import { EMPTY, fc, makeMap } from '../parts/basemap.js'
 import TimeAxis from '../parts/TimeAxis.jsx'
 import { readPalette } from '../lib/palette.js'
@@ -70,7 +71,7 @@ export default function MapScene({ site, data, rules, basis = 'sd1', onRetry }) 
 
   useEffect(() => {
     const m = map.current
-    if (!loaded || !m || !m.getSource('base') || !ready) return
+    if (!ready || !mapReady(m, loaded, ['base', 'current', 'transects'])) return
     m.getSource('base').setData(fc([scenes[0].feature]))
     m.getSource('current').setData(fc(index === 0 ? [] : [scenes[index].feature]))
     m.getSource('transects').setData(fc(data.rows.map((r) => ({ type: 'Feature', geometry: r.geometry, properties: { id: r.id, verdict: r.verdict } }))))

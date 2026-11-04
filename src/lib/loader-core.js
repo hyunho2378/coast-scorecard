@@ -93,7 +93,7 @@ export function bandOf(entry) {
 }
 
 // sensitivity_and_rules.json(poc4) 형식. 측량 대조가 있는 사업지는 두 시점 변화량 오차, 없는 곳은 단일 시점 위치 오차 항목을 쓴다.
-// 등급 경계 폭은 사업 전 해빈폭 20 m 가정의 해빈폭 점수 경계 폭(m)과 등급 변경 확률
+// 등급 경계 폭은 사업 전 해빈폭 20 m 가정의 해빈폭 점수 경계 폭(m)과 p_grade_change 값
 export function gradeSensitivity(rules, siteId) {
   const list = Array.isArray(rules?.sensitivity) ? rules.sensitivity : null
   if (!list || !list.length) return null
@@ -187,7 +187,7 @@ export function yearThresholdRows(rules) {
   return out
 }
 
-// 변화 없는 가로선의 거짓 판정 비율(false_positive). 정규 가정, 반암 판정 대상 가로선 수와 기대 거짓 판정 수
+// 규칙 파일 false_positive 항목 읽기. 화면에는 쓰지 않는다(시험에서만 읽음)
 export function falsePositiveRows(rules) {
   const f = rules?.false_positive
   const b = rules?.site_rules?.banam

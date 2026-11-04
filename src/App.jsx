@@ -4,6 +4,7 @@ import { useRoute } from './shell/route.js'
 import { loadConfig, loadRules, loadSite, withBasis } from './lib/data.js'
 import { mergeRules, reproToSite, runToSite } from './lib/runs.js'
 import { Box, ErrorLine, Loading } from './ui/index.jsx'
+import ErrorBoundary from './ui/ErrorBoundary.jsx'
 import HomeScreen from './screens/HomeScreen.jsx'
 import AnalyzeScreen from './screens/AnalyzeScreen.jsx'
 import CardScreen from './screens/CardScreen.jsx'
@@ -107,6 +108,7 @@ export default function App() {
 
   return (
     <AppShell screen={route.screen} onGo={(id) => go(id)} sites={allSites} siteId={site.id} siteName={site.name} onSite={(id) => go(route.screen, id)} busy={job?.status === 'running'}>
+      <ErrorBoundary resetKey={`${route.screen}:${site.id}`}>
       {route.screen === 'home' && <HomeScreen sites={allSites} siteData={judged} rules={merged} site={site} settings={settings} onSelect={(id) => go('home', id)} onOpen={(id, screen = 'card') => go(screen, id)} />}
       {route.screen === 'analyze' && <AnalyzeScreen sites={allSites} siteData={judged} rules={merged} settings={settings} job={job} onRun={startRun} onStop={stopRun} onOpen={(id, screen = 'card') => go(screen, id)} />}
       {route.screen === 'card' && <CardScreen key={site.id} {...common} />}
@@ -117,6 +119,7 @@ export default function App() {
       {route.screen === 'rules' && <RulesScreen sites={allSites} siteData={judged} rules={merged} settings={settings} setSettings={setSettings} siteId={site.id} onSite={(id) => go('rules', id)} />}
       {route.screen === 'docs' && <DocsScreen sites={allSites} siteData={judged} rules={merged} settings={settings} site={site} onSite={(id) => go('docs', id)} />}
       {route.screen === 'sources' && <SourcesScreen sites={cfg.sites} siteData={judged} rules={merged} basis={settings.basis} />}
+      </ErrorBoundary>
     </AppShell>
   )
 }

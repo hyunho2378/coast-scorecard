@@ -76,3 +76,21 @@ test('사업지 분석: 1023 폭 이하에서 분석 조건을 지도보다 앞�
   assert.match(a, /`구조물 \$\{presetIds\.length\}개 불러오기`/)
   assert.doesNotMatch(a, />\{repro \? `구조물 의심 가로선 \$\{presetIds\.length\}개 불러오기`/)
 })
+
+test('화면 소스에 등급 변경 확률과 거짓 판정, 기대 수, 1표준편차, 95% 문구가 없다(주석 포함)', () => {
+  const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => e.isDirectory() ? walk(`${d}/${e.name}`) : [`${d}/${e.name}`])
+  const files = walk(`${root}src`).filter((x) => /\.(jsx?|css|html)$/.test(x)).concat([`${root}index.html`])
+  for (const f of files) assert.doesNotMatch(fs.readFileSync(f, 'utf8'), /등급 변경|변경 확률|거짓 판정|기대 수|1표준편차|95%/, f)
+})
+test('판정 카드 상세 탭: 오차 유형별 표에 등급 변경 열 없음(합계까지 네 묶음)', () => {
+  const t = fs.readFileSync(`${root}src/screens/CardScreen.jsx`, 'utf8')
+  assert.doesNotMatch(t, /pGrade/)
+  assert.match(t, /className="is-group">합계<\/th><\/tr>/)
+  assert.match(t, /Array\.from\(\{ length: 4 \}/)
+})
+test('자료와 출처: 거짓 판정 표 대신 같은 해 장면쌍 위치 차이 한 줄(poc8 값)', () => {
+  const t = fs.readFileSync(`${root}src/screens/SourcesScreen.jsx`, 'utf8')
+  assert.doesNotMatch(t, /falsePositiveRows|x\.rate|fp\.map/)
+  assert.match(t, /export const SAMEPAIR_LINE = '같은 해 장면쌍 위치 차이\(구조물 의심 제외 135쌍\): 표준편차 4\.03\\u00a0m, 95백분위 7\.83\\u00a0m, 최대 10\.6\\u00a0m'/)
+  assert.match(t, /\{SAMEPAIR_LINE\}/)
+})

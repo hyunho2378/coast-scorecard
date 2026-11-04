@@ -1,7 +1,7 @@
-// 자료와 출처. 위성 자료 출처 표기, 판정 규칙, 연도별 보류 기준, 거짓 판정 비율, 해안선 높이 환산, 분석 파일
+// 자료와 출처. 위성 자료 출처 표기, 판정 규칙, 연도별 보류 기준, 같은 해 장면쌍 위치 차이, 해안선 높이 환산, 분석 파일
 import { Box, KV, PageHead, TableWrap } from '../ui/index.jsx'
 import { fmtDate } from '../lib/ledger.js'
-import { falsePositiveRows, yearThresholdRows } from '../lib/loader-core.js'
+import { yearThresholdRows } from '../lib/loader-core.js'
 import { BASES, thresholdOf } from '../lib/judge.js'
 
 // 해안선 높이 환산 적용 구분. 동해안 환산량은 poc3 4-3(경사 0.17, 2025년 장면), 토고는 같은 절의 2024년에서 2025년 장면쌍 값
@@ -12,6 +12,9 @@ const TIDE = {
   sandmotor: ['환산 적용', '평균고조위 높이'],
   aneho: ['환산 적용 대상', '장면쌍 환산량 4.74 m']
 }
+
+// 같은 해 같은 계절 장면 두 장의 가로선 위치 차이. 고성 3곳, 구조물 의심 가로선 제외 135쌍(poc8 보고 표 2)
+export const SAMEPAIR_LINE = '같은 해 장면쌍 위치 차이(구조물 의심 제외 135쌍): 표준편차 4.03\u00a0m, 95백분위 7.83\u00a0m, 최대 10.6\u00a0m'
 
 export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' }) {
   const ready = sites.filter((s) => siteData[s.id]?.status === 'ready')
@@ -28,7 +31,6 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
     const y = yearRows.find((q) => q.id === id && q.part === 'excl') || yearRows.find((q) => q.id === id)
     return y ? y.maxYear : x.samepairP90M
   }
-  const fp = falsePositiveRows(r)
   const def = r?.shoreline_definition
   const scene = r?.scene_rule
   const m = (v) => (typeof v === 'number' ? `${v.toFixed(1)}\u00a0m` : '없음')
@@ -73,20 +75,9 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
             </Box>
           )}
 
-          {fp.length > 0 && (
-            <Box title="보류 기준과 거짓 판정" sub="고성 반암, 판정 대상 20개" flush>
-              <TableWrap label="보류 기준과 거짓 판정 표">
-                <table className="cs-table">
-                  <thead><tr><th>기준</th><th className="is-num">보류 기준</th><th className="is-num is-wrap">거짓 판정 비율</th><th className="is-num is-wrap">반암 기준 초과</th></tr></thead>
-                  <tbody>
-                    {fp.map((x) => (
-                      <tr key={x.basis} className={x.basis === basis ? 'is-current' : undefined}><td>{x.label}{x.basis === basis && <span className="is-sub"> 선택</span>}</td><td className="is-num">{x.thresholdM}{'\u00a0'}m</td><td className="is-num">{(x.rate * 100).toFixed(1)}%</td><td className="is-num">{x.judgeable}개</td></tr>
-                    ))}
-                  </tbody>
-                </table>
-              </TableWrap>
-            </Box>
-          )}
+          <Box title="같은 계절 장면 비교" sub="고성 화진포와 반암, 가진">
+            <p className="cs-samepair">{SAMEPAIR_LINE}</p>
+          </Box>
 
           <Box title="해안선 높이 환산" sub="사업지별 적용" flush>
             <TableWrap label="해안선 높이 환산 표">
