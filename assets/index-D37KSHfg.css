@@ -943,11 +943,11 @@ html[data-krds-mode="high-contrast"] {
 }
 /* 공공 깃랩 app/src/styles.css 사본(2026. 11. 3.). 값은 KRDS 변수만. 앱 전용 규칙은 src/styles.css에 둔다 */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
-.visible { visibility: visible; }
+.block { display: block; }
 .inline { display: inline; }
 .flex { display: flex; }
 .table { display: table; }
-.hidden { display: none; }
+.grid { display: grid; }
 .transform { transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)); }
 .resize { resize: both; }
 .ring { --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color); --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color); box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000); }
@@ -1877,3 +1877,159 @@ html[data-krds-mode="light"] { --cs-line-base: var(--krds-color-light-success-50
 @media (max-width: 1023px) { .cs-table td.is-kind { white-space: nowrap; } }
 .cs-axis-basis { margin: 0; }
 .cs-axis-counts { display: grid; gap: var(--krds-gap-3); }
+
+/* ===== 콘솔 틀(미리 담당자 콘솔 배치, KRDS 변수) ===== */
+.cs-app { display: grid; grid-template-columns: var(--rb-sidebar-w) minmax(0, 1fr); min-height: 100dvh; background: var(--krds-color-surface-gray-subtler); }
+.cs-side-wrap.rb-side-wrap { position: sticky; top: 0; height: 100dvh; align-self: start; }
+.rb-side.cs-side { height: 100dvh; padding-top: 0; }
+.cs-brand { display: flex; align-items: center; gap: var(--krds-gap-3); flex: none; height: var(--rb-header-h); padding: 0 var(--rb-side-item-pad-x); color: var(--krds-color-text-basic); text-decoration: none; font-weight: var(--krds-font-weight-bold); white-space: nowrap; }
+.cs-brand-text { overflow: hidden; text-overflow: ellipsis; }
+.cs-main { min-width: 0; display: flex; flex-direction: column; padding: 0 var(--rb-panel-gap) var(--rb-panel-gap) 0; }
+.cs-top { position: sticky; top: 0; z-index: 60; display: flex; align-items: center; gap: var(--krds-gap-4); height: var(--rb-header-h); padding: 0 0 0 var(--krds-padding-4); background: var(--krds-color-surface-gray-subtler); }
+.cs-top-where { display: flex; align-items: center; gap: var(--krds-gap-2); flex: 1; min-width: 0; margin: 0; font-size: var(--rb-step-15); line-height: var(--rb-lh-15); color: var(--krds-color-text-subtle); }
+.cs-top-name { white-space: nowrap; color: var(--krds-color-text-basic); font-weight: var(--krds-font-weight-bold); }
+.cs-top-site { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--krds-color-text-basic); }
+.cs-top-right { display: flex; align-items: center; gap: var(--krds-gap-2); flex: none; }
+.cs-top-action { white-space: nowrap; }
+.rb-panel.cs-panel { flex: 1; min-height: calc(100dvh - var(--rb-header-h) - var(--rb-panel-gap)); }
+.cs-panel:focus { outline: none; }
+@media (max-width: 767px) {
+  .cs-app { grid-template-columns: minmax(0, 1fr); }
+  .cs-side-wrap.rb-side-wrap { position: static; height: 0; }
+  .cs-main { padding: 0; }
+  .cs-top { padding: 0 var(--krds-padding-3); gap: var(--krds-gap-2); }
+  .rb-panel.cs-panel { min-height: calc(100dvh - var(--rb-header-h)); }
+}
+@media (max-width: 479px) { .cs-top-action span { display: none; } .cs-top-site { display: none; } }
+
+/* 머리 제목 위계: 쪽 제목, 구역 제목, 본문, 보조 글자 */
+.cs-head { padding-bottom: var(--krds-padding-4); }
+.cs-head h1 { font-size: var(--rb-step-24); line-height: var(--rb-lh-24); }
+.cs-section-title { margin: 0 0 var(--krds-gap-3); font-size: var(--rb-step-17); line-height: var(--rb-lh-17); font-weight: var(--krds-font-weight-bold); color: var(--krds-color-text-basic); }
+.cs-section-title .cs-sub, .cs-sub { font-size: var(--rb-step-13); line-height: var(--rb-lh-13); font-weight: var(--krds-font-weight-regular); color: var(--krds-color-text-subtle); }
+.cs-section-head { display: flex; align-items: center; justify-content: space-between; gap: var(--krds-gap-4); margin-bottom: var(--krds-gap-3); }
+.cs-section-head .cs-section-title { margin: 0; }
+
+/* 사업지 탭(KRDS 탭 선 모양, 화면 모드 변수) */
+.cs-sitetabs { display: flex; gap: var(--krds-gap-2); overflow-x: auto; border-bottom: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); scrollbar-width: thin; }
+.cs-sitetabs button, .cs-tabs button { display: inline-flex; align-items: center; gap: var(--krds-gap-2); flex: none; height: var(--krds-number-14); padding: 0 var(--krds-padding-4); border: 0; border-bottom: var(--krds-border-width-variable-medium, 2px) solid transparent; background: none; color: var(--krds-color-text-subtle); font: inherit; font-size: var(--rb-step-15); font-weight: var(--krds-font-weight-bold); white-space: nowrap; cursor: pointer; }
+.cs-sitetabs button:hover, .cs-tabs button:hover { color: var(--krds-color-text-basic); background: var(--krds-color-action-secondary-hover); }
+.cs-sitetabs button.is-current, .cs-tabs button[aria-selected="true"] { color: var(--krds-color-text-basic); border-bottom-color: var(--krds-color-text-basic); }
+.cs-sitetab-n { min-width: var(--krds-number-8); font-size: var(--rb-step-13); color: var(--krds-color-text-subtle); text-align: center; }
+.cs-sitetab-n.is-exceed { color: var(--rb-status-information); }
+.cs-tabs { display: flex; gap: var(--krds-gap-2); border-bottom: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); overflow-x: auto; }
+
+/* 현황판과 판정 카드 작업 영역: 지도(주역) + 오른쪽 상세, 아래 목록 */
+.cs-dash { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--krds-gap-8); align-items: start; }
+@media (min-width: 1024px) {
+  .cs-dash { grid-template-columns: minmax(0, 2fr) minmax(calc(var(--krds-number-21) * 3), 1fr); }
+  .cs-dash > .cs-dash-list { grid-column: 1 / -1; }
+  .cs-dash.is-card > .cs-dash-list { grid-column: auto; }
+}
+.cs-dash-side { display: flex; flex-direction: column; gap: var(--krds-gap-8); min-width: 0; }
+.cs-stage.is-dash { height: clamp(calc(var(--krds-number-21) * 4), 56dvh, calc(var(--krds-number-21) * 8)); }
+.cs-stage.is-tool { height: clamp(calc(var(--krds-number-21) * 4), 64dvh, calc(var(--krds-number-21) * 9)); }
+
+/* 큰 숫자 3개: 숫자 한 개와 라벨 한 줄. 카드 없이 구분선으로 나눈다 */
+.cs-big { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; }
+.cs-big > div { display: flex; flex-direction: column-reverse; gap: var(--krds-gap-1); padding: 0 var(--krds-padding-5); border-left: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); min-width: 0; }
+.cs-big > div:first-child { padding-left: 0; border-left: 0; }
+.cs-big dt { font-size: var(--rb-step-13); line-height: var(--rb-lh-13); color: var(--krds-color-text-subtle); white-space: nowrap; }
+.cs-big dd { margin: 0; font-size: var(--krds-pc-font-size-heading-large); line-height: 1.2; font-weight: var(--krds-font-weight-bold); color: var(--krds-color-text-basic); }
+.cs-big dd span { font-size: var(--rb-step-15); font-weight: var(--krds-font-weight-regular); color: var(--krds-color-text-subtle); }
+.cs-big .is-key dd { font-size: var(--krds-pc-font-size-display-small); color: var(--rb-status-information); }
+@media (max-width: 767px) { .cs-big dd { font-size: var(--krds-pc-font-size-heading-medium); } .cs-big .is-key dd { font-size: var(--krds-pc-font-size-heading-large); } .cs-big > div { padding: 0 var(--krds-padding-3); } }
+
+/* 선택 가로선 상세 */
+.cs-detail { display: flex; flex-direction: column; gap: var(--krds-gap-2); padding-top: var(--krds-padding-6); border-top: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); }
+.cs-detail-title { margin: 0; font-size: var(--rb-step-15); line-height: var(--rb-lh-15); font-weight: var(--krds-font-weight-bold); color: var(--krds-color-text-subtle); }
+.cs-detail-value { margin: 0; font-size: var(--krds-pc-font-size-heading-large); line-height: 1.2; font-weight: var(--krds-font-weight-bold); color: var(--krds-color-text-basic); }
+.cs-detail-kv { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--krds-gap-2); margin: var(--krds-gap-3) 0 0; }
+.cs-detail-kv > div { display: flex; justify-content: space-between; gap: var(--krds-gap-4); padding: var(--krds-padding-2) 0; border-bottom: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); font-size: var(--rb-step-15); line-height: var(--rb-lh-15); }
+.cs-detail-kv dt { color: var(--krds-color-text-subtle); }
+.cs-detail-kv dd { margin: 0; color: var(--krds-color-text-basic); text-align: right; word-break: keep-all; }
+.cs-detail-kv.is-wide > div { justify-content: flex-start; }
+.cs-detail-kv.is-wide dt { width: calc(var(--krds-number-21) * 2); flex: none; }
+.cs-detail-kv.is-wide dd { text-align: left; }
+
+/* 목록 선택 행 */
+.cs-table.is-select tbody tr { cursor: pointer; }
+.cs-table.is-select tr.is-current td { background: var(--krds-color-action-secondary-selected); }
+.cs-table.is-select tr.is-current td:first-child .cs-rowlink { color: var(--krds-color-text-basic); font-weight: var(--krds-font-weight-bold); }
+.cs-barcell { width: 40%; }
+.cs-dash-list .cs-table-wrap { max-height: calc(var(--krds-number-21) * 6); overflow-y: auto; }
+.cs-dash-list thead th { position: sticky; top: 0; z-index: 1; }
+
+/* 두 칸 배치 */
+.cs-split { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--krds-gap-8); align-items: start; }
+@media (min-width: 1024px) {
+  .cs-split.is-tool { grid-template-columns: minmax(0, 3fr) minmax(calc(var(--krds-number-21) * 4), 2fr); }
+  .cs-split.is-even { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* 지도 위 도구 */
+.cs-maptools { position: absolute; left: var(--krds-gap-4); bottom: var(--krds-gap-8); display: flex; flex-wrap: wrap; gap: var(--krds-gap-2); }
+.cs-dot { display: inline-block; width: var(--krds-number-6); height: var(--krds-number-6); border-radius: var(--krds-radius-max); }
+.cs-dot.is-advance { background: var(--rb-status-information); }
+.cs-dot.is-hold { background: var(--krds-color-icon-gray); }
+
+/* 입력 */
+.cs-form { display: flex; flex-direction: column; gap: var(--krds-gap-5); }
+.cs-form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--krds-gap-4); }
+.cs-field { display: flex; flex-direction: column; gap: var(--krds-gap-2); min-width: 0; }
+.cs-field-label { font-size: var(--rb-step-13); line-height: var(--rb-lh-13); font-weight: var(--krds-font-weight-bold); color: var(--krds-color-text-basic); }
+.cs-field-ctl { display: flex; align-items: center; gap: var(--krds-gap-2); min-width: 0; }
+.cs-field-ctl > :first-child { flex: 1; min-width: 0; }
+.cs-field-unit { flex: none; font-size: var(--rb-step-13); color: var(--krds-color-text-subtle); }
+.cs-form .cs-input { height: var(--krds-size-height-5); font-size: var(--rb-step-15); }
+.cs-input[aria-invalid="true"] { border-color: var(--rb-status-danger); }
+.cs-inline-error { margin: 0; font-size: var(--rb-step-13); line-height: var(--rb-lh-13); color: var(--rb-status-danger); }
+.cs-form-actions { display: flex; gap: var(--krds-gap-3); }
+.cs-form-actions .krds-btn { flex: 1; justify-content: center; }
+.cs-pick { position: relative; min-width: 0; }
+.cs-pick-btn { display: flex; align-items: center; justify-content: space-between; gap: var(--krds-gap-2); width: 100%; height: var(--krds-size-height-5); padding: 0 var(--krds-padding-4); border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-dark); border-radius: var(--krds-radius-medium2); background: var(--krds-color-surface-white); color: var(--krds-color-text-basic); font: inherit; font-size: var(--rb-step-15); cursor: pointer; }
+.cs-pick-btn:disabled { color: var(--krds-color-text-disabled); cursor: not-allowed; }
+.cs-pick-val { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cs-pick .cs-pop { max-height: calc(var(--krds-number-21) * 4); overflow-y: auto; }
+.cs-pop.is-wide { min-width: 100%; }
+.cs-seg { display: flex; width: 100%; border: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-dark); border-radius: var(--krds-radius-medium2); overflow: hidden; }
+.cs-seg button { flex: 1; min-width: 0; height: var(--krds-size-height-5); padding: 0 var(--krds-padding-2); border: 0; border-left: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); background: var(--krds-color-surface-white); color: var(--krds-color-text-basic); font: inherit; font-size: var(--rb-step-15); white-space: nowrap; cursor: pointer; }
+.cs-seg button:first-child { border-left: 0; }
+.cs-seg button[aria-checked="true"] { background: var(--krds-color-action-secondary-selected); font-weight: var(--krds-font-weight-bold); }
+.cs-seg button:hover { background: var(--krds-color-action-secondary-hover); }
+.cs-stepper { display: flex; align-items: center; gap: var(--krds-gap-2); }
+.cs-stepper .cs-input { text-align: center; }
+
+/* 분석 진행 단계 */
+.cs-steps { margin: 0; padding: var(--krds-padding-3) var(--krds-padding-7); list-style: none; }
+.cs-steps li { display: flex; align-items: center; gap: var(--krds-gap-3); height: var(--rb-row-h); border-bottom: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); font-size: var(--rb-step-15); color: var(--krds-color-text-subtle); }
+.cs-steps li:last-child { border-bottom: 0; }
+.cs-steps li.is-now, .cs-steps li.is-done { color: var(--krds-color-text-basic); }
+.cs-steps li.is-now { font-weight: var(--krds-font-weight-bold); }
+.cs-steps li.is-done .cs-step-icon { color: var(--rb-status-success); }
+.cs-steps li.is-fail { color: var(--rb-status-danger); }
+.cs-step-name { flex: 1; }
+.cs-step-count { min-width: calc(var(--krds-number-21)); text-align: right; }
+.cs-step-icon { display: inline-grid; place-items: center; }
+.cs-spin { animation: cs-spin 1s linear infinite; }
+@keyframes cs-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .cs-spin { animation: none; } }
+.cs-fail, .cs-result { border-top: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); }
+.cs-result .cs-counts { padding: var(--krds-padding-4) var(--krds-padding-7) 0; }
+.cs-box-actions { display: flex; flex-wrap: wrap; gap: var(--krds-gap-2); padding: var(--krds-padding-4) var(--krds-padding-7); }
+.cs-rowtools { display: flex; gap: var(--krds-gap-2); }
+.cs-ledger-wrap .cs-ledger { border-radius: var(--krds-radius-medium2); }
+
+/* 인쇄: 판정 부록만 */
+.cs-print-foot { margin: var(--krds-gap-3) 0 0; font-size: var(--rb-step-13); color: var(--krds-color-text-subtle); }
+.cs-print-area { display: flex; flex-direction: column; gap: var(--krds-gap-4); }
+@media print {
+  .cs-side-wrap, .cs-top, .cs-sitetabs, .cs-noprint, .cs-head-actions, .rb-skip { display: none !important; }
+  .cs-app { display: block; background: none; }
+  .cs-main { padding: 0; }
+  .rb-panel.cs-panel { border: 0; min-height: 0; }
+  .cs-table-wrap { overflow: visible; max-height: none; }
+}
+/* 1023 px 이하: 큰 숫자와 선택 상세를 지도 위로 올린다. 범례는 지도 아래 한 줄 */
+@media (max-width: 1023px) { .cs-dash > .cs-dash-side { order: -1; } }
+@media (max-width: 767px) { .cs-stage .cs-legend { left: var(--krds-gap-2); top: var(--krds-gap-2); grid-template-columns: repeat(2, auto); -moz-column-gap: var(--krds-gap-4); column-gap: var(--krds-gap-4); padding: var(--krds-padding-2) var(--krds-padding-3); } }
