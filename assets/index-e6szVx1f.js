@@ -9118,28 +9118,6 @@ function yearThresholdRows(rules) {
 	}
 	return out;
 }
-function falsePositiveRows(rules) {
-	const f = rules?.false_positive;
-	const b = rules?.site_rules?.banam;
-	if (!f || !b) return [];
-	return [{
-		basis: "sd1",
-		label: "기본",
-		thresholdM: b.holdThresholdM,
-		rate: f.analytic_sd1,
-		n: f.banam_pass_sd1,
-		expected: f.banam_expected_false_sd1,
-		judgeable: b.judgeableCount
-	}, {
-		basis: "p95",
-		label: "엄격",
-		thresholdM: b.p95?.threshold_m,
-		rate: f.analytic_p95,
-		n: f.banam_pass_p95,
-		expected: f.banam_expected_false_p95,
-		judgeable: b.p95?.judgeable
-	}];
-}
 function samepairFromCorrected(rows, corrected) {
 	if (!Array.isArray(corrected) || !corrected.length) return rows;
 	const pos = {};
@@ -9580,7 +9558,7 @@ function Empty({ children }) {
 		}), children]
 	});
 }
-function ErrorLine({ children, onRetry }) {
+function ErrorLine({ children, onRetry, retryLabel = "다시 읽기" }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "cs-state is-error",
 		role: "alert",
@@ -9592,7 +9570,7 @@ function ErrorLine({ children, onRetry }) {
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children }),
 			onRetry && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
 				onClick: onRetry,
-				children: "다시 읽기"
+				children: retryLabel
 			})
 		]
 	});
@@ -9722,6 +9700,57 @@ function Field({ label, htmlFor, children, unit }) {
 		})]
 	});
 }
+// src/lib/guard.js
+function mapReady(m, loaded, sources = [], layers = []) {
+	if (!loaded || !m || typeof m.getSource !== "function") return false;
+	if (sources.some((id) => !m.getSource(id))) return false;
+	if (layers.some((id) => typeof m.getLayer !== "function" || !m.getLayer(id))) return false;
+	return true;
+}
+var boundaryFromError = (error) => ({ error: error || /* @__PURE__ */ new Error("render") });
+var boundaryFromProps = (props, state) => props.resetKey !== state.key ? {
+	error: null,
+	key: props.resetKey
+} : null;
+var boundaryRetry = (state) => ({
+	error: null,
+	round: (state.round || 0) + 1
+});
+// src/ui/ErrorBoundary.jsx
+var BOUNDARY_TEXT = "화면을 그리지 못했습니다. 다시 시도하면 같은 화면을 새로 그립니다.";
+var ErrorBoundary = class extends import_react.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			error: null,
+			key: props.resetKey
+		};
+		this.retry = this.retry.bind(this);
+	}
+	static getDerivedStateFromError(error) {
+		return boundaryFromError(error);
+	}
+	static getDerivedStateFromProps(props, state) {
+		return boundaryFromProps(props, state);
+	}
+	componentDidCatch(error, info) {
+		console.error("화면 오류", error, info?.componentStack);
+	}
+	retry() {
+		this.setState(boundaryRetry);
+	}
+	render() {
+		if (!this.state.error) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react.Fragment, { children: this.props.children }, this.state.round || 0);
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
+			flush: true,
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ErrorLine, {
+				onRetry: this.retry,
+				retryLabel: "다시 시도",
+				children: BOUNDARY_TEXT
+			})
+		});
+	}
+};
 // src/lib/ledger.js
 function fmtDate(d) {
 	if (!d) return "";
@@ -47373,7 +47402,11 @@ function TransectMap({ site, data, selected, onSelect, label, extraClass = "" })
 	]);
 	(0, import_react.useEffect)(() => {
 		const m = map.current;
-		if (!loaded || !m || !ready) return;
+		if (!ready || !mapReady(m, loaded, [
+			"base",
+			"last",
+			"transects"
+		])) return;
 		m.getSource("base").setData(fc([data.scenes[0]?.feature]));
 		m.getSource("last").setData(fc([data.scenes[data.scenes.length - 1]?.feature]));
 		m.getSource("transects").setData(fc(data.rows.map((r) => ({
@@ -47391,7 +47424,7 @@ function TransectMap({ site, data, selected, onSelect, label, extraClass = "" })
 	]);
 	(0, import_react.useEffect)(() => {
 		const m = map.current;
-		if (!loaded || !m) return;
+		if (!mapReady(m, loaded, [], ["tr-sel", "tr-sel-halo"])) return;
 		const f = [
 			"==",
 			["get", "id"],
@@ -49026,7 +49059,11 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 	}, [tick]);
 	(0, import_react.useEffect)(() => {
 		const m = map.current;
-		if (!loaded || !m) return;
+		if (!mapReady(m, loaded, [
+			"point",
+			"box",
+			"transects"
+		])) return;
 		if (posOk) {
 			m.getSource("point").setData(fc(reproSite ? [] : [{
 				type: "Feature",
@@ -49067,7 +49104,7 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 	}, [loaded, preset]);
 	(0, import_react.useEffect)(() => {
 		const m = map.current;
-		if (!loaded || !m) return;
+		if (!mapReady(m, loaded, ["polys", "ring"])) return;
 		m.getSource("polys").setData(fc(polys.map((p) => ({
 			type: "Feature",
 			geometry: {
@@ -50173,13 +50210,8 @@ function CardScreen({ site, data, rules, settings, onRetry }) {
 								colSpan: 2,
 								className: "is-group",
 								children: "합계"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								colSpan: 2,
-								className: "is-group",
-								children: "등급 변경"
 							})
-						] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: Array.from({ length: 5 }, (_, i) => [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: Array.from({ length: 4 }, (_, i) => [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 							className: "is-num",
 							children: "상하한 전"
 						}, `a${i}`), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
@@ -50221,14 +50253,6 @@ function CardScreen({ site, data, rules, settings, onRetry }) {
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 								className: "is-num",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: pt$1(r.total[1]) })
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-								className: "is-num",
-								children: typeof r.pGrade[0] === "number" ? pct(r.pGrade[0]) : ""
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-								className: "is-num",
-								children: typeof r.pGrade[1] === "number" ? pct(r.pGrade[1]) : ""
 							})
 						] }, r.mode)) })]
 					})
@@ -53420,7 +53444,11 @@ function MapScene({ site, data, rules, basis = "sd1", onRetry }) {
 	]);
 	(0, import_react.useEffect)(() => {
 		const m = map.current;
-		if (!loaded || !m || !m.getSource("base") || !ready) return;
+		if (!ready || !mapReady(m, loaded, [
+			"base",
+			"current",
+			"transects"
+		])) return;
 		m.getSource("base").setData(fc([scenes[0].feature]));
 		m.getSource("current").setData(fc(index === 0 ? [] : [scenes[index].feature]));
 		m.getSource("transects").setData(fc(data.rows.map((r) => ({
@@ -54642,6 +54670,7 @@ var TIDE = {
 	sandmotor: ["환산 적용", "평균고조위 높이"],
 	aneho: ["환산 적용 대상", "장면쌍 환산량 4.74 m"]
 };
+var SAMEPAIR_LINE = "같은 해 장면쌍 위치 차이(구조물 의심 제외 135쌍): 표준편차 4.03\xA0m, 95백분위 7.83\xA0m, 최대 10.6\xA0m";
 function SourcesScreen({ sites, siteData, rules, basis = "sd1" }) {
 	const ready = sites.filter((s) => siteData[s.id]?.status === "ready");
 	const years = [...new Set(ready.flatMap((s) => siteData[s.id].period.years))].sort();
@@ -54655,7 +54684,6 @@ function SourcesScreen({ sites, siteData, rules, basis = "sd1" }) {
 		const y = yearRows.find((q) => q.id === id && q.part === "excl") || yearRows.find((q) => q.id === id);
 		return y ? y.maxYear : x.samepairP90M;
 	};
-	const fp = falsePositiveRows(r);
 	const def = r?.shoreline_definition;
 	const scene = r?.scene_rule;
 	const m = (v) => typeof v === "number" ? `${v.toFixed(1)}\u00a0m` : "없음";
@@ -54821,54 +54849,12 @@ function SourcesScreen({ sites, siteData, rules, basis = "sd1" }) {
 						})
 					})
 				}),
-				fp.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
-					title: "보류 기준과 거짓 판정",
-					sub: "고성 반암, 판정 대상 20개",
-					flush: true,
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableWrap, {
-						label: "보류 기준과 거짓 판정 표",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
-							className: "cs-table",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "기준" }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-									className: "is-num",
-									children: "보류 기준"
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-									className: "is-num is-wrap",
-									children: "거짓 판정 비율"
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-									className: "is-num is-wrap",
-									children: "반암 기준 초과"
-								})
-							] }) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: fp.map((x) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-								className: x.basis === basis ? "is-current" : void 0,
-								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { children: [x.label, x.basis === basis && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "is-sub",
-										children: " 선택"
-									})] }),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
-										className: "is-num",
-										children: [
-											x.thresholdM,
-											"\xA0",
-											"m"
-										]
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
-										className: "is-num",
-										children: [(x.rate * 100).toFixed(1), "%"]
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
-										className: "is-num",
-										children: [x.judgeable, "개"]
-									})
-								]
-							}, x.basis)) })]
-						})
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
+					title: "같은 계절 장면 비교",
+					sub: "고성 화진포와 반암, 가진",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "cs-samepair",
+						children: SAMEPAIR_LINE
 					})
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
@@ -55140,7 +55126,7 @@ function App() {
 		try {
 			if (params.mode === "repro") {
 				const { reproInBrowser } = await __vitePreload(async () => {
-					const { reproInBrowser } = await import("./browser-B-CNZSmP.js");
+					const { reproInBrowser } = await import("./browser-CMLjACea.js");
 					return { reproInBrowser };
 				}, []);
 				const base = cfg.sites.find((s) => s.id === params.siteId);
@@ -55181,7 +55167,7 @@ function App() {
 				return id;
 			}
 			const { analyzeInBrowser } = await __vitePreload(async () => {
-				const { analyzeInBrowser } = await import("./browser-B-CNZSmP.js");
+				const { analyzeInBrowser } = await import("./browser-CMLjACea.js");
 				return { analyzeInBrowser };
 			}, []);
 			const result = await analyzeInBrowser(params, {
@@ -55270,7 +55256,7 @@ function App() {
 		settings,
 		onRetry: retry
 	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(AppShell, {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppShell, {
 		screen: route.screen,
 		onGo: (id) => go(id),
 		sites: allSites,
@@ -55278,67 +55264,70 @@ function App() {
 		siteName: site.name,
 		onSite: (id) => go(route.screen, id),
 		busy: job?.status === "running",
-		children: [
-			route.screen === "home" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HomeScreen, {
-				sites: allSites,
-				siteData: judged,
-				rules: merged,
-				site,
-				settings,
-				onSelect: (id) => go("home", id),
-				onOpen: (id, screen = "card") => go(screen, id)
-			}),
-			route.screen === "analyze" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnalyzeScreen, {
-				sites: allSites,
-				siteData: judged,
-				rules: merged,
-				settings,
-				job,
-				onRun: startRun,
-				onStop: stopRun,
-				onOpen: (id, screen = "card") => go(screen, id)
-			}),
-			route.screen === "card" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardScreen, { ...common }, site.id),
-			route.screen === "map" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MapScene, { ...common }, site.id),
-			route.screen === "compare" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CompareScene, { ...common }, site.id),
-			route.screen === "storm" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StormScreen, {
-				sites: allSites,
-				siteData: judged,
-				checks,
-				setChecks,
-				onOpen: (id) => go("map", id)
-			}),
-			route.screen === "history" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HistoryScreen, {
-				runs,
-				siteData: judged,
-				onOpen: (id, screen = "card") => go(screen, id),
-				onRemove: removeRun,
-				onAdd: addRun
-			}),
-			route.screen === "rules" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RulesScreen, {
-				sites: allSites,
-				siteData: judged,
-				rules: merged,
-				settings,
-				setSettings,
-				siteId: site.id,
-				onSite: (id) => go("rules", id)
-			}),
-			route.screen === "docs" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DocsScreen, {
-				sites: allSites,
-				siteData: judged,
-				rules: merged,
-				settings,
-				site,
-				onSite: (id) => go("docs", id)
-			}),
-			route.screen === "sources" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SourcesScreen, {
-				sites: cfg.sites,
-				siteData: judged,
-				rules: merged,
-				basis: settings.basis
-			})
-		]
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ErrorBoundary, {
+			resetKey: `${route.screen}:${site.id}`,
+			children: [
+				route.screen === "home" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HomeScreen, {
+					sites: allSites,
+					siteData: judged,
+					rules: merged,
+					site,
+					settings,
+					onSelect: (id) => go("home", id),
+					onOpen: (id, screen = "card") => go(screen, id)
+				}),
+				route.screen === "analyze" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnalyzeScreen, {
+					sites: allSites,
+					siteData: judged,
+					rules: merged,
+					settings,
+					job,
+					onRun: startRun,
+					onStop: stopRun,
+					onOpen: (id, screen = "card") => go(screen, id)
+				}),
+				route.screen === "card" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardScreen, { ...common }, site.id),
+				route.screen === "map" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MapScene, { ...common }, site.id),
+				route.screen === "compare" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CompareScene, { ...common }, site.id),
+				route.screen === "storm" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StormScreen, {
+					sites: allSites,
+					siteData: judged,
+					checks,
+					setChecks,
+					onOpen: (id) => go("map", id)
+				}),
+				route.screen === "history" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HistoryScreen, {
+					runs,
+					siteData: judged,
+					onOpen: (id, screen = "card") => go(screen, id),
+					onRemove: removeRun,
+					onAdd: addRun
+				}),
+				route.screen === "rules" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RulesScreen, {
+					sites: allSites,
+					siteData: judged,
+					rules: merged,
+					settings,
+					setSettings,
+					siteId: site.id,
+					onSite: (id) => go("rules", id)
+				}),
+				route.screen === "docs" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DocsScreen, {
+					sites: allSites,
+					siteData: judged,
+					rules: merged,
+					settings,
+					site,
+					onSite: (id) => go("docs", id)
+				}),
+				route.screen === "sources" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SourcesScreen, {
+					sites: cfg.sites,
+					siteData: judged,
+					rules: merged,
+					basis: settings.basis
+				})
+			]
+		})
 	});
 }
 // src/main.jsx
