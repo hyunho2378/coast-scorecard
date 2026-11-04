@@ -8753,15 +8753,15 @@ var VERDICT = {
 		note: "육지 쪽 이동"
 	},
 	hold: {
-		label: "판정 보류",
+		label: "정규 측량 일정",
 		note: "위성 오차 이하"
 	},
 	nodata: {
-		label: "판정 보류",
+		label: "정규 측량 일정",
 		note: "구름으로 해안선 미검출"
 	},
 	few: {
-		label: "판정 보류",
+		label: "정규 측량 일정",
 		note: "한 시점 장면 1장"
 	},
 	struct: {
@@ -8797,6 +8797,7 @@ function summarize(rows) {
 	return {
 		sectionMean: all.length ? round1(all.reduce((a, b) => a + b, 0) / all.length) : null,
 		sectionN: all.length,
+		targetN: rows.filter((r) => r.verdict !== "struct" && !r.sceneShort && typeof r.change === "number" && !Number.isNaN(r.change)).length,
 		total: rows.length,
 		judgeable: judge.length,
 		held,
@@ -8838,11 +8839,15 @@ function sceneCount(dist, periods) {
 function applySceneRule(rows, periods, min = 2) {
 	if (!periods || Object.keys(periods).length < 2) return rows;
 	return rows.map((r) => {
-		if (!isJudgeable(r.verdict)) return r;
-		return Object.values(sceneCount(r.dist, periods)).some((k) => k < min) ? {
+		if (!Object.values(sceneCount(r.dist, periods)).some((k) => k < min)) return r;
+		return isJudgeable(r.verdict) ? {
 			...r,
-			verdict: "few"
-		} : r;
+			verdict: "few",
+			sceneShort: true
+		} : {
+			...r,
+			sceneShort: true
+		};
 	});
 }
 var ROLE = {
@@ -9401,7 +9406,7 @@ function runConditions(run) {
 		out.push(["물가선", "NDWI 3집단 오츠 임계값 등치선"]);
 		out.push(["가로선 간격", `${p.spacing} m, 가로선 ${run?.data?.base?.length ?? 0}개, 길이 ${p.transectLength ?? 400} m`]);
 	}
-	out.push(["보류 기준", `${thr} m 이하 이동, 같은 해 장면쌍 차이 ${thr} m 초과, 시점별 장면 2장 미만이면 판정 보류`]);
+	out.push(["보류 기준", `${thr} m 이하 이동, 같은 해 장면쌍 차이 ${thr} m 초과, 시점별 장면 2장 미만이면 정규 측량 일정`]);
 	out.push(["구조물 의심 가로선", nStruct ? `${nStruct}개(${(run.rule.structureExcluded || []).join(", ")}번)` : "없음"]);
 	return out;
 }
@@ -9420,6 +9425,29 @@ function runLine(run) {
 		["보류 기준", `${run?.rule?.holdThresholdM} m`]
 	];
 }
+function boardDiff(engineBase, boardBase) {
+	if (!Array.isArray(engineBase) || !Array.isArray(boardBase) || !engineBase.length) return null;
+	const byId = new Map(boardBase.map((r) => [Number(r.id), r]));
+	let max = 0;
+	let differ = 0;
+	for (const r of engineBase) {
+		const b = byId.get(Number(r.id));
+		const e = typeof r.change === "number" ? r.change : null;
+		const v = b && typeof b.change === "number" ? b.change : null;
+		if (e === null && v === null) continue;
+		if (e === null || v === null) {
+			differ += 1;
+			continue;
+		}
+		max = Math.max(max, Math.abs(Math.round((e - v) * 10) / 10));
+	}
+	return {
+		n: engineBase.length,
+		max,
+		differ
+	};
+}
+var boardDiffLine = (d) => d ? `현황판 값과 가로선 ${d.n}개 차이 최대 ${d.max.toFixed(1)} m${d.differ ? `, 값 유무가 다른 가로선 ${d.differ}개` : ""}` : "";
 // src/ui/index.jsx
 var signed$1 = (v) => v === null || v === void 0 ? "" : `${v > 0 ? "+" : ""}${v.toFixed(1)}\u00a0m`;
 var pct = (v) => `${Math.round(v * 100)}%`;
@@ -9480,15 +9508,15 @@ var V$1 = {
 	},
 	hold: {
 		Icon: Minus,
-		label: "판정 보류"
+		label: "정규 측량 일정"
 	},
 	nodata: {
 		Icon: Minus,
-		label: "판정 보류"
+		label: "정규 측량 일정"
 	},
 	few: {
 		Icon: Minus,
-		label: "판정 보류"
+		label: "정규 측량 일정"
 	},
 	struct: {
 		Icon: Ban,
@@ -9597,6 +9625,15 @@ function KV({ items, row = false }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dl", {
 		className: `cs-kv${row ? " is-row" : ""}`,
 		children: items.filter(Boolean).map(([k, v]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: k }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", { children: v })] }, k))
+	});
+}
+function Note({ icon: Icon = Info, children }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+		className: "cs-note",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, {
+			size: 16,
+			"aria-hidden": "true"
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children })]
 	});
 }
 function TableWrap({ label, children }) {
@@ -9767,9 +9804,9 @@ function ledgerText({ site, rows, period, today }) {
 	const basis = thr.length === 1 ? `보류 기준 ${thr[0]} m 초과, ` : "";
 	return [
 		head,
-		`기준 초과 ${ok.length}개(${basis}판정 대상 ${s.sectionN}개 중), 보류 ${s.held}개, 구조물 의심 ${s.excluded}개`,
-		`${site.name} 구간 평균 해빈폭 ${signed(s.sectionMean)} 변화(값이 있는 가로선 ${s.sectionN}개 평균, 판정 보류 포함${s.excluded ? `, 구조물 의심 ${s.excluded}개 제외` : ""}).`,
-		...ok.map((r) => `${site.name} 가로선 ${r.id}번 해빈폭 ${signed(r.change)} 변화(판정 보류 기준 ${r.threshold} m), 기준 초과 ${VERDICT[r.verdict].label}.`)
+		`변화 확인 ${ok.length}개(${basis}판정 대상 ${s.targetN}개 중), 정규 측량 일정 ${s.held}개, 구조물 의심 ${s.excluded}개`,
+		`${site.name} 구간 평균 해빈폭 ${signed(s.sectionMean)} 변화(값이 있는 가로선 ${s.sectionN}개 평균, 정규 측량 일정 포함${s.excluded ? `, 구조물 의심 ${s.excluded}개 제외` : ""}).`,
+		...ok.map((r) => `${site.name} 가로선 ${r.id}번 해빈폭 ${signed(r.change)} 변화(보류 기준 ${r.threshold} m), 변화 확인 ${VERDICT[r.verdict].label}.`)
 	].join("\n");
 }
 Object.freeze({
@@ -47084,25 +47121,16 @@ function BigNumbers({ summary }) {
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "is-key",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dt", { children: ["기준 초과", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-					className: "cs-big-tier",
-					children: TIER.exceed
-				})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", {
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: TIER.exceed }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dd", {
 					className: "cs-num",
 					children: [summary.judgeable, /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["/", summary.total] })]
 				})]
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dt", { children: ["구조물 의심", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-				className: "cs-big-tier",
-				children: TIER.struct
-			})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", {
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: TIER.struct }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", {
 				className: "cs-num",
 				children: summary.excluded
 			})] }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dt", { children: ["판정 보류", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-				className: "cs-big-tier",
-				children: TIER.hold
-			})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", {
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: TIER.hold }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", {
 				className: "cs-num",
 				children: summary.held
 			})] })
@@ -47143,7 +47171,7 @@ function TransectDetail({ row, settings }) {
 						className: "cs-num",
 						children: maxPair === null ? "없음" : `최대 ${maxPair.toFixed(1)} m`
 					})] }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "해빈폭 점수" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", { children: "위성 값 기준 참고 점수" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", {
 						className: "cs-num",
 						children: typeof score === "number" ? `${score}점` : "제외"
 					})] }),
@@ -47454,15 +47482,15 @@ function TransectMap({ site, data, selected, onSelect, label, extraClass = "" })
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 					className: "cs-swatch is-advance",
 					"aria-hidden": "true"
-				}), "기준 초과 전진"] }),
+				}), "변화 확인 전진"] }),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 					className: "cs-swatch is-retreat",
 					"aria-hidden": "true"
-				}), "기준 초과 후퇴"] }),
+				}), "변화 확인 후퇴"] }),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 					className: "cs-swatch is-hold",
 					"aria-hidden": "true"
-				}), "판정 보류"] }),
+				}), "정규 측량 일정"] }),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 					className: "cs-swatch is-struct",
 					"aria-hidden": "true"
@@ -47486,7 +47514,7 @@ function SiteTabs({ sites, siteData, siteId, onSelect }) {
 				onClick: () => onSelect(s.id),
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: s.name }), sm && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 					className: `cs-sitetab-n cs-num${sm.judgeable ? " is-exceed" : ""}`,
-					"aria-label": `변화 확인 구간(기준 초과) ${sm.judgeable}`,
+					"aria-label": `변화 확인 구간 ${sm.judgeable}`,
 					children: sm.judgeable
 				})]
 			}, s.id);
@@ -49218,6 +49246,8 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 		rule: rules?.data?.site_rules?.[job.id]
 	}) : null;
 	const jobRepro = (job?.params?.mode || mode) === "repro";
+	const boardBase = jobRepro && resData?.status === "ready" && job?.params?.siteId && siteData[job.params.siteId]?.status === "ready" ? siteData[job.params.siteId].base : null;
+	const diffLine = boardBase ? boardDiffLine(boardDiff(resData.base, boardBase)) : "";
 	const stages = jobRepro ? REPRO_STAGES : STAGES;
 	const others = SEASONS.filter(([k]) => k !== (job?.params?.season || season));
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PageHead, {
@@ -49578,13 +49608,17 @@ function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, o
 								"aria-label": "재현 조건",
 								children: resLine.map(([k, v]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: k }), v] }, k))
 							}),
+							diffLine && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "cs-repro-note cs-repro-diff",
+								children: diffLine
+							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
 								className: "cs-counts",
 								"aria-label": "분석 결과",
 								children: [
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: resData.summary.total }), "가로선"] }),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: resData.summary.judgeable }), "기준 초과"] }),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: resData.summary.held }), "판정 보류"] }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: resData.summary.judgeable }), "변화 확인"] }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: resData.summary.held }), "정규 측량 일정"] }),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: resData.summary.excluded }), "구조물 의심"] }),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: resData.scenes.length }), "장면"] }),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: job.meta.seconds }), "초"] }),
@@ -49783,7 +49817,7 @@ var cell = (v) => {
 };
 var num = (v) => typeof v === "number" ? v.toFixed(1) : "";
 var csv = (head, rows) => "﻿" + [head.join(","), ...rows.map((r) => r.map(cell).join(","))].join("\r\n") + "\r\n";
-var verdictText = (v) => v === "struct" ? "구조물 의심" : isJudgeable(v) ? `변화 확인(기준 초과 ${VERDICT[v].label})` : "정규 측량 일정(판정 보류)";
+var verdictText = (v) => v === "struct" ? "구조물 의심" : isJudgeable(v) ? `변화 확인(${VERDICT[v].label})` : "정규 측량 일정";
 function transectsGeojson(site, rows) {
 	return JSON.stringify({
 		type: "FeatureCollection",
@@ -50020,7 +50054,7 @@ function CardScreen({ site, data, rules, settings, onRetry }) {
 							className: "cs-ledger"
 						})] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "cs-state",
-							children: "변화 확인 구간(기준 초과 가로선) 없음"
+							children: "변화 확인 구간 없음"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							role: "status",
@@ -50036,9 +50070,9 @@ function CardScreen({ site, data, rules, settings, onRetry }) {
 			role: "tabpanel",
 			"aria-labelledby": "tab-score",
 			className: "cs-split is-even",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 				"aria-label": "별표 10 점수",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableWrap, {
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableWrap, {
 					label: "별표 10 점수 표",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
 						className: "cs-table",
@@ -50116,7 +50150,7 @@ function CardScreen({ site, data, rules, settings, onRetry }) {
 							})
 						] })]
 					})
-				})
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Note, { children: "위성 값 기준 참고 점수, 현장 측량값 입력 시 확정 점수로 바뀜" })]
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
 				"aria-label": "사업 전 해빈폭별 점수",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableWrap, {
@@ -53512,7 +53546,7 @@ function MapScene({ site, data, rules, basis = "sd1", onRetry }) {
 						["is-current", "선택 장면 해안선"],
 						["is-advance", "전진 가로선"],
 						["is-retreat", "후퇴 가로선"],
-						["is-hold", "판정 보류 가로선"],
+						["is-hold", "정규 측량 일정 가로선"],
 						data.summary.excluded > 0 && ["is-struct", "구조물 의심 가로선(제외)"]
 					].filter(Boolean).map(([c, t]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 						className: `cs-swatch ${c}`,
@@ -53547,8 +53581,8 @@ function MapScene({ site, data, rules, basis = "sd1", onRetry }) {
 						className: "cs-counts",
 						"aria-label": `${isFinal ? "최종 판정 기준" : "비교 장면 기준"} 판정 개수`,
 						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: sc.judgeable }), "기준 초과"] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: sc.held }), "판정 보류"] }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: sc.judgeable }), "변화 확인"] }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: sc.held }), "정규 측량 일정"] }),
 							sc.excluded > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: sc.excluded }), "구조물 의심 제외"] })
 						]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
@@ -53715,7 +53749,7 @@ function StormScreen({ sites, siteData, checks, setChecks, onOpen }) {
 		title: "점검 순서 목록",
 		meta: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-				"변화 확인 구간(기준 초과) ",
+				"변화 확인 구간 ",
 				list.length,
 				"개"
 			] }),
@@ -53725,7 +53759,7 @@ function StormScreen({ sites, siteData, checks, setChecks, onOpen }) {
 				"개"
 			] }),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-				"정규 측량 일정 구간(판정 보류) ",
+				"정규 측량 일정 구간 ",
 				heldTotal,
 				"개 제외"
 			] }),
@@ -53737,7 +53771,7 @@ function StormScreen({ sites, siteData, checks, setChecks, onOpen }) {
 		] })
 	}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
 		flush: true,
-		children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Loading, { rows: 6 }) : !list.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Empty, { children: "변화 확인 구간(기준 초과 가로선) 없음" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableWrap, {
+		children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Loading, { rows: 6 }) : !list.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Empty, { children: "변화 확인 구간 없음" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableWrap, {
 			label: "점검 순서 표",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
 				className: "cs-table",
@@ -53893,7 +53927,7 @@ function HistoryScreen({ runs, siteData, onOpen, onRemove, onAdd }) {
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 							className: "is-num",
-							children: "기준 초과"
+							children: "변화 확인"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 							className: "is-num is-wrap",
@@ -53901,7 +53935,7 @@ function HistoryScreen({ runs, siteData, onOpen, onRemove, onAdd }) {
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 							className: "is-num",
-							children: "판정 보류"
+							children: "정규 측량 일정"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 							className: "is-num",
@@ -54042,7 +54076,7 @@ function RulesScreen({ sites, siteData, rules, settings, setSettings, siteId, on
 				className: "cs-col",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
-						title: "판정 보류 기준",
+						title: "보류 기준",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "cs-form",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
@@ -54331,7 +54365,7 @@ function RulesScreen({ sites, siteData, rules, settings, setSettings, siteId, on
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: "사업지" }),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 							className: "is-num",
-							children: "기준 초과"
+							children: "변화 확인"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 							className: "is-num",
@@ -54557,23 +54591,17 @@ function DocsScreen({ sites, siteData, rules, settings, site, onSite }) {
 								className: "is-num",
 								children: "가로선"
 							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("th", {
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 								className: "is-num is-wrap",
-								children: ["변화 확인", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "is-sub",
-									children: " 기준 초과"
-								})]
+								children: "변화 확인"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 								className: "is-num is-wrap",
 								children: "구조물 의심"
 							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("th", {
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 								className: "is-num is-wrap",
-								children: ["정규 측량 일정", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "is-sub",
-									children: " 판정 보류"
-								})]
+								children: "정규 측량 일정"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 								className: "is-num",
@@ -54700,11 +54728,11 @@ function SourcesScreen({ sites, siteData, rules, basis = "sd1" }) {
 			className: "cs-col",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
-					title: "판정 보류 기준",
+					title: "보류 기준",
 					sub: `${basisLabel} 기준`,
 					flush: true,
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TableWrap, {
-						label: "판정 보류 기준 표",
+						label: "보류 기준 표",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
 							className: "cs-table",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
@@ -54733,7 +54761,7 @@ function SourcesScreen({ sites, siteData, rules, basis = "sd1" }) {
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 									className: "is-num",
-									children: "기준 초과"
+									children: "변화 확인"
 								})
 							] }) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: sites.map((s) => {
 								const x = r?.site_rules?.[s.id];
@@ -54807,7 +54835,7 @@ function SourcesScreen({ sites, siteData, rules, basis = "sd1" }) {
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 									className: "is-num",
-									children: "기준 초과"
+									children: "변화 확인"
 								})
 							] }) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: yearRows.map((y) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
@@ -55126,7 +55154,7 @@ function App() {
 		try {
 			if (params.mode === "repro") {
 				const { reproInBrowser } = await __vitePreload(async () => {
-					const { reproInBrowser } = await import("./browser-CMLjACea.js");
+					const { reproInBrowser } = await import("./browser-DLtoDWCo.js");
 					return { reproInBrowser };
 				}, []);
 				const base = cfg.sites.find((s) => s.id === params.siteId);
@@ -55167,7 +55195,7 @@ function App() {
 				return id;
 			}
 			const { analyzeInBrowser } = await __vitePreload(async () => {
-				const { analyzeInBrowser } = await import("./browser-CMLjACea.js");
+				const { analyzeInBrowser } = await import("./browser-DLtoDWCo.js");
 				return { analyzeInBrowser };
 			}, []);
 			const result = await analyzeInBrowser(params, {
