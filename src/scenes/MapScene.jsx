@@ -2,22 +2,14 @@
 // 시간 축 개수와 표는 판정 카드와 같은 judgeRows 로 센다. 마지막 장면은 최종 판정 기준(카드와 같은 값),
 // 중간 장면은 기준 장면과 그 장면의 거리 차이로 센 비교 장면 기준. 가로선 색은 최종 판정을 쓴다
 import { useEffect, useMemo, useRef, useState } from 'react'
-import * as maplibregl from 'maplibre-gl'
-import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
-import 'maplibre-gl/dist/maplibre-gl.css'
+import { EMPTY, fc, makeMap } from '../parts/basemap.js'
 import TimeAxis from '../parts/TimeAxis.jsx'
 import { readPalette } from '../lib/palette.js'
 import { useModeTick } from '../shell/screenMode.js'
 import { axisRows, summarize, thresholdOf, BASES } from '../lib/judge.js'
 import { fmtDate } from '../lib/ledger.js'
-import { Bar, Box, PageHead, SiteState, TableWrap, Verdict, HOLD_ACTION, signed } from '../ui/index.jsx'
+import { Bar, Box, PageHead, SiteState, TableWrap, Verdict, signed } from '../ui/index.jsx'
 
-// 바탕 타일: OpenFreeMap(키 불필요, 저작권 OpenStreetMap 기여자). 화면 모드에 맞춰 고른다
-const STYLE_URL = { light: 'https://tiles.openfreemap.org/styles/positron', dark: 'https://tiles.openfreemap.org/styles/dark' }
-
-maplibregl.setWorkerUrl(workerUrl)
-const EMPTY = { type: 'FeatureCollection', features: [] }
-const fc = (feats) => ({ type: 'FeatureCollection', features: feats.filter((f) => f && f.geometry) })
 
 export default function MapScene({ site, data, rules, basis = 'sd1', onRetry }) {
   const tick = useModeTick()
@@ -55,12 +47,9 @@ export default function MapScene({ site, data, rules, basis = 'sd1', onRetry }) 
     if (!ready) return undefined
     const opts = { padding: 40, duration: 0 }
     const PAL = readPalette()
-    const light = document.documentElement.dataset.krdsMode === 'light'
-    const m = new maplibregl.Map({ container: host.current, style: light ? STYLE_URL.light : STYLE_URL.dark, ...(bounds ? { bounds, fitBoundsOptions: opts } : { center: [site.lon, site.lat], zoom: site.zoom }), attributionControl: { compact: true } })
+    const m = makeMap(host.current, bounds ? { bounds, fitBoundsOptions: opts } : { center: [site.lon, site.lat], zoom: site.zoom }, () => setMapError(true))
     map.current = m
     fitted.current = false
-    m.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
-    m.on('error', (e) => { if (String(e?.error?.message || '').includes('style')) setMapError(true) })
     const moved = (e) => { if (e.originalEvent) fitted.current = true }
     m.on('dragstart', moved); m.on('zoomstart', moved)
     m.on('load', () => {
@@ -102,13 +91,13 @@ export default function MapScene({ site, data, rules, basis = 'sd1', onRetry }) 
               <span key={t}><span className={`cs-swatch ${c}`} aria-hidden="true" />{t}</span>
             ))}
           </div>
-          {mapError && <p className="cs-stage-caption">바탕 지도 없이 해안선과 가로선만 그립니다.</p>}
+          {mapError && <p className="cs-stage-caption">바탕 지도 없음</p>}
         </div>
         <aside className="cs-col">
           <Box title="시간 축">
             <TimeAxis index={index} onIndex={setIndex} steps={steps} playing={playing} onPlaying={setPlaying} />
           </Box>
-          <p className="cs-axis-basis"><strong>{isFinal ? '최종 판정 기준' : '비교 장면 기준'}</strong> <span className="cs-head-meta" style={{ display: 'inline' }}>{isFinal ? '두 시점 장면 중앙값 비교' : `기준 장면과 ${steps[index]?.label} 한 장씩 비교`}</span></p>
+          <p className="cs-axis-basis"><strong>{isFinal ? '최종 판정' : `${steps[index]?.label} 비교`}</strong></p>
           <div className="cs-axis-counts">
             <ul className="cs-counts" aria-label={`${isFinal ? '최종 판정 기준' : '비교 장면 기준'} 판정 개수`}>
               <li><strong>{sc.judgeable}</strong>기준 초과</li>
@@ -120,7 +109,7 @@ export default function MapScene({ site, data, rules, basis = 'sd1', onRetry }) 
               <li><strong>{sc.retreat}</strong>후퇴</li>
             </ul>
           </div>
-          <Box title="장면별 이동 거리" sub={isFinal ? '최종 판정 기준' : '비교 장면 기준'} flush foot={HOLD_ACTION}>
+          <Box title="장면별 이동 거리" sub={isFinal ? '최종 판정' : '비교 장면'} flush>
             <TableWrap label="장면별 이동 거리 표">
               <table className="cs-table is-compact">
                 <thead><tr><th>가로선</th><th className="is-num">이동</th><th><span className="sr-only">막대</span></th><th>판정</th></tr></thead>

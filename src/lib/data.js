@@ -59,8 +59,8 @@ export async function loadSite(site, rules) {
 }
 
 // 보류 기준을 바꾸면 읽어 둔 가로선(base)에 판정을 다시 적용한다
-export function withBasis(d, site, rules, basis) {
+export function withBasis(d, site, rules, basis, min = 2) {
   if (d?.status !== 'ready' || !d.base) return d
-  const rows = judgeRows(d.base, rules?.site_rules?.[site.id], rules?.scene_rule?.sites?.[site.id]?.periods, basis)
+  const rows = judgeRows(d.base, rules?.site_rules?.[site.id], rules?.scene_rule?.sites?.[site.id]?.periods, basis, min)
   return { ...d, rows, summary: summarize(rows), basis }
 }

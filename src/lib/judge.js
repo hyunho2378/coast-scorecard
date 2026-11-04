@@ -103,12 +103,13 @@ export function sceneCount(dist, periods) {
   for (const [p, ids] of Object.entries(periods || {})) out[p] = ids.filter((id) => typeof dist?.[id] === 'number').length
   return out
 }
-export function applySceneRule(rows, periods) {
+// min: 시점별 최소 장면 수(운영 기준, 기본 2)
+export function applySceneRule(rows, periods, min = 2) {
   if (!periods || Object.keys(periods).length < 2) return rows
   return rows.map((r) => {
     if (!isJudgeable(r.verdict)) return r
     const n = Object.values(sceneCount(r.dist, periods))
-    return n.some((k) => k < 2) ? { ...r, verdict: 'few' } : r
+    return n.some((k) => k < min) ? { ...r, verdict: 'few' } : r
   })
 }
 
@@ -143,8 +144,8 @@ export function applyStructureRule(rows, ids) {
 }
 
 // 사이트 판정 순서: 보류 기준, 구조물 의심 제외, 장면 규칙
-export function judgeRows(base, rule, periods, basis = 'sd1') {
-  return applySceneRule(applyStructureRule(applySiteRule(base, rule, basis), rule?.structureExcluded), periods)
+export function judgeRows(base, rule, periods, basis = 'sd1', min = 2) {
+  return applySceneRule(applyStructureRule(applySiteRule(base, rule, basis), rule?.structureExcluded), periods, min)
 }
 
 // 시간 축 장면별 판정. 기준 장면 거리에서 선택 장면 거리를 뺀 값에 카드와 같은 judgeRows(보류 기준 선택,

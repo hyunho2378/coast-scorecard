@@ -1,40 +1,13 @@
-// 전역 틀. 공공 깃랩 D-21 배치(상단 바 48, 왼쪽 세로 바 240, 오른쪽 둥근 판)를 따른다.
-// 왼쪽 세로 바 맨 위는 사업지 선택(공공 깃랩 프로젝트 이름 자리), 그 아래 묶음 두 개.
-// 768 미만은 왼쪽 세로 바를 숨기고 상단 바의 메뉴 단추로 연다
+// 전역 틀. 미리 담당자 콘솔 배치를 따른다: 왼쪽 메뉴(맨 위 이름, 사업지 선택, 업무와 기록, 외부 묶음)가 화면 높이 전체를 쓰고,
+// 오른쪽은 한 줄 상단 띠(현재 화면 이름, 오른쪽 끝 주 행동 단추) 아래 둥근 흰 판. 색과 부품은 KRDS 변수와 공공 깃랩 shell.css
+// 768 미만은 왼쪽 메뉴를 숨기고 상단 띠의 메뉴 단추로 연다
 import { useEffect, useRef, useState } from 'react'
-import { BookOpen, Check, ChevronsUpDown, Columns2, FileText, Globe2, List, ListChecks, Map, Menu, Monitor, Ruler, X } from 'lucide-react'
-import { BASES } from '../lib/judge.js'
-import { NAV } from './route.js'
+import { BookOpen, Check, ChevronRight, ChevronsUpDown, Columns2, FileText, FolderOpen, History, LayoutDashboard, ListChecks, Map, Menu, Monitor, Plus, Radar, Settings2, X } from 'lucide-react'
+import { GROUPS, NAV } from './route.js'
 import { MODES, useScreenMode } from './screenMode.js'
+import { usePopover } from '../ui/popover.js'
 
-const ICON = { globe: Globe2, sites: List, storm: ListChecks, sources: BookOpen, card: FileText, map: Map, compare: Columns2 }
-const ALL = ['globe', 'sites', 'storm', 'sources']
-const SITE = ['card', 'map', 'compare']
-
-function usePopover() {
-  const [open, setOpen] = useState(false)
-  const ref = useRef(null)
-  const btn = useRef(null)
-  useEffect(() => {
-    if (!open) return undefined
-    const first = ref.current?.querySelector('[aria-checked="true"]') || ref.current?.querySelector('button')
-    first?.focus()
-    const onDown = (e) => { if (!ref.current?.contains(e.target) && !btn.current?.contains(e.target)) setOpen(false) }
-    const onKey = (e) => {
-      if (e.key === 'Escape') { setOpen(false); btn.current?.focus() }
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        const items = [...ref.current.querySelectorAll('button')]
-        const i = items.indexOf(document.activeElement)
-        const next = items[(i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]
-        next?.focus(); e.preventDefault()
-      }
-    }
-    document.addEventListener('mousedown', onDown)
-    document.addEventListener('keydown', onKey)
-    return () => { document.removeEventListener('mousedown', onDown); document.removeEventListener('keydown', onKey) }
-  }, [open])
-  return { open, setOpen, ref, btn }
-}
+export const ICON = { home: LayoutDashboard, analyze: Radar, card: FileText, map: Map, compare: Columns2, storm: ListChecks, history: History, rules: Settings2, docs: FolderOpen, sources: BookOpen }
 
 function SitePick({ sites, siteId, onSite }) {
   const p = usePopover()
@@ -86,30 +59,6 @@ function ModeMenu() {
   )
 }
 
-// 판정 보류 기준 선택. 화면 설정과 같은 메뉴 부품(cs-pop, menuitemradio)을 쓴다
-function BasisMenu({ basis, onBasis }) {
-  const p = usePopover()
-  const cur = BASES.find(([k]) => k === basis) || BASES[0]
-  return (
-    <div className="rb-gbar-drop">
-      <button ref={p.btn} type="button" className="rb-gbar-btn" aria-haspopup="menu" aria-expanded={p.open} aria-label={`판정 기준 ${cur[1]}`} onClick={() => p.setOpen(!p.open)}>
-        <Ruler size={20} aria-hidden="true" /><span className="rb-gbar-btn-text">판정 기준 {cur[1]}</span>
-      </button>
-      {p.open && (
-        <ul ref={p.ref} className="cs-pop is-right" role="menu" aria-label="판정 기준">
-          {BASES.map(([k, label]) => (
-            <li key={k} role="none">
-              <button type="button" role="menuitemradio" aria-checked={basis === k} onClick={() => { onBasis(k); p.setOpen(false); p.btn.current?.focus() }}>
-                <span className="cs-pop-check">{basis === k && <Check size={16} aria-hidden="true" />}</span>{label} 기준
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  )
-}
-
 function Item({ id, screen, onGo }) {
   const n = NAV.find((x) => x.id === id)
   const Icon = ICON[id]
@@ -124,7 +73,7 @@ function Item({ id, screen, onGo }) {
   )
 }
 
-export default function AppShell({ basis, onBasis, screen, onGo, sites, siteId, onSite, children }) {
+export default function AppShell({ screen, onGo, sites, siteId, onSite, siteName, busy, children }) {
   const [open, setOpen] = useState(false)
   const toggle = useRef(null)
   const side = useRef(null)
@@ -136,49 +85,54 @@ export default function AppShell({ basis, onBasis, screen, onGo, sites, siteId, 
     return () => document.removeEventListener('keydown', onKey)
   }, [open])
   const go = (id) => { setOpen(false); onGo(id) }
+  const cur = NAV.find((n) => n.id === screen) || NAV[0]
+  const CurIcon = ICON[cur.id]
 
   return (
     <>
       <a href="#main" className="rb-skip">본문 바로가기</a>
-      <div className="rb-top">
-        <header className="rb-gbar">
-          <div className="rb-gbar-in">
-            <div className="rb-gbar-left">
-              <button ref={toggle} type="button" className="rb-gbar-btn rb-gbar-navtoggle" aria-label={open ? '메뉴 닫기' : '메뉴 열기'} aria-expanded={open} onClick={() => setOpen(!open)}>
-                {open ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
-              </button>
-              <a href="#/globe" className="rb-gbar-brand" onClick={(e) => { e.preventDefault(); go('globe') }}>
-                <span className="rb-gbar-mark" aria-hidden="true">해</span>
-                <span className="rb-gbar-brand-text">연안정비사업 성적표</span>
-              </a>
-            </div>
-            <span />
-            <div className="rb-gbar-right">{onBasis && <BasisMenu basis={basis} onBasis={onBasis} />}<ModeMenu /></div>
-          </div>
-        </header>
-      </div>
-      <div className="rb-shell has-side">
-        <div className="rb-side-wrap">
+      <div className="cs-app">
+        <div className="rb-side-wrap cs-side-wrap">
           {open && <div className="rb-side-dim" onClick={() => setOpen(false)} aria-hidden="true" />}
-          <nav ref={side} className={`rb-side${open ? ' is-open' : ''}`} aria-label="주 메뉴">
+          <nav ref={side} className={`rb-side cs-side${open ? ' is-open' : ''}`} aria-label="주 메뉴">
+            <a href="#/home" className="cs-brand" onClick={(e) => { e.preventDefault(); go('home') }}>
+              <span className="rb-gbar-mark" aria-hidden="true">해</span>
+              <span className="cs-brand-text">연안정비사업 성적표</span>
+            </a>
             <div className="rb-side-scroll">
-              <SitePick sites={sites} siteId={siteId} onSite={onSite} />
+              <SitePick sites={sites} siteId={siteId} onSite={(id) => { setOpen(false); onSite(id) }} />
               <div className="rb-side-groups">
-                <div className="rb-side-group">
-                  <p className="rb-side-title">선택한 사업지</p>
-                  <ul>{SITE.map((id) => <Item key={id} id={id} screen={screen} onGo={go} />)}</ul>
-                </div>
-                <div className="rb-side-group">
-                  <p className="rb-side-title">전체 사업지</p>
-                  <ul>{ALL.map((id) => <Item key={id} id={id} screen={screen} onGo={go} />)}</ul>
-                </div>
+                {GROUPS.map(([g, label]) => (
+                  <section key={g} className="rb-side-group" aria-label={label}>
+                    <h2 className="rb-side-title">{label}</h2>
+                    <ul>{NAV.filter((n) => n.group === g).map((n) => <Item key={n.id} id={n.id} screen={screen} onGo={go} />)}</ul>
+                  </section>
+                ))}
               </div>
             </div>
           </nav>
         </div>
-        <main id="main" tabIndex={-1} className="rb-panel">
-          <div className="rb-panel-in">{children}</div>
-        </main>
+        <div className="cs-main">
+          <header className="cs-top">
+            <button ref={toggle} type="button" className="rb-gbar-btn rb-gbar-navtoggle" aria-label={open ? '메뉴 닫기' : '메뉴 열기'} aria-expanded={open} onClick={() => setOpen(!open)}>
+              {open ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
+            </button>
+            <p className="cs-top-where">
+              <CurIcon size={16} aria-hidden="true" className="cs-side-icon" />
+              <span className="cs-top-name">{cur.label}</span>
+              {cur.site && siteName && <><ChevronRight size={14} aria-hidden="true" className="cs-side-icon" /><span className="cs-top-site">{siteName}</span></>}
+            </p>
+            <div className="cs-top-right">
+              <ModeMenu />
+              <button type="button" className="krds-btn small primary cs-top-action" onClick={() => go('analyze')} aria-busy={busy || undefined}>
+                <Plus size={16} aria-hidden="true" /><span>새 사업지 분석</span>
+              </button>
+            </div>
+          </header>
+          <main id="main" tabIndex={-1} className="rb-panel cs-panel">
+            <div className="rb-panel-in">{children}</div>
+          </main>
+        </div>
       </div>
     </>
   )

@@ -58,6 +58,7 @@ export function normalizeTransects(fc) {
       dist: p.dist_m || null,
       samepair: p.samepair_absdiff_m || pairsFromDist(p.dist_m),
       jarkusId: p.jarkus_id ?? null,
+      start: p.start || null,
       verdict: verdictOf(change, threshold, typeof p.hold === 'boolean' ? p.hold : undefined),
       geometry: f.geometry
     }

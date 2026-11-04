@@ -6,11 +6,11 @@ import { BASES, thresholdOf } from '../lib/judge.js'
 
 // 해안선 높이 환산 적용 구분. 동해안 환산량은 poc3 4-3(경사 0.17, 2025년 장면), 토고는 같은 절의 2024년에서 2025년 장면쌍 값
 const TIDE = {
-  banam: ['환산 없음', '동해안 2025년 장면의 환산량이 수평 0.25\u00a0m에서 0.34\u00a0m 수준이라 위성 물가선을 그대로 씁니다.'],
-  jinjin: ['환산 없음', '반암과 같은 장면이며 환산량은 같은 수준입니다.'],
-  hwajinpo: ['환산 없음', '반암과 같은 장면이며 환산량은 같은 수준입니다.'],
-  sandmotor: ['환산 적용', '관측 수위와 측량 해빈 경사로 위성 물가선을 평균고조위 높이에 맞춘 뒤 변화량과 장면쌍 차이를 냅니다.'],
-  aneho: ['환산 적용 대상', '조차 영향이 커서 2024년에서 2025년 장면쌍 환산량이 4.74\u00a0m입니다.']
+  banam: ['환산 없음', '수평 0.25 m에서 0.34 m'],
+  jinjin: ['환산 없음', '반암과 같은 장면'],
+  hwajinpo: ['환산 없음', '반암과 같은 장면'],
+  sandmotor: ['환산 적용', '평균고조위 높이'],
+  aneho: ['환산 적용 대상', '장면쌍 환산량 4.74 m']
 }
 
 export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' }) {
@@ -54,10 +54,7 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
           </Box>
 
           {yearRows.length > 0 && (
-            <Box title="연도별 큰 값" sub="같은 계절 장면쌍 90퍼센타일" flush foot={<>
-              <span className="rb-phrase">2017년과 2025년 장면쌍 90퍼센타일 가운데</span> <span className="rb-phrase">큰 값을 사이트 장면 오차로 씁니다.</span>{' '}
-              <span className="rb-phrase">반암 전체 가로선의 2025년 값 79.9{'\u00a0'}m에는</span> <span className="rb-phrase">구조물 위 물가선이 들어 있습니다.</span>
-            </>}>
+            <Box title="연도별 큰 값" sub="같은 계절 장면쌍 90퍼센타일" flush>
               <TableWrap label="연도별 장면쌍 90퍼센타일 표">
                 <table className="cs-table">
                   <thead><tr><th>사업지</th><th className="is-num">2017년</th><th className="is-num">2025년</th><th className="is-num is-wrap">두 해 합친 값</th><th className="is-num is-wrap">연도별 큰 값</th><th className="is-num is-wrap">1표준편차 기준</th><th className="is-num">기준 초과</th></tr></thead>
@@ -77,10 +74,7 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
           )}
 
           {fp.length > 0 && (
-            <Box title="보류 기준과 거짓 판정" sub="고성 반암, 판정 대상 20개" flush foot={<>
-              <span className="rb-phrase">거짓 판정은 실제 변화가 없는 가로선이 기준 초과로 나오는 경우입니다.</span>{' '}
-              <span className="rb-phrase">비율은 변화량 오차를 표준편차 22.92{'\u00a0'}m 정규분포로 둔 값이고</span> <span className="rb-phrase">95% 기준은 1.96 x 22.92{'\u00a0'}m입니다.</span>
-            </>}>
+            <Box title="보류 기준과 거짓 판정" sub="고성 반암, 판정 대상 20개" flush>
               <TableWrap label="보류 기준과 거짓 판정 표">
                 <table className="cs-table">
                   <thead><tr><th>기준</th><th className="is-num">보류 기준</th><th className="is-num is-wrap">거짓 판정 비율</th><th className="is-num is-wrap">기대 거짓 판정</th><th className="is-num is-wrap">반암 기준 초과</th></tr></thead>
@@ -94,7 +88,7 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
             </Box>
           )}
 
-          <Box title="해안선 높이 환산" sub="사업지별 적용" flush foot={<span className="rb-phrase">동해안 환산량은 해빈 경사 0.17 기준 수평 거리입니다.</span>}>
+          <Box title="해안선 높이 환산" sub="사업지별 적용" flush>
             <TableWrap label="해안선 높이 환산 표">
               <table className="cs-table">
                 <thead><tr><th>사업지</th><th>환산</th><th>내용</th></tr></thead>
@@ -110,10 +104,10 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
           {(def || scene) && (
             <Box title="해안선 정의와 장면 규칙">
               <KV items={[
-                def && ['해안선 높이', '해양수산부 연안침식 실태조사 과업지시서(서해안권역 2025, 남해안권역 2024)가 해빈폭과 해빈면적을 평균해수면 기준으로 산출하도록 정한 기준을 따릅니다.'],
-                def && ['환산식', '평균해수면 위치 = 위성 위치 - (0 - 촬영 시각 조위) / 해빈 경사. 조위는 평균해수면 기준이고 위치는 바다 쪽이 양수입니다.'],
-                def && ['해빈 경사', '0.17(허주영 외 2026, 강원 실태조사 현장 대표값). 사업지 실태조사 단면이 있으면 그 경사를 씁니다.'],
-                scene && ['장면 규칙', '같은 해 같은 계절 장면 2장 이상의 중앙값을 씁니다. 두 시점 모두 장면이 2장 이상인 가로선만 판정하고 나머지는 판정 보류로 둡니다.']
+                def && ['해안선 높이', '평균해수면(해양수산부 연안침식 실태조사 과업지시서)'],
+                def && ['환산식', '위성 위치 - (0 - 촬영 시각 조위) / 해빈 경사'],
+                def && ['해빈 경사', '0.17(허주영 외 2026, 강원 실태조사 현장 대표값)'],
+                scene && ['장면 규칙', '같은 해 같은 계절 장면 2장 이상 중앙값']
               ]} />
             </Box>
           )}
@@ -135,15 +129,17 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
           <Box title="위성 자료 출처">
             <KV items={[
               ['출처 표기', `Contains modified Copernicus Sentinel data ${years.join(', ')}`],
-              ['이용 조건', '유럽연합 위임규정 1159/2013에 따라 누구나 무료로 쓰고 가공하고 배포하며, 가공한 결과물에 위 출처 문구를 붙입니다.'],
-              ['처리 단계', 'Sentinel-2 L2A 지표면 반사도에서 정규수분지수 경계로 물가선을 뽑았습니다.'],
+              ['이용 조건', '유럽연합 위임규정 1159/2013, 무료 이용과 가공'],
+              ['장면 검색', 'Earth Search STAC(Element 84), sentinel-2-l2a'],
+              ['처리 단계', 'L2A 지표면 반사도, NDWI(B03과 B08) 3집단 오츠 물가선'],
               ['바탕 지도', 'OpenFreeMap 타일, 지도 자료 OpenStreetMap 기여자']
             ]} />
           </Box>
           <Box title="판정 규칙">
             <KV items={[
-              r?.hold_rule && ['판정 보류', '보류 기준은 연도별 장면쌍 90퍼센타일 중 큰 값과 지역 사전 오차의 변화량 환산값, 10\u00a0m 가운데 가장 큰 값입니다. 사전 오차 환산값은 1표준편차 22.92\u00a0m, 95% 기준 44.9\u00a0m입니다.'],
-              r?.structure_rule && ['구조물 의심', 'NDWI 변화와 MNDWI 변화의 차이가 22.9\u00a0m를 넘거나 어느 장면의 물가선이 구조물에서 30\u00a0m 이내인 가로선은 판정과 90퍼센타일 계산에서 뺍니다.'],
+              r?.hold_rule && ['판정 보류', '1표준편차 22.92 m, 95% 44.9 m'],
+              r?.structure_rule && ['구조물 의심', '구조물 30 m 이내 물가선'],
+              ['지도 프로그램', 'geotiff.js(MIT), MapLibre GL(BSD)'],
               r?.annex10 && ['점수 식', r.annex10.source.replace(' 개정문 hwpx', '')],
               ['해상도', 'Sentinel-2 가시광과 근적외 밴드 한 칸 10\u00a0m'],
               ['촬영 간격', '2017년 3월 이전 10일, 이후 위성 2기 운용으로 5일']

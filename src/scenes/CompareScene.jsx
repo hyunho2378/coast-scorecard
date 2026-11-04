@@ -9,7 +9,7 @@ export default function CompareScene({ site, data, onRetry }) {
   const years = data?.period?.years || []
   const y0 = years[0]
   const y1 = years[years.length - 1]
-  const head = <PageHead title={`${site.name} 전후 영상 비교`} meta={y0 ? <><span>이전 {y0}년</span><span>이후 {y1}년</span></> : null} />
+  const head = <PageHead title={`${site.name} 전후 영상`} meta={y0 ? <><span>이전 {y0}년</span><span>이후 {y1}년</span></> : null} />
   if (!data || data.status === 'loading' || data.status === 'error') return <>{head}<SiteState data={data} onRetry={onRetry} /></>
   const has = data.before && data.after && !broken
 
@@ -30,14 +30,15 @@ export default function CompareScene({ site, data, onRetry }) {
                 <input id={id} type="range" min={0} max={100} value={pos} onChange={(e) => setPos(Number(e.target.value))} />
               </div>
             </div>
-          ) : broken ? <ErrorLine>영상을 읽지 못했습니다.</ErrorLine> : <Empty>이 사업지의 전후 영상이 없습니다.</Empty>}
+          ) : broken ? <ErrorLine>영상 읽기 실패</ErrorLine> : <Empty>전후 영상 없음</Empty>}
         </Box>
         <aside className="cs-col">
           <Box title="비교 영상">
             <KV items={[
-              ['이전 시기', `${y0}년 맑은 장면`],
-              ['이후 시기', `${y1}년 맑은 장면`],
-              ['합성', 'Sentinel-2 L2A 컬러 합성(B04, B03, B02)'],
+              ['이전', `${y0}년`],
+              ['이후', `${y1}년`],
+              ['합성', 'Sentinel-2 L2A 참색(B04, B03, B02)'],
+              ['출처', 'Contains modified Copernicus Sentinel data']
 
             ]} />
           </Box>
