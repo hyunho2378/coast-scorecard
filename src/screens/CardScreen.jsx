@@ -1,8 +1,9 @@
 // 판정 카드. 담당자가 사후관리대장에 옮겨 적는 한 장(UX 리서치 패키지 9장)
 import { useMemo, useRef, useState } from 'react'
-import { Check, Copy } from 'lucide-react'
+import { Check, Copy, Download } from 'lucide-react'
 import { Bar, Box, Button, KV, PageHead, SiteState, TableWrap, Verdict, HOLD_ACTION, pct, signed } from '../ui/index.jsx'
 import { ledgerText, fmtDate } from '../lib/ledger.js'
+import { downloadText, surveyCsv, surveyFileName, surveyRows } from '../lib/survey.js'
 import { projectFactsFor, scoreInputsFor, typeRulesFor, unifiedFor } from '../lib/loader-core.js'
 import { BASES, beachWidthScore, isJudgeable, roleOf, ROLE } from '../lib/judge.js'
 
@@ -50,6 +51,12 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
   const thr = s.thresholds[0]
   const max = Math.max(thr * 2, ...rows.map((r) => Math.abs(r.change ?? 0)), 1)
   const meanDef = <><span className="rb-phrase">구간 평균은 값이 있는 가로선 {s.sectionN}개</span> <span className="rb-phrase">(판정 보류 포함{s.excluded ? `, 구조물 의심 ${s.excluded}개 제외` : ''})의 평균입니다.</span></>
+
+  const survey = surveyRows(rows)
+  const nStruct = survey.filter((r) => r.group === 'struct').length
+  const nExceed = survey.filter((r) => r.group === 'exceed').length
+  const nHold = survey.length - nStruct - nExceed
+  const download = () => downloadText(surveyCsv({ site, rows, basisLabel }), surveyFileName(site, today))
 
   const copy = async () => {
     try { await navigator.clipboard.writeText(text) } catch { areaRef.current?.select(); document.execCommand?.('copy') }
@@ -200,6 +207,15 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
         </div>
 
         <aside className="cs-col">
+          <Box title="측량 우선 구간" sub={`${survey.length}개`} actions={survey.length > 0 && (
+            <Button variant="primary" onClick={download}><Download size={16} aria-hidden="true" />측량 우선 구간 내려받기</Button>
+          )}>
+            <KV items={[
+              ['순서', `구조물 의심 ${nStruct}개, 기준 초과 ${nExceed}개, 판정 보류 ${nHold}개`],
+              ['파일', `CSV, 가로선별 판정과 이동 거리, 보류 기준 ${thr}\u00a0m(${basisLabel}), 우선순위`]
+            ]} />
+          </Box>
+
           <Box title="대장 옮김 문구" flush actions={text && (
             <Button onClick={copy} aria-describedby="copy-state">
               {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}{copied ? '복사 완료' : '복사'}

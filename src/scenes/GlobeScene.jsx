@@ -195,6 +195,14 @@ export default function GlobeScene({ sites, omm, onPick }) {
   return (
     <>
       <PageHead title="사업지 지구본" meta={<><span>사업지 {sites.length}곳</span><span>위성 {omm.omm.length}기</span><span className="cs-num">모의 시계 {SPEED}배속 {fmt(simTime)}</span></>} />
+      <Box title="서비스 안내">
+        <p className="cs-text">Sentinel-2 위성 해안선으로 연안정비 사업지의 사업 전후 해빈 변화를 가로선마다 판정하고 별표 10 점수와 현장 측량 우선 구간을 보여 줍니다.</p>
+        <ol className="krds-info-list decimal" aria-label="이용 순서">
+          <li>사업지 선택: 지구본 이름표나 사업지 표에서 고릅니다.</li>
+          <li>판정 카드 확인: 가로선별 전진과 후퇴, 판정 보류, 별표 10 점수를 봅니다.</li>
+          <li>측량 우선 구간 내려받기: 판정 카드의 단추로 CSV 파일을 받습니다.</li>
+        </ol>
+      </Box>
       <div className="cs-two">
         <div className="cs-stage">
           <div ref={host} className="cs-stage-fill" />
