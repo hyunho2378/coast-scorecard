@@ -1,10 +1,11 @@
+import { fileURLToPath } from 'node:url'
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import { judgeRows, summarize, sceneJudge, axisRows } from '../src/lib/judge.js'
 import { normalizeTransects, normalizeShorelines } from '../src/lib/loader-core.js'
 
-const POC2 = process.env.COAST_POC2_DIR || '/Users/juhyunho/.aside/u/0/sessions/2026-11-03_jTs26DB0VbkJB83T/artifacts/erosion_poc2'
+const POC2 = process.env.COAST_POC2_DIR || fileURLToPath(new URL('../public/data', import.meta.url))
 const RULES = `${POC2}/sensitivity_and_rules_v3.json`
 const rules = fs.existsSync(RULES) ? JSON.parse(fs.readFileSync(RULES, 'utf8')) : null
 const has = (id) => rules && fs.existsSync(`${POC2}/${id}/transects.geojson`)

@@ -6,6 +6,7 @@ import { json2satrec, propagate, gstime, eciToGeodetic, degreesLat, degreesLong 
 import { readPalette } from '../lib/palette.js'
 import { useModeTick } from '../shell/screenMode.js'
 import { Box, PageHead } from '../ui/index.jsx'
+import { asset } from '../lib/data.js'
 
 const prefersReducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches
 let PAL = {}
@@ -79,7 +80,7 @@ export default function GlobeScene({ sites, omm, onPick }) {
     const earth = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64), new THREE.MeshPhongMaterial({ color: 0xffffff, shininess: 6 }))
     scene.add(earth)
     let alive = true
-    fetch('/data/ne_110m_land.geojson').then((r) => r.json()).then((land) => {
+    fetch(asset('data/ne_110m_land.geojson')).then((r) => r.json()).then((land) => {
       if (!alive) return
       earth.material.map = earthTexture(land)
       earth.material.needsUpdate = true

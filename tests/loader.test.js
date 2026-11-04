@@ -1,9 +1,10 @@
+import { fileURLToPath } from 'node:url'
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import { fetchJsonOptional, normalizeShorelines, normalizeTransects, periodOf, rulesForSite, bandOf } from '../src/lib/loader-core.js'
 
-const POC2 = process.env.COAST_POC2_DIR || '/Users/juhyunho/.aside/u/0/sessions/2026-11-03_jTs26DB0VbkJB83T/artifacts/erosion_poc2'
+const POC2 = process.env.COAST_POC2_DIR || fileURLToPath(new URL('../public/data', import.meta.url))
 const fakeRes = (status, body, type = 'application/json') => ({ ok: status < 400, status, headers: { get: () => type }, json: async () => body })
 
 test('MultiLineString 해안선은 조각을 모두 남긴다', () => {

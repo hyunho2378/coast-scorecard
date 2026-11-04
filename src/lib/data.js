@@ -2,12 +2,15 @@
 import { fetchJsonOptional, normalizeShorelines, normalizeTransects, periodOf, samepairFromCorrected } from './loader-core.js'
 import { summarize, judgeRows } from './judge.js'
 
-export const RULES_URL = '/ext/poc2/sensitivity_and_rules_v3.json'
+// 모든 자료 주소는 앱 기본 주소(vite base, 배포 '/coast-scorecard/')를 앞에 붙인 상대 경로로 읽는다
+export const BASE = import.meta.env?.BASE_URL || '/'
+export const asset = (p) => (/^(https?:)?\/\//.test(p) ? p : BASE + String(p).replace(/^\.?\//, ''))
+export const RULES_URL = asset('data/sensitivity_and_rules_v3.json')
 
 async function firstJson(urls) {
   let last = { status: 'missing' }
   for (const url of urls || []) {
-    const r = await fetchJsonOptional(url)
+    const r = await fetchJsonOptional(asset(url))
     if (r.status === 'ok') return r
     if (r.status === 'error') last = r
   }
@@ -17,9 +20,9 @@ async function firstJson(urls) {
 async function firstImage(urls) {
   for (const url of urls || []) {
     try {
-      const res = await fetch(url, { method: 'HEAD', cache: 'no-store' })
+      const res = await fetch(asset(url), { method: 'HEAD', cache: 'no-store' })
       const type = res.headers.get('content-type') || ''
-      if (res.ok && type.startsWith('image/')) return url
+      if (res.ok && type.startsWith('image/')) return asset(url)
     } catch { /* 다음 후보 */ }
   }
   return null
@@ -27,7 +30,7 @@ async function firstImage(urls) {
 
 export async function loadConfig() {
   const [sites, omm] = await Promise.all(
-    ['/config/sites.json', '/data/omm.json'].map((u) => fetch(u).then((r) => {
+    ['config/sites.json', 'data/omm.json'].map((u) => fetch(asset(u)).then((r) => {
       if (!r.ok) throw new Error(`${u} 응답 ${r.status}`)
       return r.json()
     }))

@@ -1,5 +1,5 @@
 {
-  "note": "사업지 목록과 자료 파일. files 항목은 앞에서부터 읽고 처음 열리는 파일을 씀. /ext/poc2/ 주소는 vite.config.js가 erosion_poc2 폴더에 연결함. 판정 보류 기준은 sensitivity_and_rules_v2.json의 site_rules 값을 씀",
+  "note": "사업지 목록과 자료 파일. files 항목은 앞에서부터 읽고 처음 열리는 파일을 씀. 경로는 앱 기본 주소(vite base) 기준 상대 경로이며 scripts/copy_data.mjs가 분석 폴더에서 복사함. 판정 보류 기준은 data/sensitivity_and_rules_v3.json의 site_rules 값을 씀",
   "sites": [
     {
       "id": "banam",
@@ -13,16 +13,16 @@
       "completion": null,
       "files": {
         "shorelines": [
-          "/ext/poc2/banam/shorelines.geojson"
+          "data/banam/shorelines.geojson"
         ],
         "transects": [
-          "/ext/poc2/banam/transects.geojson"
+          "data/banam/transects.geojson"
         ],
         "before": [
-          "/ext/poc2/banam/before.png"
+          "data/banam/before.png"
         ],
         "after": [
-          "/ext/poc2/banam/after.png"
+          "data/banam/after.png"
         ]
       },
       "labelOffset": [
@@ -47,16 +47,16 @@
       "completion": null,
       "files": {
         "shorelines": [
-          "/ext/poc2/jinjin/shorelines.geojson"
+          "data/jinjin/shorelines.geojson"
         ],
         "transects": [
-          "/ext/poc2/jinjin/transects.geojson"
+          "data/jinjin/transects.geojson"
         ],
         "before": [
-          "/ext/poc2/jinjin/before.png"
+          "data/jinjin/before.png"
         ],
         "after": [
-          "/ext/poc2/jinjin/after.png"
+          "data/jinjin/after.png"
         ]
       },
       "labelOffset": [
@@ -81,16 +81,16 @@
       "completion": null,
       "files": {
         "shorelines": [
-          "/ext/poc2/hwajinpo/shorelines.geojson"
+          "data/hwajinpo/shorelines.geojson"
         ],
         "transects": [
-          "/ext/poc2/hwajinpo/transects.geojson"
+          "data/hwajinpo/transects.geojson"
         ],
         "before": [
-          "/ext/poc2/hwajinpo/before.png"
+          "data/hwajinpo/before.png"
         ],
         "after": [
-          "/ext/poc2/hwajinpo/after.png"
+          "data/hwajinpo/after.png"
         ]
       },
       "labelOffset": [
@@ -113,16 +113,16 @@
       "completion": null,
       "files": {
         "shorelines": [
-          "/ext/poc2/aneho/shorelines.geojson"
+          "data/aneho/shorelines.geojson"
         ],
         "transects": [
-          "/ext/poc2/aneho/transects.geojson"
+          "data/aneho/transects.geojson"
         ],
         "before": [
-          "/ext/poc2/aneho/before.png"
+          "data/aneho/before.png"
         ],
         "after": [
-          "/ext/poc2/aneho/after.png"
+          "data/aneho/after.png"
         ]
       },
       "labelOffset": [
@@ -145,19 +145,19 @@
       "completion": null,
       "files": {
         "shorelines": [
-          "/ext/poc2/sandmotor/shorelines.geojson"
+          "data/sandmotor/shorelines.geojson"
         ],
         "transects": [
-          "/ext/poc2/sandmotor/transects.geojson"
+          "data/sandmotor/transects.geojson"
         ],
         "before": [
-          "/ext/poc2/sandmotor/before.png"
+          "data/sandmotor/before.png"
         ],
         "after": [
-          "/ext/poc2/sandmotor/after.png"
+          "data/sandmotor/after.png"
         ],
         "corrected": [
-          "/ext/poc2/sites/sandmotor_spring_vs_jarkus_rows.json"
+          "data/sandmotor/sandmotor_spring_vs_jarkus_rows.json"
         ]
       },
       "labelOffset": [
