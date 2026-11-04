@@ -348,3 +348,6 @@ html[data-krds-mode="light"] { --cs-line-base: var(--krds-color-light-success-50
   .rb-panel.cs-panel { border: 0; min-height: 0; }
   .cs-table-wrap { overflow: visible; max-height: none; }
 }
+/* 1023 px 이하: 큰 숫자와 선택 상세를 지도 위로 올린다. 범례는 지도 아래 한 줄 */
+@media (max-width: 1023px) { .cs-dash > .cs-dash-side { order: -1; } }
+@media (max-width: 767px) { .cs-stage .cs-legend { left: var(--krds-gap-2); top: var(--krds-gap-2); grid-template-columns: repeat(2, auto); column-gap: var(--krds-gap-4); padding: var(--krds-padding-2) var(--krds-padding-3); } }
