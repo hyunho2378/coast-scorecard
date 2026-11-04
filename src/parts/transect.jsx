@@ -49,7 +49,14 @@ export function TransectList({ rows, selected, onSelect, label = '가로선 목�
   const shown = limit ? list.slice(0, limit) : list
   const max = Math.max(...list.map((r) => Math.abs(r.change ?? 0)), (list[0]?.threshold || 10) * 2, 1)
   const ref = useRef(null)
-  useEffect(() => { ref.current?.querySelector('tr.is-current')?.scrollIntoView?.({ block: 'nearest' }) }, [selected])
+  // 선택 행이 목록 칸 밖이면 목록 칸만 움직인다(화면 전체는 움직이지 않음)
+  useEffect(() => {
+    const row = ref.current?.querySelector('tr.is-current')
+    const box = ref.current?.closest('.cs-table-wrap')
+    if (!row || !box) return
+    const top = row.offsetTop - (ref.current.tHead?.offsetHeight || 0)
+    if (top < box.scrollTop || row.offsetTop + row.offsetHeight > box.scrollTop + box.clientHeight) box.scrollTop = Math.max(0, top)
+  }, [selected])
   return (
     <TableWrap label={label}>
       <table className="cs-table is-select" ref={ref}>
