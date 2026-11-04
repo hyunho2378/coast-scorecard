@@ -108,7 +108,7 @@ export default function MapScene({ site, data, rules, basis = 'sd1', onRetry }) 
           <Box title="시간 축">
             <TimeAxis index={index} onIndex={setIndex} steps={steps} playing={playing} onPlaying={setPlaying} />
           </Box>
-          <p className="cs-axis-basis"><strong>{isFinal ? '최종 판정 기준' : '비교 장면 기준'}</strong> <span className="cs-head-meta" style={{ display: 'inline' }}>{isFinal ? '두 시점 장면 중앙값 비교, 판정 카드와 같은 개수' : `기준 장면과 ${steps[index]?.label} 한 장씩 비교`}</span></p>
+          <p className="cs-axis-basis"><strong>{isFinal ? '최종 판정 기준' : '비교 장면 기준'}</strong> <span className="cs-head-meta" style={{ display: 'inline' }}>{isFinal ? '두 시점 장면 중앙값 비교' : `기준 장면과 ${steps[index]?.label} 한 장씩 비교`}</span></p>
           <div className="cs-axis-counts">
             <ul className="cs-counts" aria-label={`${isFinal ? '최종 판정 기준' : '비교 장면 기준'} 판정 개수`}>
               <li><strong>{sc.judgeable}</strong>판정 가능</li>

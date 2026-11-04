@@ -10,7 +10,7 @@ const TIDE = {
   jinjin: ['환산 없음', '반암과 같은 장면이며 환산량은 같은 수준입니다.'],
   hwajinpo: ['환산 없음', '반암과 같은 장면이며 환산량은 같은 수준입니다.'],
   sandmotor: ['환산 적용', '관측 수위와 측량 해빈 경사로 위성 물가선을 평균고조위 높이에 맞춘 뒤 변화량과 장면쌍 차이를 냅니다.'],
-  aneho: ['환산 적용 대상', '조차 영향이 커서 2024년에서 2025년 장면쌍 환산량이 4.74\u00a0m입니다. 2021년에서 2022년 장면은 해수면 값이 없어 현재 판정 값은 환산 전 위치입니다.']
+  aneho: ['환산 적용 대상', '조차 영향이 커서 2024년에서 2025년 장면쌍 환산량이 4.74\u00a0m입니다.']
 }
 
 export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' }) {
@@ -21,7 +21,6 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
   const basisLabel = (BASES.find(([k]) => k === basis) || BASES[0])[1]
   // 판정 가능 개수는 앱이 구조물 제외와 장면 규칙까지 적용해 센 값만 쓴다. 규칙 파일 judgeableCount(아네호 17)는 화면에 쓰지 않는다
   const judgeable = (id) => siteData[id]?.status === 'ready' ? siteData[id].summary.judgeable : '읽는 중'
-  const anehoN = siteData.aneho?.status === 'ready' ? siteData.aneho.summary.judgeable : null
   const errText = (x) => x.surveyAvailable && x.surveyChangeRmseM ? `측량 대조 ${x.surveyChangeRmseM}\u00a0m` : typeof x.priorChangeErrorM === 'number' ? `동해안 ${x.priorChangeErrorM}\u00a0m` : '없음'
   // 장면쌍 90퍼센타일: 연도별 큰 값(구조물 의심 제외). 연도별 값이 없는 해외 사이트는 사이트 값
   const yearRows = yearThresholdRows(r)
@@ -56,9 +55,8 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
 
           {yearRows.length > 0 && (
             <Box title="연도별 큰 값" sub="같은 계절 장면쌍 90퍼센타일" flush foot={<>
-              <span className="rb-phrase">2017년 장면쌍과 2025년 장면쌍의 90퍼센타일을 따로 구하고</span> <span className="rb-phrase">두 값 가운데 큰 값을 사이트 장면 잡음으로 씁니다.</span>{' '}
-              <span className="rb-phrase">판정은 두 시점의 잡음을 모두 받으므로</span> <span className="rb-phrase">한 해라도 잡음이 크면 그 값을 따릅니다.</span>{' '}
-              <span className="rb-phrase">반암 전체 가로선의 2025년 값 79.9{'\u00a0'}m는</span> <span className="rb-phrase">구조물 위에서 잡힌 물가선 때문에 커진 값입니다.</span>
+              <span className="rb-phrase">2017년과 2025년 장면쌍 90퍼센타일 가운데</span> <span className="rb-phrase">큰 값을 사이트 장면 잡음으로 씁니다.</span>{' '}
+              <span className="rb-phrase">반암 전체 가로선의 2025년 값 79.9{'\u00a0'}m에는</span> <span className="rb-phrase">구조물 위 물가선이 들어 있습니다.</span>
             </>}>
               <TableWrap label="연도별 장면쌍 90퍼센타일 표">
                 <table className="cs-table">
@@ -81,8 +79,7 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
           {fp.length > 0 && (
             <Box title="보류 기준과 거짓 판정" sub="고성 반암, 판정 대상 20개" flush foot={<>
               <span className="rb-phrase">거짓 판정은 실제 변화가 없는 가로선이 판정 가능으로 나오는 경우입니다.</span>{' '}
-              <span className="rb-phrase">비율은 변화량 오차를 표준편차 22.92{'\u00a0'}m 정규분포로 둔 값이고</span> <span className="rb-phrase">95% 기준은 1.96 x 22.92{'\u00a0'}m입니다.</span>{' '}
-              <span className="rb-phrase">판정 대상은 결측과 구조물 의심을 뺀 가로선입니다.</span>
+              <span className="rb-phrase">비율은 변화량 오차를 표준편차 22.92{'\u00a0'}m 정규분포로 둔 값이고</span> <span className="rb-phrase">95% 기준은 1.96 x 22.92{'\u00a0'}m입니다.</span>
             </>}>
               <TableWrap label="보류 기준과 거짓 판정 표">
                 <table className="cs-table">
@@ -113,12 +110,10 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
           {(def || scene) && (
             <Box title="해안선 정의와 장면 규칙">
               <KV items={[
-                def && ['해안선 높이', '해양수산부 연안침식 실태조사 과업지시서(서해안권역 2025, 남해안권역 2024)가 해빈폭과 해빈면적을 평균해수면 기준으로 산출하도록 정해 환산식을 아래처럼 둡니다. 사업지별 적용은 해안선 높이 환산 표에 있습니다.'],
+                def && ['해안선 높이', '해양수산부 연안침식 실태조사 과업지시서(서해안권역 2025, 남해안권역 2024)가 해빈폭과 해빈면적을 평균해수면 기준으로 산출하도록 정한 기준을 따릅니다.'],
                 def && ['환산식', '평균해수면 위치 = 위성 위치 - (0 - 촬영 시각 조위) / 해빈 경사. 조위는 평균해수면 기준이고 위치는 바다 쪽이 양수입니다.'],
                 def && ['해빈 경사', '0.17(허주영 외 2026, 강원 실태조사 현장 대표값). 사업지 실태조사 단면이 있으면 그 경사를 씁니다.'],
-                def && ['파랑 보정', '파랑 처오름과 셋업은 보정하지 않습니다.'],
-                scene && ['장면 규칙', '같은 해 같은 계절 장면 2장 이상의 중앙값을 씁니다. 두 시점 모두 장면이 2장 이상인 가로선만 판정합니다.'],
-                scene && ['규칙 적용 결과', `장면이 1장뿐인 시점이 있는 가로선은 판정 보류로 둡니다.${anehoN !== null ? ` 이 규칙을 적용한 ${name('aneho')} 판정 가능 가로선은 ${anehoN}개입니다.` : ''}`]
+                scene && ['장면 규칙', '같은 해 같은 계절 장면 2장 이상의 중앙값을 씁니다. 두 시점 모두 장면이 2장 이상인 가로선만 판정하고 나머지는 판정 보류로 둡니다.']
               ]} />
             </Box>
           )}
@@ -147,7 +142,7 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
           </Box>
           <Box title="판정 규칙">
             <KV items={[
-              r?.hold_rule && ['판정 보류', '보류 기준은 연도별 장면쌍 90퍼센타일 중 큰 값과 지역 사전 오차의 변화량 환산값, 10\u00a0m 가운데 가장 큰 값입니다. 사전 오차 환산값은 1표준편차 22.92\u00a0m가 기본이고 상단 바에서 95% 44.9\u00a0m를 고를 수 있습니다.'],
+              r?.hold_rule && ['판정 보류', '보류 기준은 연도별 장면쌍 90퍼센타일 중 큰 값과 지역 사전 오차의 변화량 환산값, 10\u00a0m 가운데 가장 큰 값입니다. 사전 오차 환산값은 1표준편차 22.92\u00a0m, 95% 기준 44.9\u00a0m입니다.'],
               r?.structure_rule && ['구조물 의심', 'NDWI 변화와 MNDWI 변화의 차이가 22.9\u00a0m를 넘거나 어느 장면의 물가선이 구조물에서 30\u00a0m 이내인 가로선은 판정과 90퍼센타일 계산에서 뺍니다.'],
               r?.annex10 && ['점수 식', r.annex10.source.replace(' 개정문 hwpx', '')],
               ['해상도', 'Sentinel-2 가시광과 근적외 밴드 한 칸 10\u00a0m'],

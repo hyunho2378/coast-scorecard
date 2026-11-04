@@ -1,7 +1,6 @@
 // 폭풍 뒤 점검 목록. 판정 가능 가로선만 모아 변화가 큰 순서로. 점검 표시와 메모는 화면 안 상태로만 둔다
 import { useMemo } from 'react'
-import { ShieldCheck } from 'lucide-react'
-import { Box, Empty, Loading, Note, PageHead, TableWrap, Verdict, HOLD_ACTION, RESPONSIBILITY, signed } from '../ui/index.jsx'
+import { Box, Empty, Loading, PageHead, TableWrap, Verdict, HOLD_ACTION, signed } from '../ui/index.jsx'
 import { stormOrder } from '../lib/judge.js'
 import { checkKey } from '../lib/checks.js'
 
@@ -52,7 +51,6 @@ export default function StormScreen({ sites, siteData, checks, setChecks, onOpen
           </TableWrap>
         )}
       </Box>
-      <Note icon={ShieldCheck}>{RESPONSIBILITY}</Note>
     </>
   )
 }

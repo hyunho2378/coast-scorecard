@@ -38,7 +38,7 @@ export default function CompareScene({ site, data, onRetry }) {
               ['이전 시기', `${y0}년 맑은 장면`],
               ['이후 시기', `${y1}년 맑은 장면`],
               ['합성', 'Sentinel-2 L2A 컬러 합성(B04, B03, B02)'],
-              ['조작', '경계를 끌거나 방향키로 옮깁니다.']
+
             ]} />
           </Box>
         </aside>

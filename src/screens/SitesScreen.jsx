@@ -53,14 +53,14 @@ export default function SitesScreen({ sites, siteData, rules, onOpen }) {
         ) : <Empty>연결한 사업지가 없습니다.</Empty>}
       </Box>
       {cands.length > 0 && (
-        <Box title="다음 적용 후보" sub="효과평가 법정 대상 사업비 200억 원 이상" flush foot={<><span className="rb-phrase">해양수산부 연안정비 사업정보에서 고른 동해안 사업지구입니다.</span> <span className="rb-phrase">위성 전후 비교는 다음 순서로 진행합니다.</span></>}>
+        <Box title="다음 적용 후보" sub="효과평가 법정 대상 사업비 200억 원 이상" flush foot="출처: 해양수산부, 연안정비 사업정보">
           <TableWrap label="다음 적용 후보 표">
             <table className="cs-table">
               <thead><tr><th>사업지구</th><th>사업 내용</th><th className="is-num">사업비</th><th className="is-num">착공</th><th className="is-num">완료</th></tr></thead>
               <tbody>
                 {cands.map((c) => (
                   <tr key={c.no}>
-                    <td>{c.name}<span className="is-sub cs-block">다음 적용 후보</span></td>
+                    <td>{c.name}</td>
                     <td className="is-sub is-wrap is-kind">{c.content}</td>
                     <td className="is-num">약 {c.eok}억 원</td>
                     <td className="is-num">{fmtDate(c.construct)}</td>

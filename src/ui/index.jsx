@@ -1,7 +1,6 @@
 // 공유 부품. 배치는 공공 깃랩 목록 상자(rb-listbox)와 표(rb-reftable)를 따르고 값은 KRDS 변수만 쓴다
 import { ArrowDownLeft, ArrowUpRight, Ban, CircleAlert, Info, Minus } from 'lucide-react'
 
-export const RESPONSIBILITY = '위성 판정은 참고 자료이고 최종 판단은 관리주체의 현장 점검이 정합니다.'
 export const HOLD_ACTION = '판정 보류 가로선은 현장 측량으로 확인합니다.'
 
 export const signed = (v) => (v === null || v === undefined ? '' : `${v > 0 ? '+' : ''}${v.toFixed(1)}\u00a0m`)

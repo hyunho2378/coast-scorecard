@@ -1,9 +1,9 @@
 // 판정 카드. 담당자가 사후관리대장에 옮겨 적는 한 장(UX 리서치 패키지 9장)
 import { useMemo, useRef, useState } from 'react'
-import { Check, Copy, ShieldCheck } from 'lucide-react'
-import { Bar, Box, Button, KV, Note, PageHead, SiteState, TableWrap, Verdict, HOLD_ACTION, RESPONSIBILITY, pct, signed } from '../ui/index.jsx'
+import { Check, Copy } from 'lucide-react'
+import { Bar, Box, Button, KV, PageHead, SiteState, TableWrap, Verdict, HOLD_ACTION, pct, signed } from '../ui/index.jsx'
 import { ledgerText, fmtDate } from '../lib/ledger.js'
-import { falsePositiveRows, projectFactsFor, scoreInputsFor, typeRulesFor, unifiedFor } from '../lib/loader-core.js'
+import { projectFactsFor, scoreInputsFor, typeRulesFor, unifiedFor } from '../lib/loader-core.js'
 import { BASES, beachWidthScore, isJudgeable, roleOf, ROLE } from '../lib/judge.js'
 
 const ANNEX = '해양수산부 고시 제2025-181호 별표 10'
@@ -44,13 +44,12 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
   const typeRules = typeRulesFor(rules?.data, site.typeRules)
   const facts = projectFactsFor(rules?.data, site.id)
   const excludedRows = rows.filter((r) => r.verdict === 'struct')
-  const fp = excludedRows.length ? falsePositiveRows(rules?.data) : []
   const basisLabel = (BASES.find(([k]) => k === basis) || BASES[0])[1]
   const values = rows.map((r) => r.change).filter((v) => typeof v === 'number')
   const grades = rule?.surveyGrades
   const thr = s.thresholds[0]
   const max = Math.max(thr * 2, ...rows.map((r) => Math.abs(r.change ?? 0)), 1)
-  const meanDef = <><span className="rb-phrase">가로선 수준 값은 가로선 하나의 전후 이동 거리이고</span> <span className="rb-phrase">구간 평균은 값이 있는 가로선 {s.sectionN}개</span> <span className="rb-phrase">(판정 보류 포함{s.excluded ? `, 구조물 의심 ${s.excluded}개 제외` : ''})의 평균입니다.</span></>
+  const meanDef = <><span className="rb-phrase">구간 평균은 값이 있는 가로선 {s.sectionN}개</span> <span className="rb-phrase">(판정 보류 포함{s.excluded ? `, 구조물 의심 ${s.excluded}개 제외` : ''})의 평균입니다.</span></>
 
   const copy = async () => {
     try { await navigator.clipboard.writeText(text) } catch { areaRef.current?.select(); document.execCommand?.('copy') }
@@ -62,7 +61,6 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
       {head(<>
         <span>{ROLE[role]}</span>
         <span>{site.region}, {site.country}</span>
-        <span>{site.kind}</span>
         <span>{fmtDate(data.period.from)}부터 {fmtDate(data.period.to)}까지</span>
         <span>맑은 장면 {data.scenes.length}장</span>
       </>)}
@@ -81,7 +79,7 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
         <div className="cs-col">
           {isControl && (
             <Box title="대조 해변" sub="사업지 점수 계산 없음">
-              <p className="cs-text">해양수산부 연안정비 사업정보에 화진포 이름의 사업이 없어 별표 10 점수를 계산하지 않습니다. 사업지 해안선 변화와 견주는 대조 해변으로 씁니다.</p>
+              <p className="cs-text">사업지 해안선 변화와 견주는 대조 해변입니다.</p>
               <KV items={[
                 values.length > 0 && ['위성 변화', `가로선 ${values.length}개 ${signed(Math.min(...values))}에서 ${signed(Math.max(...values))}`],
                 ['판정 기준', `변화가 판정 기준 ${thr}\u00a0m보다 작아 판정 가능 가로선이 ${s.judgeable}개입니다.`],
@@ -94,7 +92,7 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
           {!isControl && s.judgeable === 0 && (
             <Box title="별표 10 점수" sub={ANNEX}>
               <p className="cs-text"><strong>판정 가능 {s.judgeable}/{s.total}, 현장 측량 대상</strong></p>
-              <p className="cs-text">값이 있는 가로선 {s.sectionN}개 가운데 판정 보류 기준 {thr}{'\u00a0'}m({basisLabel})를 넘는 가로선이 없어 위성 해안선으로 점수를 내지 않습니다. 해빈 측량으로 해빈폭과 단면을 확인합니다.</p>
+              <p className="cs-text">판정 보류 기준 {thr}{'\u00a0'}m({basisLabel})를 넘는 가로선이 없어 해빈 측량으로 해빈폭과 단면을 확인합니다.</p>
             </Box>
           )}
 
@@ -114,7 +112,7 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
           )}
 
           {!isControl && s.judgeable > 0 && (
-            <Box title="해빈폭 점수" sub="사업 전 평균 해빈폭별" flush foot={<><span className="rb-phrase">사업 전 평균 해빈폭 네 경우의 점수입니다.</span>{unified && <> <span className="rb-phrase">점수 변동은 아래 오차 유형별 표에 있습니다.</span></>}</>}>
+            <Box title="해빈폭 점수" sub="사업 전 평균 해빈폭별" flush>
               <TableWrap label="해빈폭 점수 표">
                 <table className="cs-table">
                   <thead><tr><th className="is-wrap">사업 전 평균 해빈폭</th><th className="is-num">구간 평균</th><th className="is-num">점수</th></tr></thead>
@@ -146,11 +144,7 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
           {unified && (
             <Box title="오차 유형별 점수 변동" sub={`위성 위치 오차 ${unified.errorM}\u00a0m`} flush foot={<>
               <span className="rb-phrase">가로선 {unified.nTransects}개 평균 변화 {signed(unified.meanChange)},</span> <span className="rb-phrase">사업 전 해빈폭 {unified.w0}{'\u00a0'}m와 목표해안선 바다 쪽 {unified.offset}{'\u00a0'}m 조건의</span> <span className="rb-phrase">1표준편차 점수입니다.</span>{' '}
-              <span className="rb-phrase">전은 별표 10 상하한을 적용하기 전,</span> <span className="rb-phrase">후는 해빈폭 10점에서 20점과 적합도 20점에서 40점으로 자른 값입니다.</span>{' '}
-              <span className="rb-phrase">별표 10 점수는 상하한을 적용하므로</span> <span className="rb-phrase">후 열을 씁니다.</span>{' '}
-              <span className="rb-phrase">치우침은 모든 가로선에 같은 방향으로,</span> <span className="rb-phrase">흩어짐은 가로선마다 따로 걸리는 오차입니다.</span>{' '}
-              <span className="rb-phrase">혼합은 Sand Motor 측량 대조 비율대로</span> <span className="rb-phrase">치우침 37.5%를 섞었습니다.</span>{' '}
-              <span className="rb-phrase">목표선이 없는 사업은</span> <span className="rb-phrase">종합 점수에 10/6을 곱합니다.</span>
+              <span className="rb-phrase">후 열은 별표 10 상하한</span> <span className="rb-phrase">(해빈폭 10점에서 20점, 적합도 20점에서 40점)을 적용한 값입니다.</span>
             </>}>
               <TableWrap label="오차 유형별 점수 변동 표">
                 <table className="cs-table is-grouped">
@@ -181,24 +175,8 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
               <KV items={[
                 ['가로선', excludedRows.map((r) => r.id).join(', ')],
                 ['제외 규칙', 'NDWI 변화와 MNDWI 변화의 차이가 22.9\u00a0m를 넘거나 어느 장면의 물가선이 구조물에서 30\u00a0m 이내이면 판정과 90퍼센타일 계산에서 뺍니다.'],
-                ['구조물 위치', '고해상도 바탕 영상에서 딴 잠제 추정 3곳과 반암항 방파제입니다.'],
-                ['구간 평균', `구조물 의심을 뺀 가로선 ${s.sectionN}개 평균 ${signed(s.sectionMean)}`]
+                ['구조물 위치', '고해상도 바탕 영상에서 딴 잠제 추정 3곳과 반암항 방파제입니다.']
               ]} />
-            </Box>
-          )}
-
-          {fp.length > 0 && (
-            <Box title="보류 기준과 거짓 판정" sub="변화가 없는 가로선 기준" flush foot={<><span className="rb-phrase">거짓 판정 비율은 변화량 오차를 표준편차 22.92{'\u00a0'}m 정규분포로 둔 값입니다.</span> <span className="rb-phrase">기대 거짓 판정은 판정 대상 가로선 수에 이 비율을 곱했습니다.</span></>}>
-              <TableWrap label="보류 기준과 거짓 판정 표">
-                <table className="cs-table">
-                  <thead><tr><th>기준</th><th className="is-num">보류 기준</th><th className="is-num is-wrap">거짓 판정 비율</th><th className="is-num is-wrap">기대 거짓 판정</th><th className="is-num">판정 가능</th></tr></thead>
-                  <tbody>
-                    {fp.map((r) => (
-                      <tr key={r.basis} className={r.basis === basis ? 'is-current' : undefined}><td>{r.label}{r.basis === basis && <span className="is-sub"> 선택</span>}</td><td className="is-num">{r.thresholdM}{'\u00a0'}m</td><td className="is-num">{(r.rate * 100).toFixed(1)}%</td><td className="is-num is-wrap">{r.n}개 중 {r.expected.toFixed(1)}개</td><td className="is-num">{r.judgeable}개</td></tr>
-                    ))}
-                  </tbody>
-                </table>
-              </TableWrap>
             </Box>
           )}
 
@@ -253,12 +231,8 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
               ['사업 내용', site.kind],
               site.completion && ['준공', fmtDate(site.completion)],
               facts && ['사업비', `약 ${facts.eok}억 원(해양수산부 연안정비 사업정보)`],
-              facts && !facts.legal && ['효과평가', '효과평가 법정 대상(사업비 200억 원 이상)이 아니며 별표 10 적용 방법을 보여 주는 사업지입니다.'],
-              ['판정 보류 기준', `${thr}\u00a0m(${basisLabel})`],
-              ['비교 기간', `${fmtDate(data.period.from)}부터 ${fmtDate(data.period.to)}까지`]
             ]} />
           </Box>
-          <Note icon={ShieldCheck}>{RESPONSIBILITY}</Note>
         </aside>
       </div>
     </>
