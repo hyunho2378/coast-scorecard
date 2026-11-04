@@ -8155,7 +8155,7 @@ function applySceneRule(rows, periods) {
 }
 var ROLE = {
 	project: "사업지",
-	control: "대조 해변",
+	control: "비교 해변",
 	overseas_reference: "해외 참고",
 	survey_validation: "측량 검증"
 };
@@ -8246,7 +8246,7 @@ var NAV = [
 	},
 	{
 		id: "sources",
-		label: "근거와 출처"
+		label: "자료와 출처"
 	}
 ];
 function parse() {
@@ -44232,7 +44232,7 @@ function GlobeScene({ sites, omm, onPick }) {
 			title: "서비스 안내",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "cs-text",
-				children: "Sentinel-2 위성 해안선으로 연안정비 사업지의 사업 전후 해빈 변화를 가로선마다 판정하고 별표 10 점수와 현장 측량 우선 구간을 보여 줍니다."
+				children: "Sentinel-2 위성 해안선으로 연안정비 사업지의 사업 전후 해빈 변화를 가로선마다 판정하고 별표 10 점수와 현장 측량 구간을 보여 줍니다."
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", {
 				className: "krds-info-list ordered",
 				"aria-label": "이용 순서",
@@ -44240,7 +44240,7 @@ function GlobeScene({ sites, omm, onPick }) {
 				children: [
 					["사업지 선택", "지구본 이름표나 사업지 표에서 고릅니다."],
 					["판정 카드 확인", "가로선별 전진과 후퇴, 판정 보류, 별표 10 점수를 봅니다."],
-					["측량 우선 구간 내려받기", "판정 카드의 단추로 CSV 파일을 받습니다."]
+					["현장 측량 구간 내려받기", "판정 카드의 단추로 CSV 파일을 받습니다."]
 				].map(([t, d], i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 						"aria-hidden": "true",
@@ -44548,7 +44548,7 @@ function SitesScreen({ sites, siteData, rules, onOpen }) {
 }
 // src/lib/survey.js
 var SURVEY_GROUP = {
-	struct: "구조물 의심 제외",
+	struct: "구조물 의심 가로선",
 	exceed: "기준 초과",
 	hold: "판정 보류"
 };
@@ -44602,7 +44602,7 @@ function surveyCsv({ site, rows, basisLabel }) {
 	return "﻿" + [SURVEY_HEAD.join(","), ...lines].join("\r\n") + "\r\n";
 }
 function surveyFileName(site, today) {
-	return `${site.id}_측량우선구간_${today}.csv`;
+	return `${site.id}_현장측량구간_${today}.csv`;
 }
 function downloadText(text, name, type = "text/csv;charset=utf-8") {
 	const url = URL.createObjectURL(new Blob([text], { type }));
@@ -44771,11 +44771,11 @@ function CardScreen({ site, data, rules, basis = "sd1", onRetry }) {
 				className: "cs-col",
 				children: [
 					isControl && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Box, {
-						title: "대조 해변",
+						title: "비교 해변",
 						sub: "사업지 점수 계산 없음",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "cs-text",
-							children: "사업지 해안선 변화와 견주는 대조 해변입니다."
+							children: "사업지 해안선 변화와 견주는 비교 해변입니다."
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(KV, { items: [
 							values.length > 0 && ["위성 변화", `가로선 ${values.length}개 ${signed$1(Math.min(...values))}에서 ${signed$1(Math.max(...values))}`],
 							["판정 기준", `변화가 판정 기준 ${thr}\u00a0m보다 작아 판정 가능 가로선이 ${s.judgeable}개입니다.`],
@@ -45131,7 +45131,7 @@ function CardScreen({ site, data, rules, basis = "sd1", onRetry }) {
 						})
 					}),
 					excludedRows.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
-						title: "구조물 의심 제외",
+						title: "구조물 의심 가로선",
 						sub: `${excludedRows.length}개`,
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(KV, { items: [
 							["가로선", excludedRows.map((r) => r.id).join(", ")],
@@ -45185,7 +45185,7 @@ function CardScreen({ site, data, rules, basis = "sd1", onRetry }) {
 				className: "cs-col",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box, {
-						title: "측량 우선 구간",
+						title: "현장 측량 구간",
 						sub: `${survey.length}개`,
 						actions: survey.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
 							variant: "primary",
@@ -45193,7 +45193,7 @@ function CardScreen({ site, data, rules, basis = "sd1", onRetry }) {
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Download, {
 								size: 16,
 								"aria-hidden": "true"
-							}), "측량 우선 구간 내려받기"]
+							}), "현장 측량 구간 내려받기"]
 						}),
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(KV, { items: [["순서", `구조물 의심 ${nStruct}개, 기준 초과 ${nExceed}개, 판정 보류 ${nHold}개`], ["파일 내용", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
@@ -86104,7 +86104,7 @@ function SourcesScreen({ sites, siteData, rules, basis = "sd1" }) {
 	const scene = r?.scene_rule;
 	const m = (v) => typeof v === "number" ? `${v.toFixed(1)}\u00a0m` : "없음";
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PageHead, {
-		title: "근거와 출처",
+		title: "자료와 출처",
 		meta: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
 			"사업지 ",
 			sites.length,
@@ -86203,7 +86203,7 @@ function SourcesScreen({ sites, siteData, rules, basis = "sd1" }) {
 						" ",
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "rb-phrase",
-							children: "큰 값을 사이트 장면 잡음으로 씁니다."
+							children: "큰 값을 사이트 장면 오차로 씁니다."
 						}),
 						" ",
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
