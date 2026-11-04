@@ -1,13 +1,13 @@
 // 가로선 판정 규칙. 값과 보류 여부는 분석 파일(transects.geojson)의 속성을 그대로 쓴다.
-// change_m 양수는 바다 쪽 전진, 음수는 육지 쪽 후퇴. hold 가 참이면 판정 보류.
+// change_m 양수는 바다 쪽 전진, 음수는 육지 쪽 후퇴. hold 가 참이면 정규 측량 일정.
 // hold 속성이 없는 파일만 hold_threshold_m 와 비교해 보류를 정한다. 앱 고정 기준값은 두지 않는다
 
 export const VERDICT = {
   advance: { label: '전진', note: '바다 쪽 이동' },
   retreat: { label: '후퇴', note: '육지 쪽 이동' },
-  hold: { label: '판정 보류', note: '위성 오차 이하' },
-  nodata: { label: '판정 보류', note: '구름으로 해안선 미검출' },
-  few: { label: '판정 보류', note: '한 시점 장면 1장' },
+  hold: { label: '정규 측량 일정', note: '위성 오차 이하' },
+  nodata: { label: '정규 측량 일정', note: '구름으로 해안선 미검출' },
+  few: { label: '정규 측량 일정', note: '한 시점 장면 1장' },
   struct: { label: '구조물 의심, 제외', note: '물가선이 구조물이나 암초 위에서 잡힘' }
 }
 
@@ -32,10 +32,10 @@ export function median(xs) {
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2
 }
 
-// 가로선 판정 요약. 판정 보류 비율은 전체 가로선 수를 분모로 쓴다.
-// 가로선 수준 값은 가로선 하나의 전후 이동 거리(change). 구간 평균(sectionMean)은 값이 있는 가로선 전체(판정 보류 포함)의 평균이고
-// 별표 10 평균 해빈폭 점수와 대장 문구가 함께 쓴다. meanChange 는 기준 초과 가로선만의 평균이라 점수에 쓰지 않는다
-// 구조물 의심 가로선(struct)은 판정 보류와 따로 세고 구간 평균에서도 뺀다
+// 가로선 판정 요약. 정규 측량 일정 비율은 전체 가로선 수를 분모로 쓴다.
+// 가로선 수준 값은 가로선 하나의 전후 이동 거리(change). 구간 평균(sectionMean)은 값이 있는 가로선 전체(정규 측량 일정 포함)의 평균이고
+// 별표 10 평균 해빈폭 점수와 대장 문구가 함께 쓴다. meanChange 는 변화 확인 가로선만의 평균이라 점수에 쓰지 않는다
+// 구조물 의심 가로선(struct)은 정규 측량 일정와 따로 세고 구간 평균에서도 뺀다
 export function summarize(rows) {
   const judge = rows.filter((r) => isJudgeable(r.verdict))
   const excluded = rows.filter((r) => r.verdict === 'struct').length
@@ -45,6 +45,8 @@ export function summarize(rows) {
   return {
     sectionMean: all.length ? round1(all.reduce((a, b) => a + b, 0) / all.length) : null,
     sectionN: all.length,
+    // 판정 대상: 구조물 의심이 아니고 값이 있으며 두 시점 모두 장면이 최소 장수 이상인 가로선(장면 규칙의 sceneShort 제외)
+    targetN: rows.filter((r) => r.verdict !== 'struct' && !r.sceneShort && typeof r.change === 'number' && !Number.isNaN(r.change)).length,
     total: rows.length,
     judgeable: judge.length,
     held,
@@ -73,7 +75,7 @@ export function sceneChanges(transectRows, baseScene, scene) {
   })
 }
 
-// 점검 순서 목록: 기준 초과 가로선만, 변화 절댓값이 큰 순서
+// 점검 순서 목록: 변화 확인 가로선만, 변화 절댓값이 큰 순서
 export function stormOrder(sites) {
   const out = []
   for (const s of sites) {
@@ -84,7 +86,7 @@ export function stormOrder(sites) {
   return out.sort((a, b) => Math.abs(b.change) - Math.abs(a.change) || String(a.siteId).localeCompare(String(b.siteId)) || a.id - b.id)
 }
 
-// 판정 보류 기준은 규칙 파일(sensitivity_and_rules.json site_rules)이 정답이다.
+// 정규 측량 일정 기준은 규칙 파일(sensitivity_and_rules.json site_rules)이 정답이다.
 // 기준 = max(사업지 같은 계절 장면쌍 차이 90퍼센타일, 공개 측량 대조 오차, 10 m).
 // 변화가 기준 이하이거나 그 가로선의 같은 계절 장면쌍 차이가 기준을 넘으면 보류한다
 export function ruleVerdict(change, threshold, samepair) {
@@ -97,7 +99,7 @@ export function ruleVerdict(change, threshold, samepair) {
 }
 
 // 장면 규칙: 같은 해 같은 계절 장면 2장 이상의 중앙값. 두 시점 모두 2장 이상인 가로선만 판정한다.
-// periods 는 규칙 파일 scene_rule.sites[id].periods({ 시점: [장면 id] }). 장면이 1장뿐인 시점이 있으면 few(판정 보류)
+// periods 는 규칙 파일 scene_rule.sites[id].periods({ 시점: [장면 id] }). 장면이 1장뿐인 시점이 있으면 few(정규 측량 일정)
 export function sceneCount(dist, periods) {
   const out = {}
   for (const [p, ids] of Object.entries(periods || {})) out[p] = ids.filter((id) => typeof dist?.[id] === 'number').length
@@ -106,10 +108,11 @@ export function sceneCount(dist, periods) {
 // min: 시점별 최소 장면 수(운영 기준, 기본 2)
 export function applySceneRule(rows, periods, min = 2) {
   if (!periods || Object.keys(periods).length < 2) return rows
+  // 장면이 모자란 가로선은 판정이 보류든 아니든 sceneShort 로 표시해 판정 대상 수에서 뺀다
   return rows.map((r) => {
-    if (!isJudgeable(r.verdict)) return r
     const n = Object.values(sceneCount(r.dist, periods))
-    return n.some((k) => k < min) ? { ...r, verdict: 'few' } : r
+    if (!n.some((k) => k < min)) return r
+    return isJudgeable(r.verdict) ? { ...r, verdict: 'few', sceneShort: true } : { ...r, sceneShort: true }
   })
 }
 
@@ -127,7 +130,7 @@ export const scoresSite = (rule) => roleOf(rule) !== 'control'
 // p95 값이 없는 사이트는 기본 기준을 그대로 쓴다. 화면 이름은 BASES 두 번째 값
 export const BASES = [['sd1', '기본'], ['p95', '엄격']]
 
-// 서류의 세 등급 이름. exceed: 보류 기준 초과(보완 측량 1순위), hold: 보류 기준 이하, struct: 구조물 의심
+// 서류의 세 등급 이름. exceed: 보류 기준을 넘는 값(보완 측량 1순위), hold: 보류 기준 이하, struct: 구조물 의심
 export const TIER = { exceed: '변화 확인 구간', hold: '정규 측량 일정 구간', struct: '구조물 의심 구간' }
 export const tierOf = (v) => (v === 'struct' ? 'struct' : isJudgeable(v) ? 'exceed' : 'hold')
 export function thresholdOf(rule, basis = 'sd1') {

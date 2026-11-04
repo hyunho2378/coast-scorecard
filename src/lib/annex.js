@@ -3,7 +3,7 @@ import { beachWidthScore, gradeOf, round1, summarize, targetFitScore } from './j
 
 // 목표 해안선은 가로선마다 사업 전 해안선에서 바다 쪽 offset(m) 떨어진 선이다.
 // A는 사업 전 해안선이 목표선에 닿은 가로선 비율(offset 이 0 이하면 1, 양수면 0), B는 사업 후 이동 거리가 offset 이상인 가로선 비율.
-// 대상은 이동 거리가 있는 가로선(구조물 의심 제외, 판정 보류 포함)으로 구간 평균과 같다
+// 대상은 이동 거리가 있는 가로선(구조물 의심 제외, 정규 측량 일정 포함)으로 구간 평균과 같다
 export function targetShares(rows, offset) {
   const xs = (rows || []).filter((r) => r.verdict !== 'struct' && typeof r.change === 'number')
   if (!xs.length) return { a: null, b: null, n: 0 }

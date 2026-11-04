@@ -97,3 +97,18 @@ test('재현 기준 반암: 가로선별 이동 거리 차이 0.0 m(소수 첫�
   const s = summarize(judgeRows(out.base, rules.site_rules.banam, periods))
   assert.deepEqual([s.total, s.judgeable, s.held, s.excluded], [36, 7, 14, 15])
 })
+
+test('현황판 대조 줄: 재현 기준 반암 엔진 값과 현황판 값, 가로선 36개 차이 최대 0.0 m', async () => {
+  const { boardDiff, boardDiffLine } = await import('../src/lib/runs.js')
+  const site = sites.find((s) => s.id === 'banam')
+  const periods = rules.scene_rule.sites.banam.periods
+  const tr = read('public/data/banam/transects.geojson')
+  const out = reproFromScenes({ ...site.repro, periods, features: tr.features }, fixture('banam'))
+  const board = normalizeTransects(tr)
+  const d = boardDiff(out.base, board)
+  assert.deepEqual([d.n, d.max, d.differ], [36, 0, 0])
+  assert.equal(boardDiffLine(d), '현황판 값과 가로선 36개 차이 최대 0.0 m')
+  const moved = board.map((r) => (r.id === 26 ? { ...r, change: r.change + 1.24 } : r))
+  assert.equal(boardDiffLine(boardDiff(out.base, moved)), '현황판 값과 가로선 36개 차이 최대 1.2 m')
+  assert.equal(boardDiff([], board), null)
+})

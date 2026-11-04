@@ -1,4 +1,4 @@
-// 점검 순서 목록. 기준 장면과 비교 장면 사이 기준 초과 가로선만 모아 변화가 큰 순서로. 점검 표시와 메모는 화면 안 상태로만 둔다
+// 점검 순서 목록. 기준 장면과 비교 장면 사이 변화 확인 가로선만 모아 변화가 큰 순서로. 점검 표시와 메모는 화면 안 상태로만 둔다
 import { useMemo } from 'react'
 import { Box, Empty, Loading, PageHead, TableWrap, Verdict, signed } from '../ui/index.jsx'
 import { stormOrder } from '../lib/judge.js'
@@ -15,9 +15,9 @@ export default function StormScreen({ sites, siteData, checks, setChecks, onOpen
 
   return (
     <>
-      <PageHead title="점검 순서 목록" meta={<><span>변화 확인 구간(기준 초과) {list.length}개</span><span>점검 완료 {done}개</span><span>정규 측량 일정 구간(판정 보류) {heldTotal}개 제외</span>{exclTotal > 0 && <span>구조물 의심 구간 {exclTotal}개 제외</span>}</>} />
+      <PageHead title="점검 순서 목록" meta={<><span>변화 확인 구간 {list.length}개</span><span>점검 완료 {done}개</span><span>정규 측량 일정 구간 {heldTotal}개 제외</span>{exclTotal > 0 && <span>구조물 의심 구간 {exclTotal}개 제외</span>}</>} />
       <Box flush>
-        {loading ? <Loading rows={6} /> : !list.length ? <Empty>변화 확인 구간(기준 초과 가로선) 없음</Empty> : (
+        {loading ? <Loading rows={6} /> : !list.length ? <Empty>변화 확인 구간 없음</Empty> : (
           <TableWrap label="점검 순서 표">
             <table className="cs-table">
               <thead><tr><th>순서</th><th>완료</th><th>사업지</th><th className="is-num">가로선</th><th className="is-num">변화</th><th>판정</th><th>현장 메모</th></tr></thead>

@@ -9,7 +9,7 @@ const num = (v) => (typeof v === 'number' ? v.toFixed(1) : '')
 export const csv = (head, rows) => '\uFEFF' + [head.join(','), ...rows.map((r) => r.map(cell).join(','))].join('\r\n') + '\r\n'
 
 // 판정 열 값은 서류의 세 등급 이름(변화 확인, 정규 측량 일정, 구조물 의심)에 원래 판정을 괄호로 붙인다
-export const verdictText = (v) => (v === 'struct' ? '구조물 의심' : isJudgeable(v) ? `변화 확인(기준 초과 ${VERDICT[v].label})` : '정규 측량 일정(판정 보류)')
+export const verdictText = (v) => (v === 'struct' ? '구조물 의심' : isJudgeable(v) ? `변화 확인(${VERDICT[v].label})` : '정규 측량 일정')
 
 export function transectsGeojson(site, rows) {
   return JSON.stringify({

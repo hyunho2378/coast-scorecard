@@ -7,7 +7,7 @@ import { isJudgeable, beachWidthScore, TIER } from '../lib/judge.js'
 import { EMPTY, fc, makeMap } from './basemap.js'
 import { Bar, TableWrap, Verdict, signed } from '../ui/index.jsx'
 
-// 목록 순서: 기준 초과(이동 거리 큰 순), 구조물 의심 가로선, 판정 보류
+// 목록 순서: 변화 확인(이동 거리 큰 순), 구조물 의심 가로선, 정규 측량 일정
 const RANK = (v) => (isJudgeable(v) ? 0 : v === 'struct' ? 1 : 2)
 export function listOrder(rows) {
   const size = (r) => (typeof r.change === 'number' ? Math.abs(r.change) : -1)
@@ -18,9 +18,9 @@ export function BigNumbers({ summary }) {
   if (!summary) return null
   return (
     <dl className="cs-big" aria-label="판정 요약">
-      <div className="is-key"><dt>기준 초과<span className="cs-big-tier">{TIER.exceed}</span></dt><dd className="cs-num">{summary.judgeable}<span>/{summary.total}</span></dd></div>
-      <div><dt>구조물 의심<span className="cs-big-tier">{TIER.struct}</span></dt><dd className="cs-num">{summary.excluded}</dd></div>
-      <div><dt>판정 보류<span className="cs-big-tier">{TIER.hold}</span></dt><dd className="cs-num">{summary.held}</dd></div>
+      <div className="is-key"><dt>{TIER.exceed}</dt><dd className="cs-num">{summary.judgeable}<span>/{summary.total}</span></dd></div>
+      <div><dt>{TIER.struct}</dt><dd className="cs-num">{summary.excluded}</dd></div>
+      <div><dt>{TIER.hold}</dt><dd className="cs-num">{summary.held}</dd></div>
     </dl>
   )
 }
@@ -38,7 +38,7 @@ export function TransectDetail({ row, settings }) {
       <dl className="cs-detail-kv">
         <div><dt>보류 기준</dt><dd className="cs-num">{row.threshold ?? ''} m</dd></div>
         <div><dt>같은 해 장면 차이</dt><dd className="cs-num">{maxPair === null ? '없음' : `최대 ${maxPair.toFixed(1)} m`}</dd></div>
-        <div><dt>해빈폭 점수</dt><dd className="cs-num">{typeof score === 'number' ? `${score}점` : '제외'}</dd></div>
+        <div><dt>위성 값 기준 참고 점수</dt><dd className="cs-num">{typeof score === 'number' ? `${score}점` : '제외'}</dd></div>
         <div><dt>목표선 {settings.offset} m</dt><dd>{typeof row.change === 'number' && row.verdict !== 'struct' ? (row.change >= settings.offset ? '도달' : '미도달') : '제외'}</dd></div>
       </dl>
     </section>
@@ -141,9 +141,9 @@ export function TransectMap({ site, data, selected, onSelect, label, extraClass 
       <div className="cs-legend">
         <span><span className="cs-swatch is-base" aria-hidden="true" />사업 전 해안선</span>
         <span><span className="cs-swatch is-sat1" aria-hidden="true" />사업 후 해안선</span>
-        <span><span className="cs-swatch is-advance" aria-hidden="true" />기준 초과 전진</span>
-        <span><span className="cs-swatch is-retreat" aria-hidden="true" />기준 초과 후퇴</span>
-        <span><span className="cs-swatch is-hold" aria-hidden="true" />판정 보류</span>
+        <span><span className="cs-swatch is-advance" aria-hidden="true" />변화 확인 전진</span>
+        <span><span className="cs-swatch is-retreat" aria-hidden="true" />변화 확인 후퇴</span>
+        <span><span className="cs-swatch is-hold" aria-hidden="true" />정규 측량 일정</span>
         <span><span className="cs-swatch is-struct" aria-hidden="true" />구조물 의심</span>
       </div>
     </div>

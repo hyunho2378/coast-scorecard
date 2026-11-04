@@ -88,7 +88,7 @@ export default function MapScene({ site, data, rules, basis = 'sd1', onRetry }) 
         <div className="cs-stage">
           <div ref={host} className="cs-stage-fill" role="img" aria-label={`${site.name} 해안선과 가로선 지도`} />
           <div className="cs-legend">
-            {[['is-base', '기준 장면 해안선'], ['is-current', '선택 장면 해안선'], ['is-advance', '전진 가로선'], ['is-retreat', '후퇴 가로선'], ['is-hold', '판정 보류 가로선'], data.summary.excluded > 0 && ['is-struct', '구조물 의심 가로선(제외)']].filter(Boolean).map(([c, t]) => (
+            {[['is-base', '기준 장면 해안선'], ['is-current', '선택 장면 해안선'], ['is-advance', '전진 가로선'], ['is-retreat', '후퇴 가로선'], ['is-hold', '정규 측량 일정 가로선'], data.summary.excluded > 0 && ['is-struct', '구조물 의심 가로선(제외)']].filter(Boolean).map(([c, t]) => (
               <span key={t}><span className={`cs-swatch ${c}`} aria-hidden="true" />{t}</span>
             ))}
           </div>
@@ -101,8 +101,8 @@ export default function MapScene({ site, data, rules, basis = 'sd1', onRetry }) 
           <p className="cs-axis-basis"><strong>{isFinal ? '최종 판정' : `${steps[index]?.label} 비교`}</strong></p>
           <div className="cs-axis-counts">
             <ul className="cs-counts" aria-label={`${isFinal ? '최종 판정 기준' : '비교 장면 기준'} 판정 개수`}>
-              <li><strong>{sc.judgeable}</strong>기준 초과</li>
-              <li><strong>{sc.held}</strong>판정 보류</li>
+              <li><strong>{sc.judgeable}</strong>변화 확인</li>
+              <li><strong>{sc.held}</strong>정규 측량 일정</li>
               {sc.excluded > 0 && <li><strong>{sc.excluded}</strong>구조물 의심 제외</li>}
             </ul>
             <ul className="cs-counts" aria-label={`${isFinal ? '최종 판정 기준' : '비교 장면 기준'} 방향 개수`}>

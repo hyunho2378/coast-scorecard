@@ -32,7 +32,7 @@ export default function RulesScreen({ sites, siteData, rules, settings, setSetti
       <PageHead title="운영 기준" meta={<><span>보류 기준 {settings.basis === 'p95' ? `${korea?.p95?.threshold_m ?? 44.9} m(엄격)` : `${korea?.holdThresholdM ?? 22.9} m(기본)`}</span><span>시점별 장면 {settings.minScenes}장 이상</span></>} />
       <div className="cs-split is-even">
         <div className="cs-col">
-          <Box title="판정 보류 기준">
+          <Box title="보류 기준">
             <div className="cs-form">
               <Field label="보류 기준"><Segmented label="보류 기준" value={settings.basis} options={[['sd1', `${korea?.holdThresholdM ?? 22.9} m(기본)`], ['p95', `${korea?.p95?.threshold_m ?? 44.9} m(엄격)`]]} onChange={set('basis')} /></Field>
             </div>
@@ -88,7 +88,7 @@ export default function RulesScreen({ sites, siteData, rules, settings, setSetti
       <Box title="사업지별 점수" flush>
             <TableWrap label="사업지별 별표 10 점수 표">
               <table className="cs-table">
-                <thead><tr><th>사업지</th><th className="is-num">기준 초과</th><th className="is-num">구간 평균</th><th className="is-num">해빈폭 점수</th><th className="is-num is-wrap"><span className="rb-phrase">목표해안선</span> <span className="rb-phrase">적합도</span></th><th className="is-num is-wrap"><span className="rb-phrase">위성 두 항목</span> <span className="rb-phrase">합</span></th></tr></thead>
+                <thead><tr><th>사업지</th><th className="is-num">변화 확인</th><th className="is-num">구간 평균</th><th className="is-num">해빈폭 점수</th><th className="is-num is-wrap"><span className="rb-phrase">목표해안선</span> <span className="rb-phrase">적합도</span></th><th className="is-num is-wrap"><span className="rb-phrase">위성 두 항목</span> <span className="rb-phrase">합</span></th></tr></thead>
                 <tbody>
                   {scored.map((s) => {
                     const x = annexScore(siteData[s.id].rows, settings)

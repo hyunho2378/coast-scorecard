@@ -52,3 +52,24 @@ test('서류 세 등급 이름: 변화 확인 구간, 정규 측량 일정 구�
   assert.deepEqual(['advance', 'retreat', 'hold', 'nodata', 'few', 'struct'].map(tierOf), ['exceed', 'exceed', 'hold', 'hold', 'hold', 'struct'])
   assert.deepEqual(BASES, [['sd1', '기본'], ['p95', '엄격']])
 })
+
+test('서류 등급 이름: 보류 판정 이름은 정규 측량 일정', async () => {
+  const { VERDICT, TIER } = await import('../src/lib/judge.js')
+  for (const k of ['hold', 'nodata', 'few']) assert.equal(VERDICT[k].label, '정규 측량 일정')
+  assert.deepEqual(TIER, { exceed: '변화 확인 구간', hold: '정규 측량 일정 구간', struct: '구조물 의심 구간' })
+})
+test('판정 대상 수(targetN): 구조물 의심과 값 없음, 장면 모자란 가로선(보류 판정 포함)을 뺀다', async () => {
+  const { applySceneRule, summarize } = await import('../src/lib/judge.js')
+  const periods = { 2017: ['a', 'b'], 2025: ['c', 'd'] }
+  const full = { a: 1, b: 1, c: 1, d: 1 }
+  const rows = applySceneRule([
+    { id: 1, change: 30, verdict: 'advance', dist: full },
+    { id: 2, change: 5, verdict: 'hold', dist: { ...full, b: null } },
+    { id: 3, change: 40, verdict: 'advance', dist: { ...full, d: null } },
+    { id: 4, change: null, verdict: 'nodata', dist: {} },
+    { id: 5, change: 50, verdict: 'struct', dist: full }
+  ], periods)
+  assert.deepEqual(rows.map((r) => [r.verdict, Boolean(r.sceneShort)]), [['advance', false], ['hold', true], ['few', true], ['nodata', true], ['struct', false]])
+  const s = summarize(rows)
+  assert.deepEqual([s.targetN, s.sectionN, s.judgeable, s.held, s.excluded], [1, 3, 1, 3, 1])
+})

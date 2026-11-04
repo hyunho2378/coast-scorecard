@@ -51,7 +51,7 @@ export default function DocsScreen({ sites, siteData, rules, settings, site, onS
         <h2 className="cs-section-title">판정 부록 <span className="cs-sub">{fmtDate(today)} 작성</span></h2>
         <TableWrap label="사업지별 판정 요약 표">
           <table className="cs-table">
-            <thead><tr><th>사업지</th><th className="is-num">가로선</th><th className="is-num is-wrap">변화 확인<span className="is-sub"> 기준 초과</span></th><th className="is-num is-wrap">구조물 의심</th><th className="is-num is-wrap">정규 측량 일정<span className="is-sub"> 판정 보류</span></th><th className="is-num">구간 평균</th><th className="is-num">위성 두 항목</th></tr></thead>
+            <thead><tr><th>사업지</th><th className="is-num">가로선</th><th className="is-num is-wrap">변화 확인</th><th className="is-num is-wrap">구조물 의심</th><th className="is-num is-wrap">정규 측량 일정</th><th className="is-num">구간 평균</th><th className="is-num">위성 두 항목</th></tr></thead>
             <tbody>
               {list.map(({ site: s, data: d }) => {
                 const a = annexScore(d.rows, settings)

@@ -22,7 +22,7 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
   const r = rules?.data
   const name = (id) => sites.find((s) => s.id === id)?.name || id
   const basisLabel = (BASES.find(([k]) => k === basis) || BASES[0])[1]
-  // 기준 초과 개수는 앱이 구조물 제외와 장면 규칙까지 적용해 센 값만 쓴다. 규칙 파일 judgeableCount(아네호 17)는 화면에 쓰지 않는다
+  // 변화 확인 개수는 앱이 구조물 제외와 장면 규칙까지 적용해 센 값만 쓴다. 규칙 파일 judgeableCount(아네호 17)는 화면에 쓰지 않는다
   const judgeable = (id) => siteData[id]?.status === 'ready' ? siteData[id].summary.judgeable : '읽는 중'
   const errText = (x) => x.surveyAvailable && x.surveyChangeRmseM ? `측량 대조 ${x.surveyChangeRmseM}\u00a0m` : typeof x.priorChangeErrorM === 'number' ? `동해안 ${x.priorChangeErrorM}\u00a0m` : '없음'
   // 장면쌍 90퍼센타일: 연도별 큰 값(구조물 의심 제외). 연도별 값이 없는 해외 사이트는 사이트 값
@@ -39,10 +39,10 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
       <PageHead title="자료와 출처" meta={<><span>사업지 {sites.length}곳</span><span>보류 기준 {basisLabel}</span></>} />
       <div className="cs-two">
         <div className="cs-col">
-          <Box title="판정 보류 기준" sub={`${basisLabel} 기준`} flush>
-            <TableWrap label="판정 보류 기준 표">
+          <Box title="보류 기준" sub={`${basisLabel} 기준`} flush>
+            <TableWrap label="보류 기준 표">
               <table className="cs-table">
-                <thead><tr><th>사업지</th><th className="is-num">보류 기준</th><th className="is-num is-wrap"><span className="rb-phrase">장면쌍 90퍼센타일</span> <span className="rb-phrase">연도별 큰 값</span></th><th className="is-num is-wrap">변화량 오차</th><th className="is-num">기준 초과</th></tr></thead>
+                <thead><tr><th>사업지</th><th className="is-num">보류 기준</th><th className="is-num is-wrap"><span className="rb-phrase">장면쌍 90퍼센타일</span> <span className="rb-phrase">연도별 큰 값</span></th><th className="is-num is-wrap">변화량 오차</th><th className="is-num">변화 확인</th></tr></thead>
                 <tbody>
                   {sites.map((s) => {
                     const x = r?.site_rules?.[s.id]
@@ -59,7 +59,7 @@ export default function SourcesScreen({ sites, siteData, rules, basis = 'sd1' })
             <Box title="연도별 큰 값" sub="같은 계절 장면쌍 90퍼센타일" flush>
               <TableWrap label="연도별 장면쌍 90퍼센타일 표">
                 <table className="cs-table">
-                  <thead><tr><th>사업지</th><th className="is-num">2017년</th><th className="is-num">2025년</th><th className="is-num is-wrap">두 해 합친 값</th><th className="is-num is-wrap">연도별 큰 값</th><th className="is-num is-wrap">보류 기준</th><th className="is-num">기준 초과</th></tr></thead>
+                  <thead><tr><th>사업지</th><th className="is-num">2017년</th><th className="is-num">2025년</th><th className="is-num is-wrap">두 해 합친 값</th><th className="is-num is-wrap">연도별 큰 값</th><th className="is-num is-wrap">보류 기준</th><th className="is-num">변화 확인</th></tr></thead>
                   <tbody>
                     {yearRows.map((y) => (
                       <tr key={`${y.id}-${y.part}`}>

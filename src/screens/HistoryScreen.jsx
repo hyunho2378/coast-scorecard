@@ -26,7 +26,7 @@ export default function HistoryScreen({ runs, siteData, onOpen, onRemove, onAdd 
         {!runs.length ? <Empty>새 분석 기록 없음</Empty> : (
           <TableWrap label="분석 기록 표">
             <table className="cs-table">
-              <thead><tr><th>이름</th><th>위치</th><th>시점</th><th className="is-num">장면</th><th className="is-num">가로선</th><th className="is-num">기준 초과</th><th className="is-num is-wrap">구조물 의심</th><th className="is-num">판정 보류</th><th className="is-num">시간</th><th><span className="sr-only">작업</span></th></tr></thead>
+              <thead><tr><th>이름</th><th>위치</th><th>시점</th><th className="is-num">장면</th><th className="is-num">가로선</th><th className="is-num">변화 확인</th><th className="is-num is-wrap">구조물 의심</th><th className="is-num">정규 측량 일정</th><th className="is-num">시간</th><th><span className="sr-only">작업</span></th></tr></thead>
               <tbody>
                 {runs.map((r) => {
                   const d = siteData[r.site.id]

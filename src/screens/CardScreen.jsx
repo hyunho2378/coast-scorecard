@@ -1,7 +1,7 @@
 // 판정 카드. 사후관리대장에 옮길 한 장. 탭 셋: 판정(큰 숫자, 가로선 목록, 선택 상세, 대장 문구), 별표 10 점수, 상세(오차 유형별 점수 변동)
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Check, Copy, Download } from 'lucide-react'
-import { PageHead, SiteState, TableWrap, signed, pct } from '../ui/index.jsx'
+import { Note, PageHead, SiteState, TableWrap, signed, pct } from '../ui/index.jsx'
 import { ledgerText, fmtDate } from '../lib/ledger.js'
 import { downloadText, surveyCsv, surveyFileName } from '../lib/survey.js'
 import { conditionsCsvHead, runConditions, runLine } from '../lib/runs.js'
@@ -81,7 +81,7 @@ export default function CardScreen({ site, data, rules, settings, onRetry }) {
                 <h2 className="cs-section-title">대장 옮김 문구</h2>
                 {text && <button type="button" className="krds-btn small secondary" onClick={copy}>{copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}{copied ? '복사 완료' : '복사'}</button>}
               </div>
-              {text ? <><label htmlFor="ledger" className="sr-only">대장 옮김 문구</label><textarea id="ledger" ref={areaRef} readOnly value={text} rows={Math.min(10, text.split('\n').length + 1)} className="cs-ledger" /></> : <p className="cs-state">변화 확인 구간(기준 초과 가로선) 없음</p>}
+              {text ? <><label htmlFor="ledger" className="sr-only">대장 옮김 문구</label><textarea id="ledger" ref={areaRef} readOnly value={text} rows={Math.min(10, text.split('\n').length + 1)} className="cs-ledger" /></> : <p className="cs-state">변화 확인 구간 없음</p>}
               <p role="status" className="sr-only">{copied ? '문구 복사 완료' : ''}</p>
             </section>
           </aside>
@@ -102,6 +102,7 @@ export default function CardScreen({ site, data, rules, settings, onRetry }) {
                 </tbody>
               </table>
             </TableWrap>
+            <Note>위성 값 기준 참고 점수, 현장 측량값 입력 시 확정 점수로 바뀜</Note>
           </section>
           <section aria-label="사업 전 해빈폭별 점수">
             <TableWrap label="사업 전 해빈폭별 점수 표">

@@ -94,3 +94,24 @@ test('자료와 출처: 거짓 판정 표 대신 같은 해 장면쌍 위치 차
   assert.match(t, /export const SAMEPAIR_LINE = '같은 해 장면쌍 위치 차이\(구조물 의심 제외 135쌍\): 표준편차 4\.03\\u00a0m, 95백분위 7\.83\\u00a0m, 최대 10\.6\\u00a0m'/)
   assert.match(t, /\{SAMEPAIR_LINE\}/)
 })
+
+test('화면 소스에 옛 등급 이름(판정 보류, 기준 초과)이 없다(주석 포함)', () => {
+  const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => e.isDirectory() ? walk(`${d}/${e.name}`) : [`${d}/${e.name}`])
+  const files = walk(`${root}src`).filter((x) => /\.(jsx?|css|html)$/.test(x)).concat([`${root}index.html`])
+  for (const f of files) assert.doesNotMatch(fs.readFileSync(f, 'utf8'), /판정 보류|기준 초과/, f)
+})
+test('큰 숫자 세 칸: 라벨은 서류 등급 이름 하나만(TIER)', () => {
+  const t = fs.readFileSync(`${root}src/parts/transect.jsx`, 'utf8')
+  for (const k of ['exceed', 'struct', 'hold']) assert.match(t, new RegExp(`<dt>\\{TIER\\.${k}\\}</dt>`))
+  assert.doesNotMatch(t, /cs-big-tier/)
+  assert.match(t, /\/>변화 확인 전진<\/span>/); assert.match(t, /\/>정규 측량 일정<\/span>/)
+})
+test('점수 라벨: 위성 값 기준 참고 점수, 별표 10 탭에 확정 점수 안내 한 줄', () => {
+  assert.match(fs.readFileSync(`${root}src/parts/transect.jsx`, 'utf8'), /<dt>위성 값 기준 참고 점수<\/dt>/)
+  assert.match(fs.readFileSync(`${root}src/screens/CardScreen.jsx`, 'utf8'), /<Note>위성 값 기준 참고 점수, 현장 측량값 입력 시 확정 점수로 바뀜<\/Note>/)
+})
+test('사업지 분석: 현황판 대조 줄은 재현 기준 결과에서만 계산', () => {
+  const a = fs.readFileSync(`${root}src/screens/AnalyzeScreen.jsx`, 'utf8')
+  assert.match(a, /const boardBase = jobRepro && resData\?\.status === 'ready'/)
+  assert.match(a, /\{diffLine && <p className="cs-repro-note cs-repro-diff">\{diffLine\}<\/p>\}/)
+})

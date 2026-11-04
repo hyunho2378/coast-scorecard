@@ -13,7 +13,7 @@ import { SEASONS } from '../engine/stac.js'
 import { FAIL, STAGES } from '../engine/analyze.js'
 import { REPRO_STAGES } from '../engine/repro.js'
 import { fromUtm } from '../engine/utm.js'
-import { runLine } from '../lib/runs.js'
+import { boardDiff, boardDiffLine, runLine } from '../lib/runs.js'
 
 const YEARS = Array.from({ length: 11 }, (_, i) => 2016 + i).map((y) => [y, `${y}년`])
 const SPACING = [50, 100, 200].map((v) => [v, `${v} m`])
@@ -169,6 +169,9 @@ export default function AnalyzeScreen({ sites, siteData, rules, settings, job, o
   const resData = job?.status === 'done' ? siteData[job.id] : null
   const resLine = resData?.status === 'ready' ? runLine({ data: resData, rule: rules?.data?.site_rules?.[job.id] }) : null
   const jobRepro = (job?.params?.mode || mode) === 'repro'
+  // 재현 기준 결과만: 엔진 값과 현황판 가로선 값의 최대 차이를 화면에서 계산한다
+  const boardBase = jobRepro && resData?.status === 'ready' && job?.params?.siteId && siteData[job.params.siteId]?.status === 'ready' ? siteData[job.params.siteId].base : null
+  const diffLine = boardBase ? boardDiffLine(boardDiff(resData.base, boardBase)) : ''
   const stages = jobRepro ? REPRO_STAGES : STAGES
   const others = SEASONS.filter(([k]) => k !== (job?.params?.season || season))
 
@@ -260,10 +263,11 @@ export default function AnalyzeScreen({ sites, siteData, rules, settings, job, o
             {resData?.status === 'ready' && (
               <div className="cs-result">
                 {resLine && <ul className="cs-run-cond" aria-label="재현 조건">{resLine.map(([k, v]) => <li key={k}><b>{k}</b>{v}</li>)}</ul>}
+                {diffLine && <p className="cs-repro-note cs-repro-diff">{diffLine}</p>}
                 <ul className="cs-counts" aria-label="분석 결과">
                   <li><strong>{resData.summary.total}</strong>가로선</li>
-                  <li><strong>{resData.summary.judgeable}</strong>기준 초과</li>
-                  <li><strong>{resData.summary.held}</strong>판정 보류</li>
+                  <li><strong>{resData.summary.judgeable}</strong>변화 확인</li>
+                  <li><strong>{resData.summary.held}</strong>정규 측량 일정</li>
                   <li><strong>{resData.summary.excluded}</strong>구조물 의심</li>
                   <li><strong>{resData.scenes.length}</strong>장면</li>
                   <li><strong>{job.meta.seconds}</strong>초</li>

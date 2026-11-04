@@ -95,7 +95,7 @@ export function runConditions(run) {
     out.push(['물가선', 'NDWI 3집단 오츠 임계값 등치선'])
     out.push(['가로선 간격', `${p.spacing} m, 가로선 ${run?.data?.base?.length ?? 0}개, 길이 ${p.transectLength ?? 400} m`])
   }
-  out.push(['보류 기준', `${thr} m 이하 이동, 같은 해 장면쌍 차이 ${thr} m 초과, 시점별 장면 2장 미만이면 판정 보류`])
+  out.push(['보류 기준', `${thr} m 이하 이동, 같은 해 장면쌍 차이 ${thr} m 초과, 시점별 장면 2장 미만이면 정규 측량 일정`])
   out.push(['구조물 의심 가로선', nStruct ? `${nStruct}개(${(run.rule.structureExcluded || []).join(', ')}번)` : '없음'])
   return out
 }
@@ -118,3 +118,22 @@ export function runLine(run) {
     ['보류 기준', `${run?.rule?.holdThresholdM} m`]
   ]
 }
+
+// 재현 기준 결과와 현황판 가로선 값 대조. 가로선 번호가 같은 행의 이동 거리 차이(소수 첫째 자리) 최대값
+// 두 쪽 모두 값이 없으면 차이 0, 한쪽만 값이 없으면 differ 로 센다
+export function boardDiff(engineBase, boardBase) {
+  if (!Array.isArray(engineBase) || !Array.isArray(boardBase) || !engineBase.length) return null
+  const byId = new Map(boardBase.map((r) => [Number(r.id), r]))
+  let max = 0
+  let differ = 0
+  for (const r of engineBase) {
+    const b = byId.get(Number(r.id))
+    const e = typeof r.change === 'number' ? r.change : null
+    const v = b && typeof b.change === 'number' ? b.change : null
+    if (e === null && v === null) continue
+    if (e === null || v === null) { differ += 1; continue }
+    max = Math.max(max, Math.abs(Math.round((e - v) * 10) / 10))
+  }
+  return { n: engineBase.length, max, differ }
+}
+export const boardDiffLine = (d) => (d ? `현황판 값과 가로선 ${d.n}개 차이 최대 ${d.max.toFixed(1)} m${d.differ ? `, 값 유무가 다른 가로선 ${d.differ}개` : ''}` : '')

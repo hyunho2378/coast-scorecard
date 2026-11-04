@@ -2,7 +2,7 @@
 import { ArrowDownLeft, ArrowUpRight, Ban, Check, ChevronDown, CircleAlert, Info, Minus } from 'lucide-react'
 import { usePopover } from './popover.js'
 
-export const HOLD_ACTION = '판정 보류 가로선은 현장 측량으로 확인합니다.'
+export const HOLD_ACTION = '정규 측량 일정 가로선은 현장 측량으로 확인합니다.'
 
 export const signed = (v) => (v === null || v === undefined ? '' : `${v > 0 ? '+' : ''}${v.toFixed(1)}\u00a0m`)
 export const pct = (v) => `${Math.round(v * 100)}%`
@@ -41,9 +41,9 @@ export function Button({ variant = 'secondary', children, ...rest }) {
 const V = {
   advance: { Icon: ArrowUpRight, label: '전진' },
   retreat: { Icon: ArrowDownLeft, label: '후퇴' },
-  hold: { Icon: Minus, label: '판정 보류' },
-  nodata: { Icon: Minus, label: '판정 보류' },
-  few: { Icon: Minus, label: '판정 보류' },
+  hold: { Icon: Minus, label: '정규 측량 일정' },
+  nodata: { Icon: Minus, label: '정규 측량 일정' },
+  few: { Icon: Minus, label: '정규 측량 일정' },
   struct: { Icon: Ban, label: '구조물 의심, 제외' }
 }
 export function Verdict({ v }) {

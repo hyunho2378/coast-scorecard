@@ -253,7 +253,7 @@ html[data-krds-mode="light"] { --cs-line-base: var(--krds-color-light-success-50
 .cs-big { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; }
 .cs-big > div { display: flex; flex-direction: column-reverse; gap: var(--krds-gap-1); padding: 0 var(--krds-padding-5); border-left: var(--krds-border-width-static-regular) solid var(--krds-color-border-gray-light); min-width: 0; }
 .cs-big > div:first-child { padding-left: 0; border-left: 0; }
-.cs-big dt { font-size: var(--rb-step-13); line-height: var(--rb-lh-13); color: var(--krds-color-text-subtle); white-space: nowrap; }
+.cs-big dt { font-size: var(--rb-step-13); line-height: var(--rb-lh-13); color: var(--krds-color-text-subtle); white-space: normal; word-break: keep-all; }
 .cs-big dd { margin: 0; font-size: var(--krds-pc-font-size-heading-large); line-height: 1.2; font-weight: var(--krds-font-weight-bold); color: var(--krds-color-text-basic); }
 .cs-big dd span { font-size: var(--rb-step-15); font-weight: var(--krds-font-weight-regular); color: var(--krds-color-text-subtle); }
 .cs-big .is-key dd { font-size: var(--krds-pc-font-size-display-small); color: var(--rb-status-information); }
@@ -358,12 +358,12 @@ html[data-krds-mode="light"] { --cs-line-base: var(--krds-color-light-success-50
 .cs-run-cond { display: flex; flex-wrap: wrap; gap: var(--krds-gap-1) var(--krds-gap-5); margin: 0; padding: 0; list-style: none; font-size: var(--rb-step-13); line-height: var(--rb-lh-13); color: var(--krds-color-text-subtle); }
 .cs-run-cond b { font-weight: var(--krds-font-weight-bold); color: var(--krds-color-text-basic); margin-right: var(--krds-gap-1); }
 .cs-result .cs-run-cond { padding: var(--krds-padding-4) var(--krds-padding-7) 0; }
+.cs-result .cs-repro-diff { padding: var(--krds-gap-1) var(--krds-padding-7) 0; color: var(--krds-color-text-basic); }
 .cs-card-cond { margin-bottom: var(--krds-gap-4); }
 .cs-repro-note { margin: 0; font-size: var(--rb-step-13); line-height: var(--rb-lh-13); color: var(--krds-color-text-subtle); }
 
 /* 큰 숫자 아래 서류 등급 이름. 이름 줄 수가 달라도 숫자 높이를 맞추려고 위쪽(column-reverse의 flex-end)에 붙인다 */
 .cs-big > div { justify-content: flex-end; }
-.cs-big-tier { display: block; font-size: var(--rb-step-13); line-height: var(--rb-lh-13); color: var(--krds-color-text-subtle); white-space: normal; word-break: keep-all; }
 
 /* 태블릿과 휴대폰: 분석 조건(분석 방식과 실행 단추)을 지도 위로, 지도 위 단추는 왼쪽 위(오른쪽은 확대 단추 자리) */
 @media (max-width: 1023px) {

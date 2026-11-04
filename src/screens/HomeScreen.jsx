@@ -14,7 +14,7 @@ export function SiteTabs({ sites, siteData, siteId, onSelect }) {
         const cur = s.id === siteId
         return (
           <button key={s.id} type="button" aria-current={cur ? 'true' : undefined} className={cur ? 'is-current' : undefined} onClick={() => onSelect(s.id)}>
-            <span>{s.name}</span>{sm && <span className={`cs-sitetab-n cs-num${sm.judgeable ? ' is-exceed' : ''}`} aria-label={`변화 확인 구간(기준 초과) ${sm.judgeable}`}>{sm.judgeable}</span>}
+            <span>{s.name}</span>{sm && <span className={`cs-sitetab-n cs-num${sm.judgeable ? ' is-exceed' : ''}`} aria-label={`변화 확인 구간 ${sm.judgeable}`}>{sm.judgeable}</span>}
           </button>
         )
       })}
