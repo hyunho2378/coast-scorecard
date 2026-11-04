@@ -212,7 +212,7 @@ export default function CardScreen({ site, data, rules, basis = 'sd1', onRetry }
           )}>
             <KV items={[
               ['순서', `구조물 의심 ${nStruct}개, 기준 초과 ${nExceed}개, 판정 보류 ${nHold}개`],
-              ['파일', `CSV, 가로선별 판정과 이동 거리, 보류 기준 ${thr}\u00a0m(${basisLabel}), 우선순위`]
+              ['파일 내용', <><span className="rb-phrase">가로선별 판정과 이동 거리,</span> <span className="rb-phrase">보류 기준 {thr}{'\u00a0'}m({basisLabel})와 우선순위</span></>]
             ]} />
           </Box>
 
