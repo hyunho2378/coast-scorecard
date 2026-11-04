@@ -1,7 +1,8 @@
 // 사업지 분석. 지도에서 점을 찍거나 위도와 경도를 넣고(또는 사업지 목록에서 고르고) 두 시점과 계절을 골라
 // 브라우저가 Sentinel-2 를 직접 읽어 판정까지 돌린다. 구조물 다각형을 그리면 30 m 이내 가로선을 구조물 의심으로 뺀다
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Check, Circle, LoaderCircle, Pentagon, Play, Square, Trash2 } from 'lucide-react'
+import { Check, Circle, Import, LoaderCircle, Pentagon, Play, Square, Trash2 } from 'lucide-react'
+import { structurePolygons } from '../lib/structures.js'
 import { Box, ErrorLine, Field, PageHead, Pick, Segmented } from '../ui/index.jsx'
 import { readPalette } from '../lib/palette.js'
 import { useModeTick } from '../shell/screenMode.js'
@@ -21,7 +22,7 @@ function boxRing(lon, lat) {
   return [[lon - dx, lat - dy], [lon + dx, lat - dy], [lon + dx, lat + dy], [lon - dx, lat + dy], [lon - dx, lat - dy]]
 }
 
-export default function AnalyzeScreen({ sites, siteData, settings, job, onRun, onStop, onOpen }) {
+export default function AnalyzeScreen({ sites, siteData, rules, settings, job, onRun, onStop, onOpen }) {
   const tick = useModeTick()
   const host = useRef(null)
   const map = useRef(null)
@@ -100,6 +101,10 @@ export default function AnalyzeScreen({ sites, siteData, settings, job, onRun, o
     m.getCanvas().style.cursor = drawing ? 'crosshair' : ''
   }, [loaded, polys, ring, drawing])
 
+  // 고른 사업지에 기존 구조물 의심 가로선이 있으면 그 위치로 다각형을 만든다
+  const presetIds = preset ? rules?.data?.site_rules?.[preset]?.structureExcluded || [] : []
+  const presetRows = preset && siteData[preset]?.status === 'ready' ? siteData[preset].base || siteData[preset].rows : null
+  const loadStructures = () => { setPolys(structurePolygons(presetRows, presetIds)); setRing([]); setDrawing(false) }
   const closeRing = () => { if (ring.length >= 3) { setPolys((x) => [...x, ring]); setRing([]); setDrawing(false) } }
   const params = useMemo(() => ({
     lon: lo, lat: la, beforeYear, afterYear, season, spacing, boxM: BOX_M,
@@ -129,6 +134,7 @@ export default function AnalyzeScreen({ sites, siteData, settings, job, onRun, o
           <div className="cs-maptools" role="toolbar" aria-label="구조물 다각형">
             <button type="button" className={`krds-btn small ${drawing ? 'primary' : 'secondary'}`} aria-pressed={drawing} onClick={() => { setDrawing(!drawing); setRing([]) }}><Pentagon size={16} aria-hidden="true" />구조물 그리기</button>
             {drawing && <button type="button" className="krds-btn small secondary" disabled={ring.length < 3} onClick={closeRing}><Check size={16} aria-hidden="true" />닫기 {ring.length}점</button>}
+            {presetIds.length > 0 && presetRows && <button type="button" className="krds-btn small secondary" disabled={running} onClick={loadStructures}><Import size={16} aria-hidden="true" />기존 사업지 구조물 구간 불러오기</button>}
             {polys.length > 0 && <button type="button" className="krds-btn small secondary" onClick={() => { setPolys([]); setRing([]) }}><Trash2 size={16} aria-hidden="true" />구조물 {polys.length}개 지우기</button>}
           </div>
         </div>

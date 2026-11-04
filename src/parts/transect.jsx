@@ -60,7 +60,7 @@ export function TransectList({ rows, selected, onSelect, label = '가로선 목�
   return (
     <TableWrap label={label}>
       <table className="cs-table is-select" ref={ref}>
-        <thead><tr><th>가로선</th><th>판정</th><th className="is-num">이동 거리</th><th><span className="sr-only">막대</span></th></tr></thead>
+        <thead><tr><th>가로선</th><th>판정</th><th className="is-num">이동 거리</th><th className="cs-barcell"><span className="sr-only">막대</span></th></tr></thead>
         <tbody>
           {shown.map((r) => {
             const cur = r.id === selected

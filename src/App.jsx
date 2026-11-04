@@ -96,7 +96,7 @@ export default function App() {
   return (
     <AppShell screen={route.screen} onGo={(id) => go(id)} sites={allSites} siteId={site.id} siteName={site.name} onSite={(id) => go(route.screen, id)} busy={job?.status === 'running'}>
       {route.screen === 'home' && <HomeScreen sites={allSites} siteData={judged} rules={merged} site={site} settings={settings} onSelect={(id) => go('home', id)} onOpen={(id, screen = 'card') => go(screen, id)} />}
-      {route.screen === 'analyze' && <AnalyzeScreen sites={allSites} siteData={judged} settings={settings} job={job} onRun={startRun} onStop={stopRun} onOpen={(id, screen = 'card') => go(screen, id)} />}
+      {route.screen === 'analyze' && <AnalyzeScreen sites={allSites} siteData={judged} rules={merged} settings={settings} job={job} onRun={startRun} onStop={stopRun} onOpen={(id, screen = 'card') => go(screen, id)} />}
       {route.screen === 'card' && <CardScreen key={site.id} {...common} />}
       {route.screen === 'map' && <MapScene key={site.id} {...common} />}
       {route.screen === 'compare' && <CompareScene key={site.id} {...common} />}

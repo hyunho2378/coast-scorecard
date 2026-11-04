@@ -83,10 +83,12 @@ export default function RulesScreen({ sites, siteData, rules, settings, setSetti
               </TableWrap>
             )}
           </Box>
-          <Box title="사업지별 점수" flush>
+        </div>
+      </div>
+      <Box title="사업지별 점수" flush>
             <TableWrap label="사업지별 별표 10 점수 표">
               <table className="cs-table">
-                <thead><tr><th>사업지</th><th className="is-num">기준 초과</th><th className="is-num">구간 평균</th><th className="is-num">해빈폭</th><th className="is-num">적합도</th><th className="is-num">합</th></tr></thead>
+                <thead><tr><th>사업지</th><th className="is-num">기준 초과</th><th className="is-num">구간 평균</th><th className="is-num">해빈폭 점수</th><th className="is-num is-wrap"><span className="rb-phrase">목표해안선</span> <span className="rb-phrase">적합도</span></th><th className="is-num is-wrap"><span className="rb-phrase">위성 두 항목</span> <span className="rb-phrase">합</span></th></tr></thead>
                 <tbody>
                   {scored.map((s) => {
                     const x = annexScore(siteData[s.id].rows, settings)
@@ -105,8 +107,6 @@ export default function RulesScreen({ sites, siteData, rules, settings, setSetti
               </table>
             </TableWrap>
           </Box>
-        </div>
-      </div>
     </>
   )
 }

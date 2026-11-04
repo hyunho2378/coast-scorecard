@@ -82,3 +82,14 @@ test('새 분석 결과: 사업지 자료로 바꾸고 파일로 내려받아 �
   const min3 = judgeRows(run.data.base, merged.site_rules.run1, result.periods, 'sd1', 3)
   assert.equal(min3[0].verdict, 'few')
 })
+
+test('구조물 구간 불러오기: 이어지는 번호끼리 묶어 묶음마다 사각형 하나', async () => {
+  const { idRuns, structurePolygons } = await import('../src/lib/structures.js')
+  assert.deepEqual(idRuns([8, 9, 10, 24, 25, 33, 34, 12]), [[8, 9, 10], [12], [24, 25], [33, 34]])
+  const tr = (id, y) => ({ id, geometry: { type: 'LineString', coordinates: [[128.45, y], [128.46, y]] } })
+  const rows = [tr(1, 38.40), tr(2, 38.401), tr(3, 38.402), tr(5, 38.404)]
+  const p = structurePolygons(rows, [1, 2, 3, 5, 9])
+  assert.equal(p.length, 2)
+  assert.deepEqual(p[0], [[128.45, 38.40], [128.46, 38.40], [128.46, 38.402], [128.45, 38.402]])
+  assert.deepEqual(p[1], [[128.45, 38.404], [128.46, 38.404], [128.46, 38.404], [128.45, 38.404]])
+})
